@@ -84,193 +84,191 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-purple-500 to-blue-600 p-6 text-white">
-          <div className="flex items-center space-x-3 mb-4">
-            <Moon size={32} />
-            <div>
-              <h2 className="text-2xl font-bold">Evening Review</h2>
-              <p className="text-purple-100">Reflect on your day</p>
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-500 to-blue-600 p-8 text-white">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+            <Moon size={32} className="animate-float" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold">Evening Review</h2>
+            <p className="text-purple-100 text-lg">Reflect on your day</p>
+          </div>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="w-full bg-purple-600/30 rounded-full h-3">
+          <div 
+            className="bg-white h-3 rounded-full transition-all duration-500 ease-out shadow-lg"
+            style={{ width: `${(step / totalSteps) * 100}%` }}
+          />
+        </div>
+        <p className="text-sm text-purple-100 mt-3">Step {step} of {totalSteps}</p>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 p-8 flex flex-col justify-between overflow-y-auto">
+        <div className="flex-1">
+          {step === 1 && (
+            <div className="text-center">
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                Did you complete your main priority today?
+              </h3>
+              <p className="text-gray-600 mb-8">Be honest with yourself</p>
+              
+              <div className="flex justify-center space-x-6">
+                <button
+                  onClick={() => setFormData({ ...formData, completedMainTask: true })}
+                  className={`flex flex-col items-center p-6 rounded-2xl border-2 transition-all duration-200 ${
+                    formData.completedMainTask === true
+                      ? 'bg-green-500 text-white border-green-500 transform scale-105'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-green-300 hover:bg-green-50'
+                  }`}
+                >
+                  <span className="text-4xl mb-2">✓</span>
+                  <span className="text-lg font-medium">Yes, I did it!</span>
+                </button>
+
+                <button
+                  onClick={() => setFormData({ ...formData, completedMainTask: false })}
+                  className={`flex flex-col items-center p-6 rounded-2xl border-2 transition-all duration-200 ${
+                    formData.completedMainTask === false
+                      ? 'bg-red-500 text-white border-red-500 transform scale-105'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-red-300 hover:bg-red-50'
+                  }`}
+                >
+                  <span className="text-4xl mb-2">❌</span>
+                  <span className="text-lg font-medium">Not today</span>
+                </button>
+              </div>
             </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-purple-600/30 rounded-full h-2">
-            <div 
-              className="bg-white h-2 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${(step / totalSteps) * 100}%` }}
-            />
-          </div>
-          <p className="text-sm text-purple-100 mt-2">Step {step} of {totalSteps}</p>
+          )}
+
+          {step === 2 && (
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                What was your biggest win today?
+              </h3>
+              <p className="text-gray-600 mb-8 text-center">Celebrate your achievements, big or small</p>
+              
+              <div className="max-w-md mx-auto">
+                <textarea
+                  value={formData.winOfDay}
+                  onChange={(e) => setFormData({ ...formData, winOfDay: e.target.value })}
+                  placeholder="e.g., I finished the presentation ahead of schedule"
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none resize-none h-32 text-lg"
+                />
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                What obstacles did you face today?
+              </h3>
+              <p className="text-gray-600 mb-8 text-center">Select all that apply (optional)</p>
+              
+              <div className="max-w-2xl mx-auto grid grid-cols-2 gap-3">
+                {obstacleOptions.map((obstacle) => (
+                  <button
+                    key={obstacle}
+                    onClick={() => toggleObstacle(obstacle)}
+                    className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                      (formData.obstacles || []).includes(obstacle)
+                        ? 'bg-red-100 text-red-700 border-red-300'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-red-300 hover:bg-red-50'
+                    }`}
+                  >
+                    {obstacle}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="text-center">
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                How are you feeling tonight?
+              </h3>
+              <p className="text-gray-600 mb-8">Rate your evening mood</p>
+              
+              <div className="flex justify-center space-x-4">
+                {[
+                          { value: 1, label: 'Exhausted' },
+        { value: 2, label: 'Drained' },
+        { value: 3, label: 'Okay' },
+        { value: 4, label: 'Good' },
+        { value: 5, label: 'Energized' }
+                ].map((mood) => (
+                  <button
+                    key={mood.value}
+                    onClick={() => setFormData({ ...formData, eveningMood: mood.value })}
+                    className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all duration-200 ${
+                      formData.eveningMood === mood.value
+                        ? 'bg-purple-500 text-white border-purple-500 transform scale-105'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                    }`}
+                  >
+                    <span className="text-3xl mb-2">•</span>
+                    <span className="text-sm font-medium">{mood.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                Which habits did you complete today?
+              </h3>
+              <p className="text-gray-600 mb-8 text-center">Track your daily habits</p>
+              
+              <div className="max-w-md mx-auto space-y-3">
+                {habits.map((habit, index) => (
+                  <label 
+                    key={index}
+                    className="flex items-center p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={(formData.completedHabits || [])[index] || false}
+                      onChange={() => toggleHabit(index)}
+                      className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 mr-4"
+                    />
+                    <span className="text-lg text-gray-700">{habit}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="p-8 min-h-[400px] flex flex-col justify-between">
-          <div className="flex-1">
-            {step === 1 && (
-              <div className="text-center">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  Did you finish your main priority today?
-                </h3>
-                <p className="text-gray-600 mb-8">
-                  {existingData.mainPriority ? `"${existingData.mainPriority}"` : 'Your main task for today'}
-                </p>
-                
-                <div className="flex justify-center space-x-6">
-                  <button
-                    onClick={() => setFormData({ ...formData, completedMainTask: true })}
-                    className={`flex flex-col items-center p-6 rounded-2xl border-2 transition-all duration-200 ${
-                      formData.completedMainTask === true
-                        ? 'bg-green-500 text-white border-green-500 transform scale-105'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-green-300 hover:bg-green-50'
-                    }`}
-                  >
-                    <span className="text-4xl mb-3">✅</span>
-                    <span className="text-lg font-medium">Yes, I did it!</span>
-                  </button>
+        {/* Navigation */}
+        <div className="flex justify-between mt-8">
+          <button
+            onClick={handleBack}
+            className="flex items-center space-x-2 px-6 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+          >
+            <ArrowLeft size={20} />
+            <span>Back</span>
+          </button>
 
-                  <button
-                    onClick={() => setFormData({ ...formData, completedMainTask: false })}
-                    className={`flex flex-col items-center p-6 rounded-2xl border-2 transition-all duration-200 ${
-                      formData.completedMainTask === false
-                        ? 'bg-orange-500 text-white border-orange-500 transform scale-105'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:bg-orange-50'
-                    }`}
-                  >
-                    <span className="text-4xl mb-3">⏳</span>
-                    <span className="text-lg font-medium">Not quite</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
-                  What was your win of the day?
-                </h3>
-                <p className="text-gray-600 mb-8 text-center">Celebrate something positive that happened today</p>
-                
-                <div className="max-w-md mx-auto">
-                  <textarea
-                    value={formData.winOfDay}
-                    onChange={(e) => setFormData({ ...formData, winOfDay: e.target.value })}
-                    placeholder="e.g., Had a great conversation with a colleague, learned something new, felt energized after a walk..."
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none resize-none h-32 text-lg"
-                  />
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
-                  What got in your way today?
-                </h3>
-                <p className="text-gray-600 mb-8 text-center">Select any obstacles you faced (optional)</p>
-                
-                <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-                  {obstacleOptions.map((obstacle) => (
-                    <button
-                      key={obstacle}
-                      onClick={() => toggleObstacle(obstacle)}
-                      className={`p-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${
-                        (formData.obstacles || []).includes(obstacle)
-                          ? 'bg-red-100 text-red-700 border-red-300'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-red-300 hover:bg-red-50'
-                      }`}
-                    >
-                      {obstacle}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {step === 4 && (
-              <div className="text-center">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  How are you feeling tonight?
-                </h3>
-                <p className="text-gray-600 mb-8">Rate your evening mood</p>
-                
-                <div className="flex justify-center space-x-4">
-                  {[
-                    { value: 1, emoji: '😴', label: 'Exhausted' },
-                    { value: 2, emoji: '😔', label: 'Drained' },
-                    { value: 3, emoji: '😐', label: 'Okay' },
-                    { value: 4, emoji: '😊', label: 'Good' },
-                    { value: 5, emoji: '🌟', label: 'Energized' }
-                  ].map((mood) => (
-                    <button
-                      key={mood.value}
-                      onClick={() => setFormData({ ...formData, eveningMood: mood.value })}
-                      className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all duration-200 ${
-                        formData.eveningMood === mood.value
-                          ? 'bg-purple-500 text-white border-purple-500 transform scale-105'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-purple-300 hover:bg-purple-50'
-                      }`}
-                    >
-                      <span className="text-3xl mb-2">{mood.emoji}</span>
-                      <span className="text-sm font-medium">{mood.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {step === 5 && (
-              <div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
-                  Which habits did you complete today?
-                </h3>
-                <p className="text-gray-600 mb-8 text-center">Track your daily habits</p>
-                
-                <div className="max-w-md mx-auto space-y-3">
-                  {habits.map((habit, index) => (
-                    <label 
-                      key={index}
-                      className="flex items-center p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={(formData.completedHabits || [])[index] || false}
-                        onChange={() => toggleHabit(index)}
-                        className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 mr-4"
-                      />
-                      <span className="text-lg text-gray-700">{habit}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Navigation */}
-          <div className="flex justify-between mt-8">
-            <button
-              onClick={handleBack}
-              className="flex items-center space-x-2 px-6 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <ArrowLeft size={20} />
-              <span>Back</span>
-            </button>
-
-            <button
-              onClick={handleNext}
-              disabled={!canProceed()}
-              className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-medium transition-all duration-200 ${
-                canProceed()
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-600 text-white hover:shadow-lg transform hover:-translate-y-0.5'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              <span>{step === totalSteps ? 'Complete' : 'Next'}</span>
-              <ArrowRight size={20} />
-            </button>
-          </div>
+          <button
+            onClick={handleNext}
+            disabled={!canProceed()}
+            className={`flex items-center space-x-2 px-8 py-3 rounded-xl font-medium transition-all duration-200 ${
+              canProceed()
+                ? 'bg-gradient-to-r from-purple-500 to-blue-600 text-white hover:shadow-lg transform hover:-translate-y-0.5'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <span>{step === totalSteps ? 'Complete' : 'Next'}</span>
+            <ArrowRight size={20} />
+          </button>
         </div>
       </div>
     </div>

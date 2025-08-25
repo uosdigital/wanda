@@ -3,9 +3,10 @@ import { Play, Pause, RotateCcw, Coffee, Focus } from 'lucide-react';
 
 interface PomodoroTimerProps {
   onAddPoints: (points: number) => void;
+  isDarkMode?: boolean;
 }
 
-const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints }) => {
+const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints, isDarkMode = false }) => {
   const [minutes, setMinutes] = useState(25);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
@@ -76,20 +77,30 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints }) => {
     : ((25 * 60 - (minutes * 60 + seconds)) / (25 * 60)) * 100;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border ${
+      isDarkMode 
+        ? 'bg-gray-800/80 border-gray-700' 
+        : 'bg-white/80 border-gray-100'
+    }`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-          {isBreak ? <Coffee size={20} /> : <Focus size={20} />}
+        <h3 className={`text-lg font-semibold flex items-center space-x-2 ${
+          isDarkMode ? 'text-white' : 'text-gray-900'
+        }`}>
+          {isBreak ? <Coffee size={20} className="animate-float" /> : <Focus size={20} className="animate-float" />}
           <span>{isBreak ? 'Break Time' : 'Focus Time'}</span>
         </h3>
-        <div className="text-sm text-gray-500">
+        <div className={`text-sm px-3 py-1 rounded-full ${
+          isDarkMode 
+            ? 'text-gray-300 bg-gray-700' 
+            : 'text-gray-500 bg-gray-100'
+        }`}>
           {completedPomodoros} completed
         </div>
       </div>
 
       {/* Timer Display */}
       <div className="text-center mb-6">
-        <div className="relative w-32 h-32 mx-auto">
+        <div className="relative w-32 h-32 mx-auto animate-breathe">
           {/* Progress Circle */}
           <svg className="transform -rotate-90 w-32 h-32">
             <circle
@@ -127,10 +138,10 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints }) => {
       <div className="flex justify-center space-x-4">
         <button
           onClick={toggleTimer}
-          className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+          className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ease-out transform hover:scale-105 ${
             isActive
-              ? 'bg-red-500 text-white hover:bg-red-600'
-              : `bg-${isBreak ? 'green' : 'blue'}-500 text-white hover:bg-${isBreak ? 'green' : 'blue'}-600`
+              ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg'
+              : `bg-${isBreak ? 'green' : 'blue'}-500 text-white hover:bg-${isBreak ? 'green' : 'blue'}-600 shadow-lg`
           }`}
         >
           {isActive ? <Pause size={18} /> : <Play size={18} />}
@@ -139,7 +150,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints }) => {
 
         <button
           onClick={resetTimer}
-          className="flex items-center space-x-2 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+          className="flex items-center space-x-2 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200 hover:scale-105"
         >
           <RotateCcw size={18} />
         </button>
