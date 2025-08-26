@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase, hasSupabaseConfig } from '../utils/supabase';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import visionImg from '../../images/vision.jpg';
 
 interface AuthProps {
   isDarkMode: boolean;
@@ -86,6 +87,11 @@ const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
     }`}>
       <div className={`max-w-md w-full space-y-8 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
         <div className="text-center">
+          <img 
+            src={visionImg} 
+            alt="Vision" 
+            className="w-16 h-16 mx-auto mb-4 rounded-lg"
+          />
           <h2 className="text-3xl font-bold">
             Welcome Back
           </h2>
@@ -187,11 +193,7 @@ const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
           </div>
         </form>
 
-        <div className="text-center">
-          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Single-user application
-          </p>
-        </div>
+
 
         <div className="text-center">
           <button

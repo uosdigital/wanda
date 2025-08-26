@@ -12,10 +12,10 @@ import {
   Target,
   Calendar,
   Goal,
-  StickyNote
+  StickyNote,
+  LogOut
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
-import UserProfile from './UserProfile';
 
 type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
 
@@ -201,9 +201,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </ul>
       </nav>
 
-      {/* User Profile */}
-      <UserProfile isDarkMode={isDarkMode} onSignOut={onSignOut} />
-
       {/* Bottom Controls */}
       <div className={`p-4 border-t ${
         isDarkMode ? 'border-gray-700' : 'border-gray-100'
@@ -238,6 +235,22 @@ const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <span className="text-sm font-medium">
                 {isCollapsed ? 'Expand' : 'Collapse'}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={onSignOut}
+            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+              isDarkMode 
+                ? 'hover:bg-gray-800 text-red-400' 
+                : 'hover:bg-gray-100 text-red-600'
+            }`}
+            title="Sign out"
+          >
+            <LogOut size={18} />
+            {!isCollapsed && (
+              <span className="text-sm font-medium">
+                Sign Out
               </span>
             )}
           </button>
