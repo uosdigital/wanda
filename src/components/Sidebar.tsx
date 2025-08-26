@@ -119,15 +119,15 @@ const Sidebar: React.FC<SidebarProps> = ({
       
       {/* Sidebar */}
       <div className={`fixed left-0 top-0 h-full backdrop-blur-sm border-r transition-all duration-500 ease-out z-50 flex flex-col ${
-        isCollapsed ? 'w-16' : 'w-64'
-      } ${
         isDarkMode 
           ? 'bg-gray-900/90 border-gray-700' 
           : 'bg-white/90 border-gray-200'
       } ${
-        // Mobile responsive classes - full width on mobile, fixed width on desktop
+        // Mobile responsive classes
         'w-full md:w-64' +
-        (isMobileOpen ? ' translate-x-0' : ' -translate-x-full md:translate-x-0')
+        (isMobileOpen ? ' translate-x-0' : ' -translate-x-full md:translate-x-0') +
+        // Desktop collapse logic
+        (isCollapsed ? ' md:w-16' : ' md:w-64')
       }`}>
       {/* Header Section */}
       <div className={`p-4 border-b ${
