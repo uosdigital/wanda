@@ -119,8 +119,25 @@ function App() {
         }
       }, 1000);
     } else if (timerMinutes === 0 && timerSeconds === 0 && timerIsActive) {
-      // Timer finished
+      // Timer finished - play sound and show notification
       setTimerIsActive(false);
+      
+      // Play notification sound
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+      audio.play().catch(e => console.log('Audio play failed:', e));
+      
+      // Show browser notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(timerIsBreak ? 'Break Complete!' : 'Focus Session Complete!', {
+          body: timerIsBreak ? 'Time to get back to work!' : 'Great job! Take a break.',
+          icon: '/favicon.ico',
+          badge: '/favicon.ico'
+        });
+      }
+      
+      // Show toast notification
+      showToast(timerIsBreak ? 'Break complete! Time to focus.' : 'Focus session complete! Take a break.');
+      
       if (!timerIsBreak) {
         // Completed a focus session
         setTimerCompletedPomodoros(prev => prev + 1);
@@ -141,10 +158,14 @@ function App() {
         clearInterval(interval);
       }
     };
-  }, [timerIsActive, timerMinutes, timerSeconds, timerIsBreak]);
+  }, [timerIsActive, timerMinutes, timerSeconds, timerIsBreak, showToast]);
 
   // Timer control functions
   const toggleTimer = () => {
+    // Request notification permission on first timer start
+    if (!timerIsActive && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
     setTimerIsActive(!timerIsActive);
   };
 
