@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   BarChart3, 
   Home, 
@@ -13,7 +13,8 @@ import {
   Calendar,
   Goal,
   StickyNote,
-  LogOut
+  LogOut,
+  Settings
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
 
@@ -37,6 +38,7 @@ interface SidebarProps {
   timerMinutes?: number;
   timerSeconds?: number;
   onToggleTimer?: () => void;
+  syncStatus?: 'synced' | 'syncing' | 'error' | 'offline';
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -56,8 +58,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   timerIsBreak = false,
   timerMinutes = 25,
   timerSeconds = 0,
-  onToggleTimer
+  onToggleTimer,
+  syncStatus = 'offline'
 }) => {
+  const [showSettings, setShowSettings] = useState(false);
   // Disable page scroll when mobile menu is open
   React.useEffect(() => {
     if (isMobileOpen) {
@@ -216,6 +220,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
         )}
+
+
       </div>
 
       {/* Navigation Menu */}
@@ -285,22 +291,72 @@ const Sidebar: React.FC<SidebarProps> = ({
         isDarkMode ? 'border-gray-700' : 'border-gray-100'
       }`}>
         <div className="space-y-3">
+          {/* Sync Status */}
+          {!isCollapsed && (
+            <div className={`rounded-lg p-2 border ${
+              syncStatus === 'synced' 
+                ? isDarkMode 
+                  ? 'bg-green-900/50 border-green-700' 
+                  : 'bg-green-50 border-green-200'
+                : syncStatus === 'syncing'
+                ? isDarkMode 
+                  ? 'bg-yellow-900/50 border-yellow-700' 
+                  : 'bg-yellow-50 border-yellow-200'
+                : syncStatus === 'error'
+                ? isDarkMode 
+                  ? 'bg-red-900/50 border-red-700' 
+                  : 'bg-red-50 border-red-200'
+                : isDarkMode 
+                  ? 'bg-gray-800/50 border-gray-700' 
+                  : 'bg-gray-50 border-gray-200'
+            }`}>
+              <div className="flex items-center space-x-2">
+                {syncStatus === 'synced' ? (
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                ) : syncStatus === 'syncing' ? (
+                  <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                ) : syncStatus === 'error' ? (
+                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                ) : (
+                  <div className="w-2 h-2 rounded-full bg-gray-500"></div>
+                )}
+                <span className={`text-xs font-medium ${
+                  syncStatus === 'synced' 
+                    ? isDarkMode ? 'text-green-300' : 'text-green-700'
+                    : syncStatus === 'syncing'
+                    ? isDarkMode ? 'text-yellow-300' : 'text-yellow-700'
+                    : syncStatus === 'error'
+                    ? isDarkMode ? 'text-red-300' : 'text-red-700'
+                    : isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  {syncStatus === 'synced' ? 'Synced' : 
+                   syncStatus === 'syncing' ? 'Syncing...' : 
+                   syncStatus === 'error' ? 'Sync Error' : 
+                   'Offline'}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Settings Button */}
           <button
-            onClick={onToggleDarkMode}
+            onClick={() => setShowSettings(true)}
             className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
               isDarkMode 
-                ? 'hover:bg-gray-800 text-yellow-400' 
+                ? 'hover:bg-gray-800 text-gray-300' 
                 : 'hover:bg-gray-100 text-gray-600'
             }`}
-            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            title="Settings"
           >
-            {isDarkMode ? <Sun size={20} className="transition-all duration-500" /> : <Moon size={20} className="transition-all duration-500" />}
+            <Settings size={20} className="transition-all duration-500" />
             {!isCollapsed && (
               <span className="text-sm font-medium">
-                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                Settings
               </span>
             )}
           </button>
+
+          {/* Collapse Button */}
           <button
             onClick={onToggleCollapse}
             className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg transition-all duration-200 hover:scale-105 hidden md:flex ${
@@ -317,24 +373,66 @@ const Sidebar: React.FC<SidebarProps> = ({
               </span>
             )}
           </button>
-          <button
-            onClick={onSignOut}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-              isDarkMode 
-                ? 'hover:bg-gray-800 text-red-400' 
-                : 'hover:bg-gray-100 text-red-600'
-            }`}
-            title="Sign out"
-          >
-            <LogOut size={20} className="transition-all duration-500" />
-            {!isCollapsed && (
-              <span className="text-sm font-medium">
-                Sign Out
-              </span>
-            )}
-          </button>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className={`w-full max-w-md rounded-2xl shadow-xl border transform transition-all duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <div className={`px-5 py-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Settings</h2>
+            </div>
+            <div className="p-5 space-y-4">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => {
+                  onToggleDarkMode();
+                  setShowSettings(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'hover:bg-gray-700 text-yellow-400' 
+                    : 'hover:bg-gray-100 text-gray-600'
+                }`}
+              >
+                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                <span className="font-medium">
+                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                </span>
+              </button>
+
+              {/* Sign Out Button */}
+              <button
+                onClick={() => {
+                  onSignOut();
+                  setShowSettings(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 ${
+                  isDarkMode 
+                    ? 'hover:bg-gray-700 text-red-400' 
+                    : 'hover:bg-gray-100 text-red-600'
+                }`}
+              >
+                <LogOut size={20} />
+                <span className="font-medium">Sign Out</span>
+              </button>
+            </div>
+            <div className={`px-5 py-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <button
+                onClick={() => setShowSettings(false)}
+                className={`w-full px-4 py-2 rounded-lg transition-colors ${
+                  isDarkMode 
+                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </>
   );

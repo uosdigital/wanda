@@ -37,21 +37,33 @@ function App() {
   const [appData, setAppData] = useState<AppData>(() => getEmptyAppData());
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'offline'>('offline');
 
   // Load data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await loadAppData();
-        setAppData(data);
+        setSyncStatus('syncing');
+        const result = await loadAppData();
+        setAppData(result.data);
+        
+        // Set sync status based on data source
+        if (result.source === 'supabase') {
+          setSyncStatus('synced');
+        } else if (result.source === 'localStorage') {
+          setSyncStatus('offline');
+        } else {
+          setSyncStatus('offline');
+        }
       } catch (error) {
         console.error('Failed to load app data:', error);
+        setSyncStatus('error');
       } finally {
         setIsLoading(false);
       }
     };
     loadData();
-  }, []);
+  }, [isAuthenticated]);
 
   // Check authentication status
   useEffect(() => {
@@ -93,7 +105,10 @@ function App() {
   const [timerCompletedPomodoros, setTimerCompletedPomodoros] = useState(0);
 
   useEffect(() => {
-    saveAppData(appData);
+    // Only save if we have actual data (not just the initial empty state)
+    if (Object.keys(appData.dailyData).length > 0 || (appData.notes && appData.notes.length > 0) || (appData.habits && appData.habits.length > 0)) {
+      saveAppData(appData);
+    }
   }, [appData]);
 
   useEffect(() => {
@@ -256,7 +271,16 @@ function App() {
     };
     console.log('[DEBUG] Updated appData:', updatedData);
     setAppData(updatedData);
-    await saveAppData(updatedData);
+    
+    // Update sync status
+    setSyncStatus('syncing');
+    try {
+      await saveAppData(updatedData);
+      setSyncStatus('synced');
+    } catch (error) {
+      console.error('Failed to save data:', error);
+      setSyncStatus('error');
+    }
   };
 
   const calculateTotalPoints = () => {
@@ -345,7 +369,16 @@ function App() {
       }
     };
     setAppData(updatedData);
-    await saveAppData(updatedData);
+    
+    // Update sync status
+    setSyncStatus('syncing');
+    try {
+      await saveAppData(updatedData);
+      setSyncStatus('synced');
+    } catch (error) {
+      console.error('Failed to save time blocks:', error);
+      setSyncStatus('error');
+    }
   };
 
   const triggerTimeblock = (label: string, category: Category) => {
@@ -358,7 +391,16 @@ function App() {
     const updated = { ...appData, notes: nextNotes };
     console.log('[DEBUG] Saving notes, updated appData:', updated);
     setAppData(updated);
-    await saveAppData(updated);
+    
+    // Update sync status
+    setSyncStatus('syncing');
+    try {
+      await saveAppData(updated);
+      setSyncStatus('synced');
+    } catch (error) {
+      console.error('Failed to save notes:', error);
+      setSyncStatus('error');
+    }
   };
 
   const addNote = (text: string, color: string) => {
@@ -425,6 +467,7 @@ function App() {
         timerMinutes={timerMinutes}
         timerSeconds={timerSeconds}
         onToggleTimer={toggleTimer}
+        syncStatus={syncStatus}
       />
 
       {/* Mobile Header */}

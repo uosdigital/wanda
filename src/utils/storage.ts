@@ -11,7 +11,7 @@ export const getEmptyAppData = (): AppData => ({
   notes: []
 });
 
-export const loadAppData = async (): Promise<AppData> => {
+export const loadAppData = async (): Promise<{ data: AppData; source: 'supabase' | 'localStorage' | 'empty' }> => {
   // Try Supabase first if configured
   if (hasSupabaseConfig) {
     try {
@@ -32,7 +32,7 @@ export const loadAppData = async (): Promise<AppData> => {
           }
         } else if (data && data.app_data) {
           console.info('[storage] Successfully loaded data from Supabase');
-          return data.app_data as AppData;
+          return { data: data.app_data as AppData, source: 'supabase' };
         }
       } else {
         console.info('[storage] No authenticated user, falling back to localStorage');
@@ -47,12 +47,12 @@ export const loadAppData = async (): Promise<AppData> => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       console.info('[storage] Loaded data from localStorage');
-      return JSON.parse(stored) as AppData;
+      return { data: JSON.parse(stored) as AppData, source: 'localStorage' };
     }
   } catch (error) {
     console.error('Failed to load app data:', error);
   }
-  return getEmptyAppData();
+  return { data: getEmptyAppData(), source: 'empty' };
 };
 
 export const saveAppData = async (data: AppData): Promise<void> => {
