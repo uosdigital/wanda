@@ -58,6 +58,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   timerSeconds = 0,
   onToggleTimer
 }) => {
+  // Disable page scroll when mobile menu is open
+  React.useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileOpen]);
   const menuItems = [
     {
       id: 'dashboard' as View,
@@ -128,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       />
       
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full backdrop-blur-sm border-r transition-all duration-500 ease-out z-50 flex flex-col ${
+      <div className={`fixed left-0 top-0 h-full backdrop-blur-sm border-r transition-all duration-500 ease-out z-50 flex flex-col overflow-hidden ${
         isDarkMode 
           ? 'bg-gray-900/90 border-gray-700' 
           : 'bg-white/90 border-gray-200'
@@ -207,7 +219,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation Menu */}
-      <nav className="px-3 py-4 flex-1">
+      <nav className="px-3 py-4 flex-1 overflow-y-auto">
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
