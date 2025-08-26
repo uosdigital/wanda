@@ -32,6 +32,23 @@ export const loadAppData = (): AppData => {
           return getEmptyAppData();
         }
       } catch {}
+      
+      // Additional cleanup: remove any daily data that contains dummy patterns
+      if (data.dailyData && typeof data.dailyData === 'object') {
+        const cleanedDailyData: any = {};
+        const today = new Date().toDateString();
+        
+        Object.keys(data.dailyData).forEach(key => {
+          const dayData = data.dailyData[key];
+          // Only keep today's data or data that doesn't have dummy patterns
+          if (key === today || !dayData || !dayData.sleepQuality || !dayData.morningMood) {
+            cleanedDailyData[key] = dayData;
+          }
+        });
+        
+        data.dailyData = cleanedDailyData;
+      }
+      
       // Ensure all required properties exist with safe defaults
       return {
         ...getEmptyAppData(),
