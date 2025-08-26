@@ -11,10 +11,11 @@ import {
   Moon,
   Target,
   Calendar,
-  Goal
+  Goal,
+  StickyNote
 } from 'lucide-react';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
 
 interface SidebarProps {
   currentView: View;
@@ -85,6 +86,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-100',
       hoverColor: 'hover:bg-indigo-50'
+    },
+    {
+      id: 'notes' as View,
+      label: 'Notes',
+      icon: StickyNote,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
+      hoverColor: 'hover:bg-yellow-50'
     }
   ];
 

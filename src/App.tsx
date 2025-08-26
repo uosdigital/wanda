@@ -8,14 +8,15 @@ import TimerView from './components/TimerView';
 import Habits from './components/Habits';
 import Sidebar from './components/Sidebar';
 import FullScreenModal from './components/FullScreenModal';
-import { AppData, DailyData } from './types';
+import { AppData, DailyData, Note } from './types';
 import { initializeAppData, saveAppData, loadAppData, clearAppData, resetToDummyData } from './utils/storage';
 import { useToast } from './components/ToastProvider';
 import Timeblocking from './components/Timeblocking';
 import Points from './components/Points';
+import Notes from './components/Notes';
 import { TimeBlock } from './types';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
 
 type AddPointsFn = (points: number, reason?: string) => void;
 
@@ -159,6 +160,27 @@ function App() {
     setCurrentView('timeblocking');
   };
 
+  const saveNotes = (updater: (prev: Note[]) => Note[]) => {
+    const nextNotes = updater(appData.notes || []);
+    const updated = { ...appData, notes: nextNotes };
+    setAppData(updated);
+    saveAppData(updated);
+  };
+
+  const addNote = (text: string, color: string) => {
+    const now = new Date().toISOString();
+    saveNotes(prev => [{ id: crypto.randomUUID(), text, color, createdAt: now }, ...prev]);
+  };
+
+  const updateNote = (id: string, text: string, color: string) => {
+    const now = new Date().toISOString();
+    saveNotes(prev => prev.map(n => n.id === id ? { ...n, text, color, updatedAt: now } : n));
+  };
+
+  const deleteNote = (id: string) => {
+    saveNotes(prev => prev.filter(n => n.id !== id));
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
       isDarkMode 
@@ -275,6 +297,16 @@ function App() {
         {currentView === 'points' && (
           <Points
             onBack={() => setCurrentView('dashboard')}
+            isDarkMode={isDarkMode}
+          />
+        )}
+
+        {currentView === 'notes' && (
+          <Notes
+            notes={appData.notes || []}
+            onAdd={addNote}
+            onUpdate={updateNote}
+            onDelete={deleteNote}
             isDarkMode={isDarkMode}
           />
         )}

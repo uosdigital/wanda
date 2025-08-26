@@ -6,6 +6,14 @@ export interface TimeBlock {
   label: string;
 }
 
+export interface Note {
+  id: string;
+  text: string;
+  color: string; // tailwind color class or hex
+  createdAt: string; // ISO datetime
+  updatedAt?: string; // ISO datetime
+}
+
 export interface DailyData {
   sleepQuality?: number;
   bedTime?: string;
@@ -50,4 +58,5 @@ export interface AppData {
   currentStreak: number;
   dailyData: Record<string, DailyData>;
   habits: string[];
+  notes?: Note[];
 }
