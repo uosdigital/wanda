@@ -7,6 +7,7 @@ import TimerView from './components/TimerView';
 import Habits from './components/Habits';
 import Sidebar from './components/Sidebar';
 import FullScreenModal from './components/FullScreenModal';
+import Auth from './components/Auth';
 import { AppData, DailyData, Note } from './types';
 import { saveAppData, loadAppData, clearAppData, getEmptyAppData } from './utils/storage';
 import { useToast } from './components/ToastProvider';
@@ -14,6 +15,7 @@ import Timeblocking from './components/Timeblocking';
 import Points from './components/Points';
 import Notes from './components/Notes';
 import { TimeBlock } from './types';
+import { supabase, hasSupabaseConfig } from './utils/supabase';
 
 type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
 
@@ -31,6 +33,7 @@ function App() {
   const [eveningFlowCompleted, setEveningFlowCompleted] = useState(false);
   const [appData, setAppData] = useState<AppData>(() => getEmptyAppData());
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Load data on mount
   useEffect(() => {
@@ -45,6 +48,28 @@ function App() {
       }
     };
     loadData();
+  }, []);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (hasSupabaseConfig) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          setIsAuthenticated(!!user);
+        } catch (error) {
+          console.error('Auth check failed:', error);
+        }
+      }
+    };
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
@@ -86,6 +111,19 @@ function App() {
       dailyData: {},
       habits: []
     });
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true);
   };
 
   const updateDailyData = async (data: Partial<DailyData>) => {
@@ -234,6 +272,11 @@ function App() {
     );
   }
 
+  // Show auth screen if Supabase is configured and user is not authenticated
+  if (hasSupabaseConfig && !isAuthenticated) {
+    return <Auth isDarkMode={isDarkMode} onAuthSuccess={handleAuthSuccess} />;
+  }
+
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
       isDarkMode 
@@ -251,6 +294,7 @@ function App() {
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         todaysPoints={calculateTodaysPoints()}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Content */}

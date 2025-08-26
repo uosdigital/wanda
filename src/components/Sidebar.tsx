@@ -15,6 +15,7 @@ import {
   StickyNote
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
+import UserProfile from './UserProfile';
 
 type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
 
@@ -28,6 +29,7 @@ interface SidebarProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   todaysPoints: number;
+  onSignOut: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -39,7 +41,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   currentStreak,
   isDarkMode,
   onToggleDarkMode,
-  todaysPoints
+  todaysPoints,
+  onSignOut
 }) => {
   const menuItems = [
     {
@@ -197,6 +200,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           })}
         </ul>
       </nav>
+
+      {/* User Profile */}
+      <UserProfile isDarkMode={isDarkMode} onSignOut={onSignOut} />
 
       {/* Bottom Controls */}
       <div className={`p-4 border-t ${
