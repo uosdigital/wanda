@@ -16,6 +16,8 @@ import Points from './components/Points';
 import Notes from './components/Notes';
 import { TimeBlock } from './types';
 import { supabase, hasSupabaseConfig } from './utils/supabase';
+import visionImg from '../images/vision.jpg';
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
 
@@ -66,7 +68,10 @@ function App() {
     checkAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((
+      _event: AuthChangeEvent,
+      session: Session | null
+    ) => {
       setIsAuthenticated(!!session?.user);
     });
 
@@ -300,25 +305,48 @@ function App() {
         onMobileToggle={() => setMobileSidebarOpen(!mobileSidebarOpen)}
       />
 
+      {/* Mobile Header */}
+      <header className={`fixed top-0 left-0 right-0 z-30 md:hidden ${
+        isDarkMode 
+          ? 'bg-gray-900/90 backdrop-blur-sm border-b border-gray-700' 
+          : 'bg-white/90 backdrop-blur-sm border-b border-gray-200'
+      }`}>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg overflow-hidden ring-2 ring-blue-500/30">
+              <img src={visionImg} alt="Twist" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h1 className={`text-lg font-bold ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>Twist</h1>
+              <p className={`text-xs ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>
+                {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} · {calculateTodaysPoints()} pts
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className={`p-2 rounded-lg transition-colors ${
+              isDarkMode 
+                ? 'text-gray-300 hover:bg-gray-800' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+            aria-label="Open menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <main className={`transition-all duration-300 ${
-        sidebarCollapsed ? 'ml-16' : 'ml-64'
-      } md:ml-64 px-4 py-4 pt-16 md:pt-8`}>
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileSidebarOpen(true)}
-          className={`fixed top-4 left-4 z-30 p-3 rounded-lg transition-colors md:hidden ${
-            isDarkMode 
-              ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' 
-              : 'bg-white text-gray-600 hover:bg-gray-100'
-          } shadow-lg border ${
-            isDarkMode ? 'border-gray-600' : 'border-gray-200'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+      <main className={`transition-all duration-300 ml-0 ${
+        sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
+      } px-4 py-4 pt-20 md:pt-8`}>
         {currentView === 'dashboard' && (
           <Dashboard
             todaysData={getTodaysData()}

@@ -151,6 +151,16 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
           </div>
+          {/* Mobile close button */}
+          <button
+            onClick={onMobileToggle}
+            className={`md:hidden p-2 rounded-lg transition-colors ${
+              isDarkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'
+            }`}
+            aria-label="Close menu"
+          >
+            <ChevronLeft size={20} />
+          </button>
         </div>
 
         {/* Stats Section */}
