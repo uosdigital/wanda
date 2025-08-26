@@ -349,12 +349,12 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
               How are you feeling right now?
             </h3>
             <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-3">
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-4">
                 {moodOptions.map((option, index) => (
                   <button
                     key={option.value}
                     onClick={() => handleMoodSelect(option.value)}
-                    className={`p-2 md:p-3 rounded-xl border-2 transition-all duration-300 hover:scale-105 transform text-xs md:text-sm font-medium ${
+                    className={`p-3 md:p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 transform text-sm md:text-base font-medium ${
                       formData.morningMood === option.value
                         ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-500 scale-105 shadow-lg'
                         : isDarkMode
