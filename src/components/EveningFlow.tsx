@@ -599,7 +599,7 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
       </div>
 
         {/* Navigation */}
-        <div className="flex justify-between mt-8">
+        <div className="flex justify-between mt-8 mb-8">
           <button
             onClick={handleBack}
             className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 ${
