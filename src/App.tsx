@@ -219,6 +219,13 @@ function App() {
     setTimerSeconds(0);
   };
 
+  const setCustomTimer = (minutes: number) => {
+    setTimerIsActive(false);
+    setTimerIsBreak(false);
+    setTimerMinutes(minutes);
+    setTimerSeconds(0);
+  };
+
   // Reset completion states when modals close
   useEffect(() => {
     if (!morningFlowOpen) {
@@ -597,6 +604,7 @@ function App() {
             timerCompletedPomodoros={timerCompletedPomodoros}
             onToggleTimer={toggleTimer}
             onResetTimer={resetTimer}
+            onSetCustomTimer={setCustomTimer}
           />
         )}
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowLeft, Play, Pause, RotateCcw, Coffee, Focus } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Play, Pause, RotateCcw, Coffee, Focus, X } from 'lucide-react';
 
 interface TimerViewProps {
   onBack: () => void;
@@ -12,6 +12,7 @@ interface TimerViewProps {
   timerCompletedPomodoros: number;
   onToggleTimer: () => void;
   onResetTimer: () => void;
+  onSetCustomTimer?: (minutes: number) => void;
 }
 
 const TimerView: React.FC<TimerViewProps> = ({ 
@@ -24,8 +25,11 @@ const TimerView: React.FC<TimerViewProps> = ({
   timerIsBreak,
   timerCompletedPomodoros,
   onToggleTimer,
-  onResetTimer
+  onResetTimer,
+  onSetCustomTimer
 }) => {
+  const [showCustomTimer, setShowCustomTimer] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState(25);
   const formatTime = (mins: number, secs: number) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
@@ -112,9 +116,13 @@ const TimerView: React.FC<TimerViewProps> = ({
                 
                 {/* Time Display */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={`text-2xl font-bold ${isDarkMode ? 'text-teal-300' : 'text-gray-900'}`}>
+                  <button
+                    onClick={() => setShowCustomTimer(true)}
+                    className={`text-2xl font-bold transition-all duration-200 hover:scale-105 ${isDarkMode ? 'text-teal-300 hover:text-teal-200' : 'text-gray-900 hover:text-gray-700'}`}
+                    title="Click to set custom timer"
+                  >
                     {formatTime(timerMinutes, timerSeconds)}
-                  </span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -176,6 +184,80 @@ const TimerView: React.FC<TimerViewProps> = ({
           </ul>
         </div>
       </div>
+
+      {/* Custom Timer Modal */}
+      {showCustomTimer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className={`w-full max-w-md rounded-2xl shadow-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <div className={`px-5 py-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Set Custom Timer</h2>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Minutes
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="120"
+                  value={customMinutes}
+                  onChange={(e) => setCustomMinutes(parseInt(e.target.value) || 25)}
+                  className={`w-full p-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-white border-gray-600' 
+                      : 'bg-white text-gray-900 border-gray-300'
+                  }`}
+                />
+              </div>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex gap-2">
+                  {[15, 25, 30, 45, 60].map((mins) => (
+                    <button
+                      key={mins}
+                      onClick={() => setCustomMinutes(mins)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        customMinutes === mins
+                          ? 'bg-blue-500 text-white'
+                          : isDarkMode
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className={`px-5 py-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCustomTimer(false)}
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (onSetCustomTimer) {
+                      onSetCustomTimer(customMinutes);
+                    }
+                    setShowCustomTimer(false);
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+                >
+                  Set Timer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
