@@ -280,10 +280,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 
           <button
             onClick={onStartEvening}
-            disabled={hasCompletedEvening}
             className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ease-out transform hover:scale-105 ${
               hasCompletedEvening
-                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                ? 'bg-green-100 text-green-700 hover:bg-green-200'
                 : 'bg-gradient-to-r from-purple-500 to-blue-600 text-white hover:shadow-xl hover:-translate-y-1 animate-pulse-glow'
             }`}
           >
