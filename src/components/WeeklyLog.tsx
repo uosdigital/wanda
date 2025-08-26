@@ -52,8 +52,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
   const getMoodCategory = (mood: string) => {
     if (!mood || mood.trim() === '') return '';
     
-    const positiveMoods = ['energised', 'ready', 'upbeat'];
-    const negativeMoods = ['low', 'struggling', 'tough mood', 'anxious', 'overwhelmed', 'unmotivated', 'sad', 'irritable', 'stuck', 'exhausted', 'frustrated', 'lonely', 'hopeless'];
+    const positiveMoods = ['energised', 'ready', 'upbeat', 'motivated', 'excited', 'confident', 'calm', 'focused', 'optimistic', 'happy', 'productive', 'content'];
+    const negativeMoods = ['low', 'struggling', 'tough mood', 'anxious', 'overwhelmed', 'unmotivated', 'sad', 'irritable', 'stuck', 'exhausted', 'frustrated', 'lonely', 'hopeless', 'tired', 'stressed', 'distracted', 'restless'];
     
     if (positiveMoods.includes(mood)) return 'positive';
     if (negativeMoods.includes(mood)) return 'negative';
@@ -1025,15 +1025,19 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`text-sm capitalize ${
-                            isDarkMode ? 'text-white' : 'text-gray-900'
-                          }`}>{day.data.morningMood}</span>
+                          {day.data.morningMood ? (
+                            <span className={`text-sm capitalize ${
+                              isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>{day.data.morningMood}</span>
+                          ) : null}
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMoodCategoryColor(moodCategory)}`}>
-                            <span className="mr-1">{getMoodCategoryIcon(moodCategory)}</span>
-                            {moodCategory.charAt(0).toUpperCase() + moodCategory.slice(1)}
-                          </span>
+                          {moodCategory ? (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMoodCategoryColor(moodCategory)}`}>
+                              <span className="mr-1">{getMoodCategoryIcon(moodCategory)}</span>
+                              {moodCategory.charAt(0).toUpperCase() + moodCategory.slice(1)}
+                            </span>
+                          ) : null}
                         </td>
                       </tr>
                     );
@@ -1168,15 +1172,19 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`text-sm capitalize ${
-                            isDarkMode ? 'text-white' : 'text-gray-900'
-                          }`}>{String(day.data.eveningMood || '—')}</span>
+                          {day.data.eveningMood ? (
+                            <span className={`text-sm capitalize ${
+                              isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>{day.data.eveningMood}</span>
+                          ) : null}
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMoodCategoryColor(moodCategory)}`}>
-                            <span className="mr-1">{getMoodCategoryIcon(moodCategory)}</span>
-                            {moodCategory.charAt(0).toUpperCase() + moodCategory.slice(1)}
-                          </span>
+                          {moodCategory ? (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMoodCategoryColor(moodCategory)}`}>
+                              <span className="mr-1">{getMoodCategoryIcon(moodCategory)}</span>
+                              {moodCategory.charAt(0).toUpperCase() + moodCategory.slice(1)}
+                            </span>
+                          ) : null}
                         </td>
                       </tr>
                     );
