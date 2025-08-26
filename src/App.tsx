@@ -205,7 +205,6 @@ function App() {
       }`}>
         {currentView === 'dashboard' && (
           <Dashboard
-            appData={appData}
             todaysData={getTodaysData()}
             onStartMorning={() => setMorningFlowOpen(true)}
             onStartEvening={() => setEveningFlowOpen(true)}

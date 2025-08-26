@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, ArrowRight, Sun, Clock, Heart, Target, Users, Star, Check, X, ChevronUp, ChevronDown, BookOpen, PenTool, Guitar } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ArrowLeft, ArrowRight, Target, Users, X, BookOpen, PenTool, Guitar } from 'lucide-react';
 import { DailyData, TimeBlock } from '../types';
+import visionImg from '../../images/vision.jpg';
 
 interface TimeInputProps {
   value: string | undefined;
@@ -59,7 +60,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
     meetings: existingData.meetings || []
   });
 
-  const totalSteps = 14;
+  const totalSteps = 13;
 
   const habitOptions = [
     { id: 'guitar', label: 'Guitar', icon: Guitar },
@@ -204,7 +205,6 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
       case 11: return true; // Optional good stuff
       case 12: return true; // Meetings are optional
       case 13: return formData.goodDayVision?.trim() !== '';
-      case 14: return true; // Completion step
       default: return false;
     }
   };
@@ -217,18 +217,13 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
     setFormData({ ...formData, habits: updated });
   };
 
-  const handleHabitsComplete = () => {
-    // Manual progression for good stuff selection
-    handleNext();
-  };
-
   const getStepContent = () => {
     switch (step) {
       case 1:
         return (
           <div className="text-center animate-fade-in">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
-              <Sun size={48} className="text-white" />
+            <div className="w-24 h-24 rounded-xl overflow-hidden mx-auto mb-8">
+              <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
             </div>
             <h3 className={`text-4xl font-bold mb-6 animate-slide-up ${
               isDarkMode ? 'text-white' : 'text-gray-900'
@@ -628,42 +623,6 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
           </div>
         );
 
-      case 14:
-        return (
-          <div className="text-center animate-fade-in">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
-              <Check size={48} className="text-white" />
-            </div>
-            <h3 className={`text-3xl font-bold mb-6 animate-slide-up ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
-              Perfect
-            </h3>
-            <div className={`max-w-2xl mx-auto rounded-2xl p-8 border animate-slide-up ${
-              isDarkMode 
-                ? 'bg-gradient-to-r from-gray-700 to-gray-600 border-gray-600' 
-                : 'bg-gradient-to-r from-blue-50 to-green-50 border-blue-200'
-            }`} style={{animationDelay: '0.2s'}}>
-              <p className={`text-lg leading-relaxed ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
-                Stay hydrated, fuel yourself well, and remember: <strong>even tiny starts count</strong>.
-              </p>
-              <p className="text-xl font-bold text-blue-600 mt-4">
-                You've got this
-              </p>
-            </div>
-            <div className="mt-8 animate-slide-up" style={{animationDelay: '0.4s'}}>
-              <button
-                onClick={handleNext}
-                className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-12 py-4 rounded-xl font-semibold text-lg hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
-              >
-                Complete Morning Check-in
-              </button>
-            </div>
-          </div>
-        );
-
       default:
         return null;
     }
@@ -683,8 +642,8 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
       } border-b p-4 flex-shrink-0`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <Sun size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
             </div>
             <div>
               <h2 className={`text-lg font-semibold ${

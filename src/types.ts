@@ -27,6 +27,7 @@ export interface DailyData {
   completedPeople?: boolean[];
   completedTasks?: boolean[];
   completedMainTask?: boolean;
+  priorityTasks?: Array<{ label: string; completed: boolean }>;
   winOfDay?: string;
   obstacles?: string[];
   eveningMood?: string | number;

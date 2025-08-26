@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, TrendingUp, Calendar, Trophy, Flame, Moon, Clock, Target } from 'lucide-react';
+import { ArrowLeft, Clock } from 'lucide-react';
 import { AppData } from '../types';
 import {
   Chart as ChartJS,
@@ -42,28 +42,16 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
   const [selectedDay, setSelectedDay] = React.useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  // Helper functions
-  const getMoodText = (mood?: number) => {
-    if (!mood) return '—';
-    const moods = ['Poor', 'Fair', 'Okay', 'Good', 'Great'];
-    return moods[mood - 1] || '—';
-  };
-
-  const getCompletionRate = () => {
-    const daysWithData = weekDataWithDetails.filter(day => day.data.mainPriority).length;
-    const completedDays = weekDataWithDetails.filter(day => day.data.completedMainTask).length;
-    return daysWithData > 0 ? Math.round((completedDays / daysWithData) * 100) : 0;
-  };
-
-  const getTotalWins = () => {
-    return weekDataWithDetails.filter(day => day.data.winOfDay).length;
+  // Helper types
+  type DummyDay = {
+    sleepData: { sleepQuality: number; bedTime: string; wakeTime: string; sleepHours: number };
+    morningMood: string;
   };
 
   // Mood categorization helper functions
   const getMoodCategory = (mood: string) => {
     const positiveMoods = ['energised', 'ready', 'upbeat'];
     const negativeMoods = ['low', 'struggling', 'tough mood', 'anxious', 'overwhelmed', 'unmotivated', 'sad', 'irritable', 'stuck', 'exhausted', 'frustrated', 'lonely', 'hopeless'];
-    const neutralMoods = ['flat', 'mixed', 'meh', 'okay', 'tired', 'neutral', 'stressed', 'distracted', 'restless', 'busy', 'unsure', 'low-key'];
     
     if (positiveMoods.includes(mood)) return 'positive';
     if (negativeMoods.includes(mood)) return 'negative';
@@ -134,21 +122,25 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
   };
 
   const weekDataWithDetails = React.useMemo(() => {
-    // Get 7 days of data based on week offset
+    // Get 7 days of data based on week offset, aligned Sunday -> Saturday
   const getLast7Days = () => {
-    const days = [];
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - (6 - currentWeekOffset * 7));
-      
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date(startDate);
-        date.setDate(startDate.getDate() + (6 - i));
+      const days = [] as Array<{ date: Date; dateStr: string; data: any; dayName: string; dayNumber: number }>; 
+      // Reference date shifted by week offset
+      const ref = new Date();
+      ref.setHours(0, 0, 0, 0);
+      ref.setDate(ref.getDate() + currentWeekOffset * 7);
+      // Find Sunday of that week
+      const sunday = new Date(ref);
+      sunday.setDate(ref.getDate() - ref.getDay()); // 0 is Sunday
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(sunday);
+        date.setDate(sunday.getDate() + i);
       const dateStr = date.toDateString();
       const dayData = appData.dailyData[dateStr];
-      
       days.push({
-        date: date,
-        dateStr: dateStr,
+          date,
+          dateStr,
         data: dayData || {},
         dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
         dayNumber: date.getDate()
@@ -160,9 +152,9 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
     const baseWeekData = getLast7Days();
 
     // Create different dummy data based on the week offset
-    const getDummyDataForWeek = (weekOffset: number) => {
+    const getDummyDataForWeek = (weekOffset: number): ReadonlyArray<DummyDay> => {
       // Comprehensive mood data for the last month
-      const moodData = {
+      const moodData: Record<string, ReadonlyArray<DummyDay>> = {
         0: [ // Current week
           { sleepData: { sleepQuality: 4, bedTime: '23:30', wakeTime: '07:15', sleepHours: 7.75 }, morningMood: 'energised' },
           { sleepData: { sleepQuality: 3, bedTime: '00:15', wakeTime: '07:30', sleepHours: 7.25 }, morningMood: 'ready' },
@@ -228,7 +220,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
         ]
       };
 
-      return moodData[weekOffset] || moodData[0];
+      const key = String(weekOffset);
+      return moodData[key] || moodData['0'];
     };
 
     const dummyData = getDummyDataForWeek(currentWeekOffset);
@@ -312,13 +305,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           <button
             onClick={() => setCurrentWeekOffset(prev => prev - 1)}
             className={`p-3 rounded-xl transition-colors ${
-              currentWeekOffset <= -2 
-                ? 'text-gray-400 cursor-not-allowed' 
-                : isDarkMode 
-                  ? 'text-gray-300 hover:bg-gray-800' 
-                  : 'text-gray-600 hover:bg-gray-100'
+              isDarkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'
             }`}
-            disabled={currentWeekOffset <= -2}
           >
             <ArrowLeft size={20} />
           </button>
@@ -329,28 +317,22 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
             }`}>
               {currentWeekOffset === 0 ? 'This Week' : 
                currentWeekOffset === -1 ? 'Last Week' : 
-               `${Math.abs(currentWeekOffset)} weeks ago`}
+               currentWeekOffset === 1 ? 'Next Week' : 
+               `${Math.abs(currentWeekOffset)} weeks ${currentWeekOffset < 0 ? 'ago' : 'ahead'}`}
           </div>
             <div className={`text-xs ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
               {(() => {
-                // Use the exact same logic as getLast7Days()
-                const startDate = new Date();
-                startDate.setDate(startDate.getDate() - (6 - currentWeekOffset * 7));
-                
-                // The end date should be 6 days after the start date (7 days total)
-                const endDate = new Date(startDate);
-                endDate.setDate(startDate.getDate() + 6);
-                
-                return `${startDate.toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric' 
-                })} - ${endDate.toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric',
-                  year: 'numeric'
-                })}`;
+                // Compute Sunday -> Saturday range for currentWeekOffset
+                const ref = new Date();
+                ref.setHours(0, 0, 0, 0);
+                ref.setDate(ref.getDate() + currentWeekOffset * 7);
+                const sunday = new Date(ref);
+                sunday.setDate(ref.getDate() - ref.getDay());
+                const saturday = new Date(sunday);
+                saturday.setDate(sunday.getDate() + 6);
+                return `${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
               })()}
         </div>
       </div>
@@ -358,13 +340,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           <button
             onClick={() => setCurrentWeekOffset(prev => prev + 1)}
             className={`p-3 rounded-xl transition-colors ${
-              currentWeekOffset >= 2 
-                ? 'text-gray-400 cursor-not-allowed' 
-                : isDarkMode 
-                  ? 'text-gray-300 hover:bg-gray-800' 
-                  : 'text-gray-600 hover:bg-gray-100'
+              isDarkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'
             }`}
-            disabled={currentWeekOffset >= 2}
           >
             <ArrowLeft size={20} className="rotate-180" />
           </button>
@@ -488,9 +465,9 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Additional Tasks Completed */}
       <div className={`rounded-2xl shadow-sm border mb-8 ${
@@ -508,8 +485,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
             <h2 className={`text-xl font-semibold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>Tasks</h2>
+            </div>
           </div>
-        </div>
         <div className="p-6">
           <div className="grid grid-cols-7 gap-4 mb-6">
             {weekDataWithDetails.map((day, index) => {
@@ -564,8 +541,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
             })}
           </div>
         </div>
-        </div>
-        
+      </div>
+
       {/* Habits Completed */}
       <div className={`rounded-2xl shadow-sm border mb-8 ${
         isDarkMode 
@@ -638,8 +615,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
             })}
           </div>
         </div>
-                </div>
-                
+        </div>
+        
       {/* Connect Completed */}
       <div className={`rounded-2xl shadow-sm border mb-8 ${
         isDarkMode 
@@ -673,12 +650,12 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                   ? 'bg-yellow-100 text-yellow-600 border-2 border-yellow-200'
                   : 'bg-gray-100 text-gray-400 border-2 border-gray-200';
               return (
-                <div key={index} className="text-center">
+              <div key={index} className="text-center">
                   <div className={`text-sm font-medium mb-2 ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-600'
                   }`}>
-                    {day.dayName}
-              </div>
+                  {day.dayName}
+                </div>
                   <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-lg font-bold ${stateClass}`}>
                     {hasPeople ? completedCount : '—'}
                   </div>
@@ -705,8 +682,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
             })}
           </div>
         </div>
-      </div>
-
+                </div>
+                
       {/* Basics Completed */}
       <div className={`rounded-2xl shadow-sm border mb-8 ${
         isDarkMode 
@@ -719,12 +696,12 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-lg overflow-hidden">
               <img src={basicsImg} alt="Basics" className="w-full h-full object-cover" />
-            </div>
+                  </div>
             <h2 className={`text-xl font-semibold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>Basics</h2>
-          </div>
-        </div>
+                  </div>
+                </div>
         <div className="p-6">
           <div className="grid grid-cols-7 gap-4 mb-6">
             {weekDataWithDetails.map((day, index) => {
@@ -746,7 +723,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                     isDarkMode ? 'text-gray-300' : 'text-gray-600'
                   }`}>
                     {day.dayName}
-                  </div>
+              </div>
                   <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-lg font-bold ${stateClass}`}>
                     {hasBasics ? achievedCount : '—'}
                   </div>
@@ -877,10 +854,10 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                        },
                        grid: {
                          color: '#F3F4F6',
-                         drawBorder: false,
                        },
                        border: {
                          color: '#E5E7EB',
+                         display: false,
                        },
                      },
                     x: {
@@ -1446,7 +1423,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                           isDarkMode ? 'text-purple-300' : 'text-purple-900'
                         }`}>Tasks</h5>
                         <div className="space-y-2">
-                          {weekDataWithDetails[selectedDay].data.additionalTasks.map((task, idx) => {
+                          {weekDataWithDetails[selectedDay].data.additionalTasks.map((task: string, idx: number) => {
                             const isCompleted = weekDataWithDetails[selectedDay].data.completedTasks?.[idx];
                             return (
                               <div key={idx} className="flex items-center justify-between text-sm">
@@ -1482,7 +1459,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                           isDarkMode ? 'text-orange-300' : 'text-orange-900'
                         }`}>Connect</h5>
                         <div className="space-y-2">
-                          {weekDataWithDetails[selectedDay].data.peopleToMessage.map((person, idx) => {
+                          {weekDataWithDetails[selectedDay].data.peopleToMessage.map((person: string, idx: number) => {
                             const isCompleted = weekDataWithDetails[selectedDay].data.completedPeople?.[idx];
                             return (
                               <div key={idx} className="flex items-center justify-between text-sm">
@@ -1515,7 +1492,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                           isDarkMode ? 'text-teal-300' : 'text-teal-900'
                         }`}>Habits</h5>
                         <div className="space-y-3">
-                          {weekDataWithDetails[selectedDay].data.habits.map((habitId, idx) => {
+                          {weekDataWithDetails[selectedDay].data.habits.map((habitId: string, idx: number) => {
                             const habitLabels: { [key: string]: string } = {
                               'guitar': 'Guitar',
                               'write': 'Write',
@@ -1567,7 +1544,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                           isDarkMode ? 'text-blue-300' : 'text-blue-900'
                         }`}>Meetings & Appointments</h5>
                         <div className="space-y-2">
-                          {weekDataWithDetails[selectedDay].data.meetings.map((meeting, idx) => (
+                          {weekDataWithDetails[selectedDay].data.meetings.map((meeting: { title: string; startTime: string; endTime: string }, idx: number) => (
                             <div key={idx} className="text-sm">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center flex-1 min-w-0">

@@ -14,6 +14,7 @@ import {
   Goal,
   StickyNote
 } from 'lucide-react';
+import visionImg from '../../images/vision.jpg';
 
 type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
 
@@ -111,8 +112,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       }`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-green-500 rounded-xl flex items-center justify-center transform hover:scale-105 transition-transform duration-200">
-              <span className="text-white font-bold text-lg">T</span>
+            <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-blue-500/30">
+              <img src={visionImg} alt="Twist" className="w-full h-full object-cover" />
             </div>
             {!isCollapsed && (
               <div className="animate-fade-in">

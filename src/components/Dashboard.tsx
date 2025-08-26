@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Sun, Moon, CheckCircle2, Circle, Users, Play, Pause, RotateCcw, Trophy, Flame, RefreshCw, GlassWater, Target, TrendingUp, ClipboardList, Lightbulb, Clock, Calendar, Heart, Headphones, Brain } from 'lucide-react';
-import { AppData, DailyData, TimeBlock } from '../types';
-import { clearAppData } from '../utils/storage';
+import React, { useState } from 'react';
+import { Sun, Moon, CheckCircle2, Circle, RefreshCw, Target, Lightbulb, Clock, Calendar, Plus } from 'lucide-react';
+import { DailyData, TimeBlock } from '../types';
 import { useToast } from './ToastProvider';
 import guitarImg from '../../images/guitar.jpg';
 import writeImg from '../../images/write.jpg';
@@ -28,7 +27,6 @@ import mindfulImg from '../../images/mindful.jpg';
   };
 
 interface DashboardProps {
-  appData: AppData;
   todaysData: DailyData;
   onStartMorning: () => void;
   onStartEvening: () => void;
@@ -42,7 +40,6 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
-  appData,
   todaysData,
   onStartMorning,
   onStartEvening,
@@ -55,19 +52,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   onTimeblock
 }) => {
   const { showToast } = useToast();
-  const [showPointsNotification, setShowPointsNotification] = useState(false);
-  const [pointsEarned, setPointsEarned] = useState(0);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
-
-  // Map habit IDs to custom images for dashboard
-  const habitImageMap: { [key: string]: string } = {
-    guitar: guitarImg,
-    write: writeImg,
-    socialise: socialiseImg,
-    exercise: runImg,
-    read: readImg,
-  };
 
   const todaysBlocks: TimeBlock[] = todaysData.timeBlocks || [];
   const formatRange = (startIso: string, endIso: string) => {
@@ -77,60 +63,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     return `${fmt(s)}–${fmt(e)}`;
   };
 
-  const calculateTotalPoints = () => {
-    let total = 0;
-    
-    // Calculate points from all daily data
-    Object.values(appData.dailyData).forEach(dayData => {
-      // Morning flow completion: 10 points
-      if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) {
-        total += 10;
-      }
-      
-      // Evening flow completion: 10 points (use dayDescription per flow)
-      if (dayData.eveningMood && dayData.dayDescription) {
-        total += 10;
-      }
-      
-      // Main priority completion: 50 points
-      if (dayData.completedMainTask) {
-        total += 50;
-      }
-      
-      // Additional tasks: 25 points each
-      if (dayData.completedTasks) {
-        total += dayData.completedTasks.filter(Boolean).length * 25;
-      }
-      
-      // People to message: 30 points each
-      if (dayData.completedPeople) {
-        total += dayData.completedPeople.filter(Boolean).length * 30;
-      }
-      
-      // Habits completion: 30 points each
-      if (dayData.completedHabits) {
-        total += dayData.completedHabits.length * 30;
-      }
-      
-      // Basics: each 10 points
-      if (dayData.basics) {
-        const { drankWater, ateHealthy, listenedToSomething, wasMindful } = dayData.basics;
-        total += (drankWater ? 10 : 0)
-          + (ateHealthy ? 10 : 0)
-          + (listenedToSomething ? 10 : 0)
-          + (wasMindful ? 10 : 0);
-      }
-    });
-    
-    return total;
-  };
-
-  const addPointsWithNotification = (points: number) => {
-    onAddPoints(points, points === 50 ? 'Priority task completed' : points === 10 ? 'Task completed' : '+points');
-    setPointsEarned(points);
-    setShowPointsNotification(true);
-    setTimeout(() => setShowPointsNotification(false), 2000);
-  };
   const toggleTask = (index: number) => {
     const completedTasks = todaysData.completedTasks || [false, false, false];
     const newCompleted = [...completedTasks];
@@ -142,6 +74,8 @@ const Dashboard: React.FC<DashboardProps> = ({
     
     onUpdateData({ completedTasks: newCompleted });
   };
+
+  
 
   const toggleMainTask = () => {
     const newCompleted = !todaysData.completedMainTask;
@@ -190,11 +124,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     setShowAddTaskModal(false);
   };
 
-  const getMoodText = (mood: number) => {
-    const moods = ['Poor', 'Fair', 'Okay', 'Good', 'Great'];
-    return moods[mood - 1] || 'Okay';
-  };
-
   const calculateSleepDuration = (bedTime: string, wakeTime: string) => {
     if (!bedTime || !wakeTime) return null;
     
@@ -226,56 +155,34 @@ const Dashboard: React.FC<DashboardProps> = ({
   if (hasNoActiveDay) {
     return (
       <div className="min-h-screen flex items-center justify-center animate-fade-in">
-        <div className="text-center space-y-8 max-w-md mx-auto px-6">
-          {/* Date Display */}
-          <div className={`backdrop-blur-sm rounded-2xl p-8 shadow-lg border ${
-            isDarkMode 
-              ? 'bg-gray-800/80 border-gray-700' 
-              : 'bg-white/80 border-gray-100'
-          }`}>
-            <div className="space-y-4">
-              <div className="text-6xl font-bold text-gray-300 mb-2">
-                {new Date().getDate()}
-              </div>
-              <div className={`text-xl font-medium ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}>
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long',
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </div>
-              <div className={`text-sm ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long'
-                })}
-              </div>
+        <div className="text-center space-y-10 mx-auto px-6">
+          {/* Icon and Date (no card) */}
+          <div className="space-y-6">
+            <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto">
+              <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
+            </div>
+            <div className={`${isDarkMode ? 'text-gray-100' : 'text-gray-800'} text-5xl md:text-6xl font-extrabold tracking-tight mx-auto max-w-3xl`}>
+              {new Date().toLocaleDateString('en-US', { 
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+              })}
             </div>
           </div>
 
-          {/* Start My Day Button */}
+          {/* Start Button */}
           <div className="space-y-4">
             <button
               onClick={onStartMorning}
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ease-out transform hover:scale-105 hover:shadow-2xl animate-pulse-glow"
+              className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ease-out transform hover:scale-105 hover:shadow-2xl animate-pulse-glow"
             >
               <div className="flex items-center justify-center space-x-3">
                 <Sun size={24} className="animate-float" />
-                <span>Start My Day</span>
+                <span>Start</span>
               </div>
             </button>
-            
-            <p className={`text-sm ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              Begin your morning check-in to start tracking today's progress
-            </p>
           </div>
-
-
         </div>
       </div>
     );
@@ -283,19 +190,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      {/* Points Notification */}
-      {showPointsNotification && (
-        <div className={`fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg animate-slide-up ${
-          isDarkMode 
-            ? 'bg-green-600 text-white' 
-            : 'bg-green-500 text-white'
-        }`}>
-          <div className="flex items-center space-x-2">
-            <Trophy size={20} />
-            <span className="font-semibold">+{pointsEarned} points!</span>
-          </div>
-        </div>
-      )}
+      
       {/* Welcome Section */}
       <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
         isDarkMode 
@@ -475,28 +370,41 @@ const Dashboard: React.FC<DashboardProps> = ({
                   )}
                 </div>
               </div>
+
+              
             </div>
           )}
 
-                          {/* Key Tasks */}
-          {Array.isArray(todaysData.additionalTasks) && todaysData.additionalTasks.length > 0 && (
-            <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
-              isDarkMode 
-                ? 'bg-gray-800/80 border-gray-700' 
-                : 'bg-white/80 border-gray-100'
-            }`} style={{animationDelay: '0.2s'}}>
-              <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                <span className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden">
-                    <img src={tasksImg} alt="Tasks" className="w-full h-full object-cover" />
-                  </div>
-                  <span>Tasks</span>
-                </span>
-              </h3>
-              <div className="space-y-3">
-                {(Array.isArray(todaysData.additionalTasks) ? todaysData.additionalTasks : []).map((task, index) => {
+          {/* Key Tasks */}
+          <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
+            isDarkMode 
+              ? 'bg-gray-800/80 border-gray-700' 
+              : 'bg-white/80 border-gray-100'
+          }`} style={{animationDelay: '0.2s'}}>
+            <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              <span className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg overflow-hidden">
+                  <img src={tasksImg} alt="Tasks" className="w-full h-full object-cover" />
+                </div>
+                <span>Tasks</span>
+              </span>
+              <button
+                onClick={addNewTask}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
+                <Plus size={14} />
+                <span>Add Task</span>
+              </button>
+            </h3>
+            <div className="space-y-3">
+              {(!Array.isArray(todaysData.additionalTasks) || todaysData.additionalTasks.length === 0) && (
+                <div className={`p-4 rounded-xl text-sm ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-600'}`}>
+                  No tasks yet. Click "Add Task" to create one.
+                </div>
+              )}
+              {(Array.isArray(todaysData.additionalTasks) ? todaysData.additionalTasks : []).map((task, index) => {
                   const taskBlocks = todaysBlocks.filter(b => b.label === task);
                   return (
                     <div 
@@ -541,9 +449,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                   );
                 })}
-              </div>
             </div>
-          )}
+          </div>
 
           {/* Connect */}
           {Array.isArray(todaysData.peopleToMessage) && todaysData.peopleToMessage.length > 0 && (
@@ -629,7 +536,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 </span>
               </h3>
               <div className="space-y-3">
-                {(Array.isArray(todaysData.habits) ? todaysData.habits : []).map((habitId, index) => {
+                {(Array.isArray(todaysData.habits) ? todaysData.habits : []).map((habitId) => {
                   const habitLabels: { [key: string]: string } = {
                     'guitar': 'Guitar',
                     'write': 'Write',
