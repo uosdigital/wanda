@@ -27,6 +27,7 @@ function App() {
   const { showToast } = useToast();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [morningFlowOpen, setMorningFlowOpen] = useState(false);
   const [eveningFlowOpen, setEveningFlowOpen] = useState(false);
   const [morningFlowCompleted, setMorningFlowCompleted] = useState(false);
@@ -295,12 +296,29 @@ function App() {
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         todaysPoints={calculateTodaysPoints()}
         onSignOut={handleSignOut}
+        isMobileOpen={mobileSidebarOpen}
+        onMobileToggle={() => setMobileSidebarOpen(!mobileSidebarOpen)}
       />
 
       {/* Main Content */}
       <main className={`max-w-6xl mx-auto px-4 py-8 transition-all duration-300 ${
         sidebarCollapsed ? 'ml-16' : 'ml-64'
-      }`}>
+      } md:ml-64`}>
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileSidebarOpen(true)}
+          className={`fixed top-4 left-4 z-30 p-2 rounded-lg transition-colors md:hidden ${
+            isDarkMode 
+              ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' 
+              : 'bg-white text-gray-600 hover:bg-gray-100'
+          } shadow-lg border ${
+            isDarkMode ? 'border-gray-600' : 'border-gray-200'
+          }`}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
         {currentView === 'dashboard' && (
           <Dashboard
             todaysData={getTodaysData()}

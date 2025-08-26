@@ -30,6 +30,8 @@ interface SidebarProps {
   onToggleDarkMode: () => void;
   todaysPoints: number;
   onSignOut: () => void;
+  isMobileOpen: boolean;
+  onMobileToggle: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -42,7 +44,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   isDarkMode,
   onToggleDarkMode,
   todaysPoints,
-  onSignOut
+  onSignOut,
+  isMobileOpen,
+  onMobileToggle
 }) => {
   const menuItems = [
     {
@@ -104,13 +108,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <div className={`fixed left-0 top-0 h-full backdrop-blur-sm border-r transition-all duration-500 ease-out z-50 flex flex-col ${
-      isCollapsed ? 'w-16' : 'w-64'
-    } ${
-      isDarkMode 
-        ? 'bg-gray-900/90 border-gray-700' 
-        : 'bg-white/90 border-gray-200'
-    }`}>
+    <>
+      {/* Mobile overlay */}
+      <div 
+        className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden ${
+          isMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onMobileToggle}
+      />
+      
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-0 h-full backdrop-blur-sm border-r transition-all duration-500 ease-out z-50 flex flex-col ${
+        isCollapsed ? 'w-16' : 'w-64'
+      } ${
+        isDarkMode 
+          ? 'bg-gray-900/90 border-gray-700' 
+          : 'bg-white/90 border-gray-200'
+      } ${
+        // Mobile responsive classes
+        'md:translate-x-0' + 
+        (isMobileOpen ? ' translate-x-0' : ' -translate-x-full md:translate-x-0')
+      }`}>
       {/* Header Section */}
       <div className={`p-4 border-b ${
         isDarkMode ? 'border-gray-700' : 'border-gray-100'
@@ -179,7 +197,13 @@ const Sidebar: React.FC<SidebarProps> = ({
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => onViewChange(item.id)}
+                  onClick={() => {
+                    onViewChange(item.id);
+                    // Close mobile sidebar when item is selected
+                    if (window.innerWidth < 768) {
+                      onMobileToggle();
+                    }
+                  }}
                   className={`w-full flex items-center space-x-3 px-3 py-3 rounded-xl font-medium transition-all duration-300 ease-out transform hover:scale-105 ${
                     isActive
                       ? `${item.bgColor} ${item.color} shadow-md`
@@ -224,7 +248,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
           <button
             onClick={onToggleCollapse}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hidden md:flex ${
               isDarkMode 
                 ? 'hover:bg-gray-800 text-gray-300' 
                 : 'hover:bg-gray-100 text-gray-600'
@@ -257,6 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
     </div>
+    </>
   );
 };
 
