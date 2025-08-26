@@ -7,7 +7,8 @@ export const getEmptyAppData = (): AppData => ({
   totalPoints: 0,
   currentStreak: 0,
   dailyData: {},
-  habits: []
+  habits: [],
+  notes: []
 });
 
 export const loadAppData = async (): Promise<AppData> => {
@@ -61,16 +62,42 @@ export const saveAppData = async (data: AppData): Promise<void> => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         console.info('[storage] Attempting to save to Supabase for user:', user.id);
-        const { error } = await supabase
+        // First try to get existing data
+        const { data: existingData, error: selectError } = await supabase
           .from('user_data')
-          .upsert({
-            user_id: user.id,
-            app_data: data,
-            updated_at: new Date().toISOString()
-          });
-        
-        if (error) {
-          console.error('Supabase save error:', error);
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (selectError && selectError.code !== 'PGRST116') {
+          console.error('Error checking existing data:', selectError);
+        }
+
+        let upsertError;
+        if (existingData) {
+          // Update existing record
+          const { error } = await supabase
+            .from('user_data')
+            .update({
+              app_data: data,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', user.id);
+          upsertError = error;
+        } else {
+          // Insert new record
+          const { error } = await supabase
+            .from('user_data')
+            .insert({
+              user_id: user.id,
+              app_data: data,
+              updated_at: new Date().toISOString()
+            });
+          upsertError = error;
+        }
+
+        if (upsertError) {
+          console.error('Supabase save error:', upsertError);
         } else {
           console.info('[storage] Successfully saved data to Supabase');
           // Also save to localStorage as backup

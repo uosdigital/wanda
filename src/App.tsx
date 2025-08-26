@@ -59,6 +59,7 @@ function App() {
       if (hasSupabaseConfig) {
         try {
           const { data: { user } } = await supabase.auth.getUser();
+          console.log('[DEBUG] Auth check - user:', user);
           setIsAuthenticated(!!user);
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -72,6 +73,7 @@ function App() {
       _event: AuthChangeEvent,
       session: Session | null
     ) => {
+      console.log('[DEBUG] Auth state change - session:', session);
       setIsAuthenticated(!!session?.user);
     });
 
@@ -115,7 +117,8 @@ function App() {
       totalPoints: 0,
       currentStreak: 0,
       dailyData: {},
-      habits: []
+      habits: [],
+      notes: []
     });
   };
 
@@ -134,6 +137,7 @@ function App() {
 
   const updateDailyData = async (data: Partial<DailyData>) => {
     const today = new Date().toDateString();
+    console.log('[DEBUG] Updating daily data for:', today, 'with:', data);
     const updatedData = {
       ...appData,
       dailyData: {
@@ -144,6 +148,7 @@ function App() {
         }
       }
     };
+    console.log('[DEBUG] Updated appData:', updatedData);
     setAppData(updatedData);
     await saveAppData(updatedData);
   };
@@ -245,13 +250,19 @@ function App() {
   const saveNotes = async (updater: (prev: Note[]) => Note[]) => {
     const nextNotes = updater(appData.notes || []);
     const updated = { ...appData, notes: nextNotes };
+    console.log('[DEBUG] Saving notes, updated appData:', updated);
     setAppData(updated);
     await saveAppData(updated);
   };
 
   const addNote = (text: string, color: string) => {
     const now = new Date().toISOString();
-    saveNotes(prev => [{ id: crypto.randomUUID(), text, color, createdAt: now }, ...prev]);
+    console.log('[DEBUG] Adding note:', { text, color, now });
+    saveNotes(prev => {
+      const newNotes = [{ id: crypto.randomUUID(), text, color, createdAt: now }, ...prev];
+      console.log('[DEBUG] New notes array:', newNotes);
+      return newNotes;
+    });
   };
 
   const updateNote = (id: string, text: string, color: string) => {
