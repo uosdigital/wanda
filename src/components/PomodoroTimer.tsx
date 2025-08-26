@@ -125,7 +125,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints, isDarkMode =
           
           {/* Time Display */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className={`text-2xl font-bold ${isDarkMode ? 'text-teal-300' : 'text-gray-900'}`}>
               {formatTime(minutes, seconds)}
             </span>
           </div>

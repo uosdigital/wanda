@@ -28,7 +28,7 @@ function generateTimeOptions(): Array<{ label: string; minutes: number }>{
   return options;
 }
 
-const rowHeightPx = 40; // each hour row height
+const rowHeightPx = 80; // each hour row height (doubled)
 
 type Category = 'priority' | 'task' | 'habit' | 'connect' | 'custom';
 

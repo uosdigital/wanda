@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Moon, CheckCircle2, Circle, X, GlassWater, Heart, Headphones, Brain } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Circle, X } from 'lucide-react';
 import healthyImg from '../../images/healthy.jpg';
 import listenImg from '../../images/listen.jpg';
 import mindfulImg from '../../images/mindful.jpg';
 import basicsImg from '../../images/basics.jpg';
+import visionImg from '../../images/vision.jpg';
+import runImg from '../../images/run.jpg';
 import { DailyData } from '../types';
 
 interface EveningFlowProps {
@@ -67,6 +69,23 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
     }
   };
 
+  // Cmd/Ctrl + Enter advances to next step when allowed
+  React.useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (step < totalSteps && canProceed()) {
+          e.preventDefault();
+          handleNext();
+        } else if (step === totalSteps && canProceed()) {
+          e.preventDefault();
+          handleNext();
+        }
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [step, totalSteps, formData, isDarkMode]);
+
   const canProceed = () => {
     switch (step) {
       case 1: return true; // Welcome message
@@ -125,8 +144,8 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
       } border-b p-4 flex-shrink-0`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <Moon size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
             </div>
             <div>
               <h2 className={`text-lg font-semibold ${
@@ -177,6 +196,9 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
         <div className="flex-1 flex items-center justify-center">
           {step === 1 && (
             <div className="text-center">
+              <div className="w-24 h-24 rounded-xl overflow-hidden mx-auto mb-8">
+                <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
+              </div>
               <h3 className={`text-2xl font-semibold mb-4 ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
@@ -436,10 +458,11 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
               
               <div className="max-w-md mx-auto space-y-4">
                 {[
-                  { id: 'drankWater', label: 'Did you drink enough water today?', image: basicsImg },
-                  { id: 'ateHealthy', label: 'Did you eat healthy meals today?', image: healthyImg },
-                  { id: 'listenedToSomething', label: 'Did you listen to something interesting today?', image: listenImg },
-                  { id: 'wasMindful', label: 'Did you take 10 minutes to be mindful today?', image: mindfulImg }
+                  { id: 'drankWater', label: 'I drank enough water today.', image: basicsImg },
+                  { id: 'ateHealthy', label: 'I ate healthy meals today.', image: healthyImg },
+                  { id: 'listenedToSomething', label: 'I listened to something interesting today.', image: listenImg },
+                  { id: 'wasMindful', label: 'I took 10 minutes to be mindful today.', image: mindfulImg },
+                  { id: 'steps10k', label: 'I did 10k steps today.', image: runImg }
                 ].map((basic) => {
                   const isCompleted = formData.basics?.[basic.id as keyof typeof formData.basics] || false;
                   return (
@@ -463,15 +486,10 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
                         setFormData({ ...formData, basics: newBasics });
                       }}
                     >
-                      {isCompleted ? (
-                        <CheckCircle2 className="text-green-500 flex-shrink-0" size={24} />
-                      ) : (
-                        <Circle className="text-gray-400 flex-shrink-0" size={24} />
-                      )}
                       <div className="w-6 h-6 rounded-md overflow-hidden bg-gray-200">
                         <img src={basic.image} alt={basic.label} className="w-full h-full object-cover" />
                       </div>
-                      <span className={`${
+                      <span className={`flex-1 ${
                         isCompleted
                           ? isDarkMode
                             ? 'text-green-400 font-medium'
@@ -482,6 +500,11 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
                       }`}>
                         {basic.label}
                       </span>
+                      {isCompleted ? (
+                        <CheckCircle2 className="text-green-500 flex-shrink-0 ml-2" size={24} />
+                      ) : (
+                        <Circle className="text-gray-400 flex-shrink-0 ml-2" size={24} />
+                      )}
                     </div>
                   );
                 })}
@@ -500,7 +523,7 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
                 isDarkMode ? 'text-gray-300' : 'text-gray-600'
               }`}>Choose a word that best describes your mood</p>
               
-              <div className="max-w-2xl mx-auto grid grid-cols-3 gap-3">
+              <div className="max-w-2xl mx-auto grid grid-cols-5 gap-3">
                 {eveningMoods.map((mood) => (
                   <button
                     key={mood}
@@ -560,10 +583,12 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
               }`}>
                 Sleep well and I'll see you in the morning!
               </p>
-              <div className="text-6xl mb-8">🌙</div>
+              <div className="w-24 h-24 rounded-xl overflow-hidden mx-auto mb-8">
+                <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
+              </div>
               <button
                 onClick={handleNext}
-                className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-12 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow"
+                className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-12 py-4 rounded-xl font-semibold text-lg"
               >
                 Complete Evening Review
               </button>

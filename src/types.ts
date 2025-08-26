@@ -44,6 +44,8 @@ export interface DailyData {
     ateHealthy?: boolean;
     listenedToSomething?: boolean;
     wasMindful?: boolean;
+    steps10k?: boolean;
+    sleep7h?: boolean;
   };
   date?: string;
   timeBlocks?: TimeBlock[];

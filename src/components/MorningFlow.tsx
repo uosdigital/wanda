@@ -1,7 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, ArrowRight, Target, Users, X, BookOpen, PenTool, Guitar } from 'lucide-react';
+import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 import { DailyData, TimeBlock } from '../types';
 import visionImg from '../../images/vision.jpg';
+import guitarImg from '../../images/guitar.jpg';
+import writeImg from '../../images/write.jpg';
+import readImg from '../../images/read.jpg';
+import runImg from '../../images/run.jpg';
+import socialiseImg from '../../images/socialise.jpg';
 
 interface TimeInputProps {
   value: string | undefined;
@@ -60,14 +65,14 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
     meetings: existingData.meetings || []
   });
 
-  const totalSteps = 13;
+  const totalSteps = 14;
 
   const habitOptions = [
-    { id: 'guitar', label: 'Guitar', icon: Guitar },
-    { id: 'write', label: 'Write', icon: PenTool },
-    { id: 'read', label: 'Read', icon: BookOpen },
-    { id: 'exercise', label: 'Exercise', icon: Target },
-    { id: 'socialise', label: 'Socialise', icon: Users }
+    { id: 'guitar', label: 'Guitar', image: guitarImg },
+    { id: 'write', label: 'Write', image: writeImg },
+    { id: 'read', label: 'Read', image: readImg },
+    { id: 'exercise', label: 'Exercise', image: runImg },
+    { id: 'socialise', label: 'Socialise', image: socialiseImg }
   ];
 
   const moodOptions = useMemo(() => {
@@ -190,6 +195,23 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
     }
   };
 
+  // Cmd/Ctrl + Enter advances to next step when allowed
+  React.useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (step < totalSteps && canProceed()) {
+          e.preventDefault();
+          handleNext();
+        } else if (step === totalSteps && canProceed()) {
+          e.preventDefault();
+          handleNext();
+        }
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [step, totalSteps, formData, isDarkMode]);
+
   const canProceed = () => {
     switch (step) {
       case 1: return true; // Greeting
@@ -205,6 +227,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
       case 11: return true; // Optional good stuff
       case 12: return true; // Meetings are optional
       case 13: return formData.goodDayVision?.trim() !== '';
+      case 14: return true; // Final confirmation screen
       default: return false;
     }
   };
@@ -491,7 +514,6 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
             </h3>
             <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
               {habitOptions.map((option, index) => {
-                const Icon = option.icon;
                 return (
                   <button
                     key={option.id}
@@ -505,7 +527,9 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
                     }`}
                     style={{animationDelay: `${index * 0.1}s`}}
                   >
-                    <Icon size={24} />
+                    <div className="w-8 h-8 rounded-md overflow-hidden bg-gray-200">
+                      <img src={option.image} alt={option.label} className="w-full h-full object-cover" />
+                    </div>
                     <span className="font-medium">{option.label}</span>
                   </button>
                 );
@@ -623,6 +647,29 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
           </div>
         );
 
+      case 14:
+        return (
+          <div className="text-center animate-fade-in">
+            <h3 className={`text-3xl font-bold mb-4 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              Complete Morning Review
+            </h3>
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-8`}>
+              You’re all set for the day.
+            </p>
+            <div className="w-24 h-24 rounded-xl overflow-hidden mx-auto mb-8">
+              <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
+            </div>
+            <button
+              onClick={handleNext}
+              className="px-12 py-4 rounded-xl font-semibold text-lg bg-blue-600 text-white"
+            >
+              Complete
+            </button>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -723,7 +770,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              <span>{step === totalSteps ? 'Complete' : 'Next'}</span>
+              <span>Next</span>
               <ArrowRight size={20} />
             </button>
           )}

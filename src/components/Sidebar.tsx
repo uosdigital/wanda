@@ -27,6 +27,7 @@ interface SidebarProps {
   currentStreak: number;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
+  todaysPoints: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -37,7 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   totalPoints,
   currentStreak,
   isDarkMode,
-  onToggleDarkMode
+  onToggleDarkMode,
+  todaysPoints
 }) => {
   const menuItems = [
     {
@@ -122,7 +124,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }`}>Twist</h1>
                 <p className={`text-sm ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}>{totalPoints} points · Day {currentStreak}</p>
+                }`}>
+                  {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} · {todaysPoints} pts
+                </p>
               </div>
             )}
           </div>
@@ -133,15 +137,15 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="grid grid-cols-2 gap-3 animate-slide-up">
             <div className={`rounded-lg p-3 border ${
               isDarkMode 
-                ? 'bg-gradient-to-r from-orange-900/50 to-orange-800/50 border-orange-700' 
-                : 'bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200'
+                ? 'bg-gradient-to-r from-rose-900/50 to-rose-800/50 border-rose-700' 
+                : 'bg-gradient-to-r from-rose-50 to-rose-100 border-rose-200'
             }`}>
-              <div className="flex items-center space-x-2 text-orange-600">
+              <div className="flex items-center space-x-2 text-rose-600">
                 <Flame size={16} />
                 <span className="font-bold text-sm">{currentStreak}</span>
               </div>
               <p className={`text-xs mt-1 ${
-                isDarkMode ? 'text-orange-300' : 'text-orange-700'
+                isDarkMode ? 'text-rose-300' : 'text-rose-700'
               }`}>Day streak</p>
             </div>
             <div className={`rounded-lg p-3 border ${

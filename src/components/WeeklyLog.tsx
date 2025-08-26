@@ -111,11 +111,13 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
     
     // Basics: each 10 points
     if (dayData.basics) {
-      const { drankWater, ateHealthy, listenedToSomething, wasMindful } = dayData.basics;
+      const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
       points += (drankWater ? 10 : 0)
         + (ateHealthy ? 10 : 0)
         + (listenedToSomething ? 10 : 0)
-        + (wasMindful ? 10 : 0);
+        + (wasMindful ? 10 : 0)
+        + (steps10k ? 10 : 0)
+        + (sleep7h ? 10 : 0);
     }
     
     return points;
@@ -706,10 +708,10 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           <div className="grid grid-cols-7 gap-4 mb-6">
             {weekDataWithDetails.map((day, index) => {
               const basics = day.data.basics || {};
-              const achievedCount = ['drankWater','ateHealthy','listenedToSomething','wasMindful']
+              const achievedCount = ['drankWater','ateHealthy','listenedToSomething','wasMindful','steps10k','sleep7h']
                 .map(k => (basics as any)[k])
                 .filter(Boolean).length;
-              const totalBasics = 4;
+              const totalBasics = 6;
               const remaining = totalBasics - achievedCount;
               const hasBasics = Boolean(day.data.basics);
               const stateClass = achievedCount > 0

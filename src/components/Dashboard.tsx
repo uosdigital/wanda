@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Sun, Moon, CheckCircle2, Circle, RefreshCw, Target, Lightbulb, Clock, Calendar, Plus } from 'lucide-react';
 import { DailyData, TimeBlock } from '../types';
-import { useToast } from './ToastProvider';
 import guitarImg from '../../images/guitar.jpg';
 import writeImg from '../../images/write.jpg';
 import socialiseImg from '../../images/socialise.jpg';
@@ -51,7 +50,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   isDarkMode,
   onTimeblock
 }) => {
-  const { showToast } = useToast();
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
 
@@ -144,6 +142,20 @@ const Dashboard: React.FC<DashboardProps> = ({
     return Math.round(durationHours * 100) / 100; // Round to 2 decimal places
   };
 
+  // Auto-calculate 7+ hours sleep basic when both times are present
+  React.useEffect(() => {
+    const hours = calculateSleepDuration(todaysData.bedTime || '', todaysData.wakeTime || '') || 0;
+    const has7h = hours >= 7;
+    const currentBasics = todaysData.basics || {};
+    if ((currentBasics.sleep7h || false) !== has7h) {
+      onUpdateData({ basics: { ...currentBasics, sleep7h: has7h } });
+      // Add points when sleep7h becomes true
+      if (has7h && !currentBasics.sleep7h) {
+        onAddPoints(10, '7+ hours sleep completed');
+      }
+    }
+  }, [todaysData.bedTime, todaysData.wakeTime]);
+
   const getSleepText = (quality: number) => {
     const descriptions = ['Poor', 'Fair', 'Good', 'Great', 'Excellent'];
     return descriptions[quality - 1] || 'Not set';
@@ -232,17 +244,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           >
             <Moon size={20} className="animate-float" />
             <span>{hasCompletedEvening ? 'Evening Complete!' : 'Review My Day'}</span>
-          </button>
-
-          <button
-            onClick={() => showToast('Test toast! This is working!', 3000)}
-            className={`flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-105 ${
-              isDarkMode 
-                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <span>Test Toast</span>
           </button>
 
           <button
@@ -689,7 +690,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                   { id: 'drankWater', label: 'Drink enough water', image: basicsImg },
                   { id: 'ateHealthy', label: 'Eat healthy meals', image: healthyImg },
                   { id: 'listenedToSomething', label: 'Listen to something interesting', image: listenImg },
-                  { id: 'wasMindful', label: 'Be mindful', image: mindfulImg }
+                  { id: 'wasMindful', label: 'Be mindful', image: mindfulImg },
+                  { id: 'steps10k', label: '10k steps', image: runImg },
+                  { id: 'sleep7h', label: '7+ hours sleep', image: basicsImg }
                 ].map((basic) => {
                   const isCompleted = todaysData.basics?.[basic.id as keyof typeof todaysData.basics] || false;
                   return (

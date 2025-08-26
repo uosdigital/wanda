@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Sun, Moon, BarChart3, Play, Pause, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import MorningFlow from './components/MorningFlow';
 import Dashboard from './components/Dashboard';
 import EveningFlow from './components/EveningFlow';
@@ -9,7 +8,7 @@ import Habits from './components/Habits';
 import Sidebar from './components/Sidebar';
 import FullScreenModal from './components/FullScreenModal';
 import { AppData, DailyData, Note } from './types';
-import { initializeAppData, saveAppData, loadAppData, clearAppData, resetToDummyData } from './utils/storage';
+import { saveAppData, loadAppData, clearAppData } from './utils/storage';
 import { useToast } from './components/ToastProvider';
 import Timeblocking from './components/Timeblocking';
 import Points from './components/Points';
@@ -106,14 +105,37 @@ function App() {
       if (dayData.completedHabits) total += dayData.completedHabits.length * 30;
       // Basics (each 10 points)
       if (dayData.basics) {
-        const { drankWater, ateHealthy, listenedToSomething, wasMindful } = dayData.basics;
+        const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
         total += (drankWater ? 10 : 0)
           + (ateHealthy ? 10 : 0)
           + (listenedToSomething ? 10 : 0)
-          + (wasMindful ? 10 : 0);
+          + (wasMindful ? 10 : 0)
+          + (steps10k ? 10 : 0)
+          + (sleep7h ? 10 : 0);
       }
     });
     return total;
+  };
+
+  const calculateTodaysPoints = (): number => {
+    const dayData = getTodaysData();
+    let points = 0;
+    if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) points += 10;
+    if (dayData.eveningMood && dayData.dayDescription) points += 10;
+    if (dayData.completedMainTask) points += 50;
+    if (dayData.completedTasks) points += dayData.completedTasks.filter(Boolean).length * 25;
+    if (dayData.completedPeople) points += dayData.completedPeople.filter(Boolean).length * 30;
+    if (dayData.completedHabits) points += dayData.completedHabits.length * 30;
+    if (dayData.basics) {
+      const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
+      points += (drankWater ? 10 : 0)
+        + (ateHealthy ? 10 : 0)
+        + (listenedToSomething ? 10 : 0)
+        + (wasMindful ? 10 : 0)
+        + (steps10k ? 10 : 0)
+        + (sleep7h ? 10 : 0);
+    }
+    return points;
   };
 
   const addPoints: AddPointsFn = (points, reason) => {
@@ -197,6 +219,7 @@ function App() {
         currentStreak={appData.currentStreak}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+        todaysPoints={calculateTodaysPoints()}
       />
 
       {/* Main Content */}

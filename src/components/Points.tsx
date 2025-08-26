@@ -10,6 +10,7 @@ import visionImg from '../../images/vision.jpg';
 import listenImg from '../../images/listen.jpg';
 import mindfulImg from '../../images/mindful.jpg';
 import healthyImg from '../../images/healthy.jpg';
+import runImg from '../../images/run.jpg';
 
 interface PointsProps {
   onBack: () => void;
@@ -35,7 +36,9 @@ const Points: React.FC<PointsProps> = ({ onBack, isDarkMode = false }) => {
     { label: 'Drink enough water', points: 10, icon: 'basics', image: basicsImg },
     { label: 'Eat healthy meals', points: 10, icon: 'healthy', image: healthyImg },
     { label: 'Listen to something interesting', points: 10, icon: 'listen', image: listenImg },
-    { label: 'Be mindful', points: 10, icon: 'mindful', image: mindfulImg }
+    { label: 'Be mindful', points: 10, icon: 'mindful', image: mindfulImg },
+    { label: '10k steps', points: 10, icon: 'steps', image: runImg },
+    { label: '7+ hours sleep', points: 10, icon: 'sleep', image: basicsImg }
   ];
 
   return (
