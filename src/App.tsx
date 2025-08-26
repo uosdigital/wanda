@@ -318,6 +318,8 @@ function App() {
 
       {/* Mobile Header */}
       <header className={`fixed top-0 left-0 right-0 z-30 md:hidden ${
+        (morningFlowOpen || eveningFlowOpen) ? 'hidden' : ''
+      } ${
         isDarkMode 
           ? 'bg-gray-900/90 backdrop-blur-sm border-b border-gray-700' 
           : 'bg-white/90 backdrop-blur-sm border-b border-gray-200'
