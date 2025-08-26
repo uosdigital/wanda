@@ -134,10 +134,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           : 'bg-white/90 border-gray-200'
       } ${
         // Mobile responsive classes
-        'w-full md:w-64' +
+        'w-full' +
         (isMobileOpen ? ' translate-x-0' : ' -translate-x-full md:translate-x-0') +
-        // Desktop collapse logic - only apply when not collapsed
-        (isCollapsed ? ' md:w-16' : '')
+        // Desktop width logic - use conditional width instead of base + override
+        (isCollapsed ? ' md:w-16' : ' md:w-64')
       }`}>
       {/* Header Section */}
       <div className={`p-4 border-b ${
@@ -224,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       onMobileToggle();
                     }
                   }}
-                  className={`w-full flex items-center space-x-3 px-3 py-3 rounded-xl font-medium transition-all duration-300 ease-out transform hover:scale-105 ${
+                  className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-3 rounded-xl font-medium transition-all duration-300 ease-out transform hover:scale-105 ${
                     isActive
                       ? `${item.bgColor} ${item.color} shadow-md`
                       : `${isDarkMode ? 'text-gray-300' : 'text-gray-600'} ${
@@ -275,14 +275,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="space-y-3">
           <button
             onClick={onToggleDarkMode}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
               isDarkMode 
                 ? 'hover:bg-gray-800 text-yellow-400' 
                 : 'hover:bg-gray-100 text-gray-600'
             }`}
             title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            {isDarkMode ? <Sun size={20} className="transition-all duration-500" /> : <Moon size={20} className="transition-all duration-500" />}
             {!isCollapsed && (
               <span className="text-sm font-medium">
                 {isDarkMode ? 'Light Mode' : 'Dark Mode'}
@@ -291,14 +291,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
           <button
             onClick={onToggleCollapse}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 hidden md:flex ${
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg transition-all duration-200 hover:scale-105 hidden md:flex ${
               isDarkMode 
                 ? 'hover:bg-gray-800 text-gray-300' 
                 : 'hover:bg-gray-100 text-gray-600'
             }`}
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            {isCollapsed ? <ChevronRight size={20} className="transition-all duration-500" /> : <ChevronLeft size={20} className="transition-all duration-500" />}
             {!isCollapsed && (
               <span className="text-sm font-medium">
                 {isCollapsed ? 'Expand' : 'Collapse'}
@@ -307,14 +307,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
           <button
             onClick={onSignOut}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
               isDarkMode 
                 ? 'hover:bg-gray-800 text-red-400' 
                 : 'hover:bg-gray-100 text-red-600'
             }`}
             title="Sign out"
           >
-            <LogOut size={18} />
+            <LogOut size={20} className="transition-all duration-500" />
             {!isCollapsed && (
               <span className="text-sm font-medium">
                 Sign Out
