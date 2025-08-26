@@ -193,7 +193,8 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
 
       {/* Content */}
       <div className="flex-1 p-4 md:p-8 flex flex-col justify-between overflow-y-auto">
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-start justify-center min-h-0">
+          <div className="w-full max-w-md">
           {step === 1 && (
             <div className="text-center">
               <div className="w-24 h-24 rounded-xl overflow-hidden mx-auto mb-8">
@@ -595,6 +596,7 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
             </div>
           )}
         </div>
+      </div>
 
         {/* Navigation */}
         <div className="flex justify-between mt-8">

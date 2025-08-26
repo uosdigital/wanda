@@ -738,10 +738,12 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
 
       {/* Content */}
       <div className="flex-1 p-4 md:p-8 flex flex-col justify-between overflow-y-auto">
-        <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${
+        <div className={`flex-1 flex items-start justify-center transition-all duration-300 min-h-0 ${
           isAnimating ? 'opacity-0 transform translate-x-8' : 'opacity-100 transform translate-x-0'
         }`}>
-          {getStepContent()}
+          <div className="w-full max-w-md">
+            {getStepContent()}
+          </div>
         </div>
 
         {/* Navigation */}
