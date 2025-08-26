@@ -236,7 +236,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <div className="flex items-center justify-center space-x-3">
                 <Sun size={24} className="animate-float" />
-                <span>{hasCompletedMorning ? 'Edit Morning' : 'Start'}</span>
+                <span>{hasCompletedMorning ? 'Morning Complete!' : 'Start'}</span>
               </div>
             </button>
           </div>
@@ -274,8 +274,8 @@ const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Sun size={20} className="animate-float" />
-            <span className="hidden sm:inline">{hasCompletedMorning ? 'Edit Morning' : 'Start My Day'}</span>
-            <span className="sm:hidden">{hasCompletedMorning ? 'Edit' : 'Start Day'}</span>
+            <span className="hidden sm:inline">{hasCompletedMorning ? 'Morning Complete!' : 'Start My Day'}</span>
+            <span className="sm:hidden">{hasCompletedMorning ? 'Complete!' : 'Start Day'}</span>
           </button>
 
           <button
