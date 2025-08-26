@@ -182,7 +182,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       <div className="min-h-screen flex items-center justify-center animate-fade-in">
         <div className="text-center space-y-10 mx-auto px-6">
           {/* Icon and Date (no card) */}
-          <div className="space-y-6">
+          <div>
             <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto">
               <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
             </div>
@@ -214,7 +214,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto animate-fade-in">
       
       {/* Welcome Section */}
       <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
@@ -276,7 +276,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div>
         {/* Good Day Vision */}
         {todaysData.goodDayVision && (
           <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
@@ -899,8 +899,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>Add New Task</h3>
               
-              <div className="space-y-4">
-                <div>
+              <div>
+                <div className="mb-4">
                   <label className={`block text-sm font-medium mb-2 ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-700'
                   }`}>

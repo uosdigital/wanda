@@ -448,7 +448,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
             }`}>
               What other tasks would you like to accomplish today?
             </h3>
-            <div className="max-w-2xl mx-auto space-y-4 animate-slide-up" style={{animationDelay: '0.2s'}}>
+            <div className="max-w-2xl mx-auto animate-slide-up" style={{animationDelay: '0.2s'}}>
               {[0, 1, 2, 3].map((index) => (
                 <div key={index} className="animate-slide-up" style={{animationDelay: `${0.2 + (index * 0.1)}s`}}>
                   <input
@@ -480,7 +480,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
             }`}>
               Who do you want to connect with today?
             </h3>
-            <div className="max-w-2xl mx-auto space-y-4 animate-slide-up" style={{animationDelay: '0.2s'}}>
+            <div className="max-w-2xl mx-auto animate-slide-up" style={{animationDelay: '0.2s'}}>
               {[0, 1, 2, 3].map((index) => (
                 <div key={index} className="animate-slide-up" style={{animationDelay: `${0.2 + (index * 0.1)}s`}}>
                   <input

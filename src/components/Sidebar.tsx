@@ -32,6 +32,10 @@ interface SidebarProps {
   onSignOut: () => void;
   isMobileOpen: boolean;
   onMobileToggle: () => void;
+  timerIsActive?: boolean;
+  timerIsBreak?: boolean;
+  timerMinutes?: number;
+  timerSeconds?: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -46,7 +50,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   todaysPoints,
   onSignOut,
   isMobileOpen,
-  onMobileToggle
+  onMobileToggle,
+  timerIsActive = false,
+  timerIsBreak = false,
+  timerMinutes = 25,
+  timerSeconds = 0
 }) => {
   const menuItems = [
     {
@@ -83,10 +91,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'timer' as View,
-      label: 'Timer',
+      label: timerIsActive ? `${timerMinutes}:${timerSeconds.toString().padStart(2, '0')}` : 'Timer',
       icon: Clock,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
+      color: timerIsActive ? (timerIsBreak ? 'text-green-600' : 'text-purple-600') : 'text-purple-600',
+      bgColor: timerIsActive ? (timerIsBreak ? 'bg-green-100' : 'bg-purple-100') : 'bg-purple-100',
       hoverColor: 'hover:bg-purple-50'
     },
     {

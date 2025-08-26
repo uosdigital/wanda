@@ -84,6 +84,13 @@ function App() {
     return saved ? JSON.parse(saved) : true;
   });
   const [timeblockIntent, setTimeblockIntent] = useState<{ label: string; category: Category } | null>(null);
+  
+  // Global timer state
+  const [timerMinutes, setTimerMinutes] = useState(25);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerIsActive, setTimerIsActive] = useState(false);
+  const [timerIsBreak, setTimerIsBreak] = useState(false);
+  const [timerCompletedPomodoros, setTimerCompletedPomodoros] = useState(0);
 
   useEffect(() => {
     saveAppData(appData);
@@ -97,6 +104,56 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Global timer logic
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (timerIsActive && (timerMinutes > 0 || timerSeconds > 0)) {
+      interval = setInterval(() => {
+        if (timerSeconds > 0) {
+          setTimerSeconds(timerSeconds - 1);
+        } else if (timerMinutes > 0) {
+          setTimerMinutes(timerMinutes - 1);
+          setTimerSeconds(59);
+        }
+      }, 1000);
+    } else if (timerMinutes === 0 && timerSeconds === 0 && timerIsActive) {
+      // Timer finished
+      setTimerIsActive(false);
+      if (!timerIsBreak) {
+        // Completed a focus session
+        setTimerCompletedPomodoros(prev => prev + 1);
+        addPoints(15, 'Pomodoro focus session completed');
+        setTimerIsBreak(true);
+        setTimerMinutes(5);
+        setTimerSeconds(0);
+      } else {
+        // Completed a break
+        setTimerIsBreak(false);
+        setTimerMinutes(25);
+        setTimerSeconds(0);
+      }
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [timerIsActive, timerMinutes, timerSeconds, timerIsBreak]);
+
+  // Timer control functions
+  const toggleTimer = () => {
+    setTimerIsActive(!timerIsActive);
+  };
+
+  const resetTimer = () => {
+    setTimerIsActive(false);
+    setTimerIsBreak(false);
+    setTimerMinutes(25);
+    setTimerSeconds(0);
+  };
 
   // Reset completion states when modals close
   useEffect(() => {
@@ -314,6 +371,10 @@ function App() {
         onSignOut={handleSignOut}
         isMobileOpen={mobileSidebarOpen}
         onMobileToggle={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+        timerIsActive={timerIsActive}
+        timerIsBreak={timerIsBreak}
+        timerMinutes={timerMinutes}
+        timerSeconds={timerSeconds}
       />
 
       {/* Mobile Header */}
@@ -436,6 +497,13 @@ function App() {
             onBack={() => setCurrentView('dashboard')}
             onAddPoints={addPoints}
             isDarkMode={isDarkMode}
+            timerMinutes={timerMinutes}
+            timerSeconds={timerSeconds}
+            timerIsActive={timerIsActive}
+            timerIsBreak={timerIsBreak}
+            timerCompletedPomodoros={timerCompletedPomodoros}
+            onToggleTimer={toggleTimer}
+            onResetTimer={resetTimer}
           />
         )}
 
