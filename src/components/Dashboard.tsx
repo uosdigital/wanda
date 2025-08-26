@@ -80,6 +80,17 @@ const Dashboard: React.FC<DashboardProps> = ({
     newCompleted[index] = !newCompleted[index];
     
     if (newCompleted[index]) {
+      // Play task completion sound
+      try {
+        const audio = new Audio('/sounds/task.wav');
+        audio.volume = 0.5;
+        audio.play().catch(e => {
+          console.log('Task audio play failed:', e);
+        });
+      } catch (error) {
+        console.log('Task audio creation failed:', error);
+      }
+      
       onAddPoints(25, 'Task completed');
     }
     
@@ -91,36 +102,15 @@ const Dashboard: React.FC<DashboardProps> = ({
   const toggleMainTask = () => {
     const newCompleted = !todaysData.completedMainTask;
     if (newCompleted) {
-      // Play completion sound with better error handling
+      // Play priority completion sound
       try {
-        const audio = new Audio();
-        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT';
+        const audio = new Audio('/sounds/priority.wav');
         audio.volume = 0.5;
         audio.play().catch(e => {
-          console.log('Audio play failed:', e);
-          // Fallback: try to play a simple beep using Web Audio API
-          try {
-            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
-          } catch (fallbackError) {
-            console.log('Fallback audio also failed:', fallbackError);
-          }
+          console.log('Priority audio play failed:', e);
         });
       } catch (error) {
-        console.log('Audio creation failed:', error);
+        console.log('Priority audio creation failed:', error);
       }
       
       onAddPoints(50, 'Priority task completed');
