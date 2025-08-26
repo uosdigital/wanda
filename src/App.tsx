@@ -375,6 +375,7 @@ function App() {
         timerIsBreak={timerIsBreak}
         timerMinutes={timerMinutes}
         timerSeconds={timerSeconds}
+        onToggleTimer={toggleTimer}
       />
 
       {/* Mobile Header */}

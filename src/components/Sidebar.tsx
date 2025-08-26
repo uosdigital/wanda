@@ -36,6 +36,7 @@ interface SidebarProps {
   timerIsBreak?: boolean;
   timerMinutes?: number;
   timerSeconds?: number;
+  onToggleTimer?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -54,7 +55,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   timerIsActive = false,
   timerIsBreak = false,
   timerMinutes = 25,
-  timerSeconds = 0
+  timerSeconds = 0,
+  onToggleTimer
 }) => {
   const menuItems = [
     {
@@ -91,10 +93,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'timer' as View,
-      label: timerIsActive ? `${timerMinutes}:${timerSeconds.toString().padStart(2, '0')}` : 'Timer',
+      label: 'Timer',
       icon: Clock,
-      color: timerIsActive ? (timerIsBreak ? 'text-green-600' : 'text-purple-600') : 'text-purple-600',
-      bgColor: timerIsActive ? (timerIsBreak ? 'bg-green-100' : 'bg-purple-100') : 'bg-purple-100',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
       hoverColor: 'hover:bg-purple-50'
     },
     {
@@ -235,6 +237,29 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <span className="truncate transition-all duration-200">
                       {item.label}
                     </span>
+                  )}
+                  {/* Timer lozenge for timer item */}
+                  {item.id === 'timer' && timerIsActive && !isCollapsed && (
+                    <div className="ml-auto">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleTimer?.();
+                        }}
+                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-105 ${
+                          timerIsBreak
+                            ? isDarkMode
+                              ? 'bg-green-900/50 text-green-300 hover:bg-green-900/70'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : isDarkMode
+                              ? 'bg-purple-900/50 text-purple-300 hover:bg-purple-900/70'
+                              : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        }`}
+                        title={timerIsActive ? 'Click to pause' : 'Click to start'}
+                      >
+                        {timerMinutes}:{timerSeconds.toString().padStart(2, '0')}
+                      </button>
+                    </div>
                   )}
                 </button>
               </li>
