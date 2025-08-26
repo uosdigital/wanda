@@ -236,7 +236,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <div className="flex items-center justify-center space-x-3">
                 <Sun size={24} className="animate-float" />
-                <span>Start</span>
+                <span>{hasCompletedMorning ? 'Edit Morning' : 'Start'}</span>
               </div>
             </button>
           </div>
@@ -267,16 +267,15 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
           <button
             onClick={onStartMorning}
-            disabled={hasCompletedMorning}
             className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ease-out transform hover:scale-105 ${
               hasCompletedMorning
-                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                ? 'bg-green-100 text-green-700 hover:bg-green-200'
                 : 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:shadow-xl hover:-translate-y-1 animate-pulse-glow'
             }`}
           >
             <Sun size={20} className="animate-float" />
-            <span className="hidden sm:inline">{hasCompletedMorning ? 'Morning Complete!' : 'Start My Day'}</span>
-            <span className="sm:hidden">{hasCompletedMorning ? 'Complete!' : 'Start Day'}</span>
+            <span className="hidden sm:inline">{hasCompletedMorning ? 'Edit Morning' : 'Start My Day'}</span>
+            <span className="sm:hidden">{hasCompletedMorning ? 'Edit' : 'Start Day'}</span>
           </button>
 
           <button
