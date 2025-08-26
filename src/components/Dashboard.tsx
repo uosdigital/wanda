@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sun, Moon, CheckCircle2, Circle, RefreshCw, Target, Lightbulb, Clock, Calendar, Plus } from 'lucide-react';
 import { DailyData, TimeBlock } from '../types';
 import guitarImg from '../../images/guitar.jpg';
@@ -52,6 +52,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showAddTaskModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showAddTaskModal]);
 
   const todaysBlocks: TimeBlock[] = todaysData.timeBlocks || [];
   const formatRange = (startIso: string, endIso: string) => {
@@ -876,7 +889,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Add Task Modal */}
         {showAddTaskModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" style={{ overflow: 'hidden' }}>
             <div className={`rounded-2xl p-6 shadow-xl border max-w-md w-full mx-4 animate-slide-up ${
               isDarkMode 
                 ? 'bg-gray-800 border-gray-700' 
