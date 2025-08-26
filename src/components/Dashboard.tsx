@@ -91,6 +91,10 @@ const Dashboard: React.FC<DashboardProps> = ({
   const toggleMainTask = () => {
     const newCompleted = !todaysData.completedMainTask;
     if (newCompleted) {
+      // Play completion sound
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+      audio.play().catch(e => console.log('Audio play failed:', e));
+      
       onAddPoints(50, 'Priority task completed');
     }
     onUpdateData({ completedMainTask: newCompleted });
