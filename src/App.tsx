@@ -8,7 +8,7 @@ import Habits from './components/Habits';
 import Sidebar from './components/Sidebar';
 import FullScreenModal from './components/FullScreenModal';
 import { AppData, DailyData, Note } from './types';
-import { saveAppData, loadAppData, clearAppData } from './utils/storage';
+import { saveAppData, loadAppData, clearAppData, getEmptyAppData } from './utils/storage';
 import { useToast } from './components/ToastProvider';
 import Timeblocking from './components/Timeblocking';
 import Points from './components/Points';
@@ -29,7 +29,23 @@ function App() {
   const [eveningFlowOpen, setEveningFlowOpen] = useState(false);
   const [morningFlowCompleted, setMorningFlowCompleted] = useState(false);
   const [eveningFlowCompleted, setEveningFlowCompleted] = useState(false);
-  const [appData, setAppData] = useState<AppData>(() => loadAppData());
+  const [appData, setAppData] = useState<AppData>(() => getEmptyAppData());
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await loadAppData();
+        setAppData(data);
+      } catch (error) {
+        console.error('Failed to load app data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : true;
@@ -72,7 +88,7 @@ function App() {
     });
   };
 
-  const updateDailyData = (data: Partial<DailyData>) => {
+  const updateDailyData = async (data: Partial<DailyData>) => {
     const today = new Date().toDateString();
     const updatedData = {
       ...appData,
@@ -85,7 +101,7 @@ function App() {
       }
     };
     setAppData(updatedData);
-    saveAppData(updatedData);
+    await saveAppData(updatedData);
   };
 
   const calculateTotalPoints = () => {
@@ -161,7 +177,7 @@ function App() {
 
   const getTodaysKey = () => new Date().toDateString();
 
-  const saveTimeBlocks = (blocks: TimeBlock[]) => {
+  const saveTimeBlocks = async (blocks: TimeBlock[]) => {
     const key = getTodaysKey();
     const updatedData = {
       ...appData,
@@ -174,7 +190,7 @@ function App() {
       }
     };
     setAppData(updatedData);
-    saveAppData(updatedData);
+    await saveAppData(updatedData);
   };
 
   const triggerTimeblock = (label: string, category: Category) => {
@@ -182,11 +198,11 @@ function App() {
     setCurrentView('timeblocking');
   };
 
-  const saveNotes = (updater: (prev: Note[]) => Note[]) => {
+  const saveNotes = async (updater: (prev: Note[]) => Note[]) => {
     const nextNotes = updater(appData.notes || []);
     const updated = { ...appData, notes: nextNotes };
     setAppData(updated);
-    saveAppData(updated);
+    await saveAppData(updated);
   };
 
   const addNote = (text: string, color: string) => {
@@ -202,6 +218,21 @@ function App() {
   const deleteNote = (id: string) => {
     saveNotes(prev => prev.filter(n => n.id !== id));
   };
+
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+          : 'bg-gradient-to-br from-blue-50 via-white to-green-50'
+      }`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
