@@ -14,39 +14,39 @@ export const loadAppData = (): AppData => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const data = JSON.parse(stored);
-      // Detect legacy dummy seeded data from previous versions and purge
-      try {
-        const isLegacyDummy = (
-          (data.totalPoints === 125 && data.currentStreak === 3) ||
-          (data.dailyData && typeof data.dailyData === 'object' && Object.keys(data.dailyData).length > 0 &&
-            // heuristic: contains historical days (not today) and classic fields like goodDayVision
-            Object.keys(data.dailyData).some((k) => {
-              const d = data.dailyData[k];
-              return d && (d.goodDayVision || d.sleepQuality || d.morningMood);
-            })
-          )
-        );
-        if (isLegacyDummy) {
-          localStorage.removeItem(STORAGE_KEY);
-          console.info('[storage] Cleared legacy dummy data');
-          return getEmptyAppData();
-        }
-      } catch {}
       
-      // Additional cleanup: remove any daily data that contains dummy patterns
+      // AGGRESSIVE CLEANUP: Remove ALL legacy dummy data patterns
+      let shouldClearAll = false;
+      
+      // Check for any legacy patterns
       if (data.dailyData && typeof data.dailyData === 'object') {
-        const cleanedDailyData: any = {};
-        const today = new Date().toDateString();
-        
-        Object.keys(data.dailyData).forEach(key => {
+        const hasLegacyData = Object.keys(data.dailyData).some(key => {
           const dayData = data.dailyData[key];
-          // Only keep today's data or data that doesn't have dummy patterns
-          if (key === today || !dayData || !dayData.sleepQuality || !dayData.morningMood) {
-            cleanedDailyData[key] = dayData;
-          }
+          return dayData && (
+            dayData.sleepQuality || 
+            dayData.morningMood || 
+            dayData.goodDayVision ||
+            dayData.habits?.length > 0 ||
+            dayData.completedHabits?.length > 0 ||
+            dayData.additionalTasks?.length > 0 ||
+            dayData.peopleToMessage?.length > 0
+          );
         });
         
-        data.dailyData = cleanedDailyData;
+        if (hasLegacyData) {
+          shouldClearAll = true;
+        }
+      }
+      
+      // Also check for legacy totals
+      if (data.totalPoints > 0 || data.currentStreak > 0) {
+        shouldClearAll = true;
+      }
+      
+      if (shouldClearAll) {
+        localStorage.removeItem(STORAGE_KEY);
+        console.info('[storage] Aggressively cleared ALL legacy data');
+        return getEmptyAppData();
       }
       
       // Ensure all required properties exist with safe defaults
