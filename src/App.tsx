@@ -301,13 +301,13 @@ function App() {
       />
 
       {/* Main Content */}
-      <main className={`max-w-6xl mx-auto px-4 py-8 transition-all duration-300 ${
+      <main className={`transition-all duration-300 ${
         sidebarCollapsed ? 'ml-16' : 'ml-64'
-      } md:ml-64`}>
+      } md:ml-64 px-4 py-4 pt-16 md:pt-8`}>
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileSidebarOpen(true)}
-          className={`fixed top-4 left-4 z-30 p-2 rounded-lg transition-colors md:hidden ${
+          className={`fixed top-4 left-4 z-30 p-3 rounded-lg transition-colors md:hidden ${
             isDarkMode 
               ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' 
               : 'bg-white text-gray-600 hover:bg-gray-100'
@@ -315,7 +315,7 @@ function App() {
             isDarkMode ? 'border-gray-600' : 'border-gray-200'
           }`}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>

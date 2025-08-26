@@ -201,7 +201,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
       
       {/* Welcome Section */}
       <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
@@ -210,16 +210,16 @@ const Dashboard: React.FC<DashboardProps> = ({
           : 'bg-white/80 border-gray-100'
       }`}>
         <div className="mb-6">
-          <h2 className={`text-2xl font-bold ${
+          <h2 className={`text-xl sm:text-2xl font-bold ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
             Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}!
           </h2>
-          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Here is how today is looking...</p>
+          <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm sm:text-base`}>Here is how today is looking...</p>
         </div>
 
         {/* Flow Buttons */}
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
           <button
             onClick={onStartMorning}
             disabled={hasCompletedMorning}
@@ -230,7 +230,8 @@ const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Sun size={20} className="animate-float" />
-            <span>{hasCompletedMorning ? 'Morning Complete!' : 'Start My Day'}</span>
+            <span className="hidden sm:inline">{hasCompletedMorning ? 'Morning Complete!' : 'Start My Day'}</span>
+            <span className="sm:hidden">{hasCompletedMorning ? 'Complete!' : 'Start Day'}</span>
           </button>
 
           <button
@@ -243,7 +244,8 @@ const Dashboard: React.FC<DashboardProps> = ({
             }`}
           >
             <Moon size={20} className="animate-float" />
-            <span>{hasCompletedEvening ? 'Evening Complete!' : 'Review My Day'}</span>
+            <span className="hidden sm:inline">{hasCompletedEvening ? 'Evening Complete!' : 'Review My Day'}</span>
+            <span className="sm:hidden">{hasCompletedEvening ? 'Complete!' : 'Review Day'}</span>
           </button>
 
           <button
