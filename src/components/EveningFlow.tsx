@@ -193,7 +193,7 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
 
       {/* Content */}
       <div className="flex-1 p-4 md:p-8 flex flex-col justify-between overflow-y-auto">
-        <div className="flex-1 flex items-start justify-center min-h-0">
+        <div className="flex-1 flex items-start justify-center min-h-0 py-4">
           <div className="w-full max-w-md">
           {step === 1 && (
             <div className="text-center">
@@ -524,12 +524,12 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
                 isDarkMode ? 'text-gray-300' : 'text-gray-600'
               }`}>Choose a word that best describes your mood</p>
               
-              <div className="max-w-2xl mx-auto grid grid-cols-5 gap-3">
+              <div className="max-w-2xl mx-auto grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-3">
                 {eveningMoods.map((mood) => (
                   <button
                     key={mood}
                     onClick={() => setFormData({ ...formData, eveningMood: mood })}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                    className={`p-2 md:p-4 rounded-xl border-2 transition-all duration-200 text-xs md:text-sm ${
                       formData.eveningMood === mood
                         ? isDarkMode
                           ? 'bg-purple-900/20 text-purple-400 border-purple-600 transform scale-105'
