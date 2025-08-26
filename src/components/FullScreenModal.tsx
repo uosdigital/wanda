@@ -69,7 +69,7 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 transition-opacity duration-300 ${
+    <div className={`fixed top-0 left-0 w-full h-screen z-50 transition-opacity duration-300 ${
       isAnimatingOut ? 'opacity-0' : 'opacity-100'
     }`}>
       {/* Backdrop */}
