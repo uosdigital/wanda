@@ -349,12 +349,12 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
               How are you feeling right now?
             </h3>
             <div className="w-full">
-              <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3 lg:gap-4">
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-3 lg:gap-4">
                 {moodOptions.map((option, index) => (
                   <button
                     key={option.value}
                     onClick={() => handleMoodSelect(option.value)}
-                    className={`p-3 md:p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 transform text-sm md:text-base font-medium ${
+                    className={`p-2 md:p-2 rounded-xl border-2 transition-all duration-300 hover:scale-105 transform text-sm md:text-base font-medium ${
                       formData.morningMood === option.value
                         ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-500 scale-105 shadow-lg'
                         : isDarkMode
@@ -741,7 +741,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
         <div className={`flex items-start justify-center transition-all duration-300 min-h-0 py-4 ${
           isAnimating ? 'opacity-0 transform translate-x-8' : 'opacity-100 transform translate-x-0'
         }`}>
-          <div className="w-full max-w-md">
+          <div className={`w-full ${step === 5 ? 'max-w-4xl' : 'max-w-md'}`}>
             {getStepContent()}
           </div>
         </div>
