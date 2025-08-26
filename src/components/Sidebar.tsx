@@ -136,8 +136,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         // Mobile responsive classes
         'w-full md:w-64' +
         (isMobileOpen ? ' translate-x-0' : ' -translate-x-full md:translate-x-0') +
-        // Desktop collapse logic
-        (isCollapsed ? ' md:w-16' : ' md:w-64')
+        // Desktop collapse logic - only apply when not collapsed
+        (isCollapsed ? ' md:w-16' : '')
       }`}>
       {/* Header Section */}
       <div className={`p-4 border-b ${
