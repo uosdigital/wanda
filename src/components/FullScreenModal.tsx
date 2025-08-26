@@ -84,7 +84,7 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
       
       {/* Modal Content */}
       <div className="relative w-full h-full flex items-start justify-center p-0 md:p-4 md:items-center">
-        <div className={`w-full h-full md:max-w-5xl md:h-auto md:min-h-[600px] md:max-h-[95vh] md:rounded-3xl shadow-2xl overflow-hidden ${
+        <div className={`w-full h-full md:max-w-5xl md:h-auto md:max-h-[95vh] md:rounded-3xl shadow-2xl overflow-hidden ${
           isDarkMode
             ? 'bg-gray-800 border-gray-700'
             : 'bg-white border-gray-100'
