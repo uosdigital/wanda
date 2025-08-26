@@ -53,6 +53,24 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
 
+  // Random inspirational phrases
+  const inspirationalPhrases = [
+    "In no time at all, this'll be the distant past.",
+    "The straight was a circle, the straight line was a lie.",
+    "Sometimes, I wrap my head around it all, and it makes perfect sense.",
+    "And I'm leaning on a broken fence, between past and present tense",
+    "We are beautiful, we are doomed.",
+    "Give us this day our daily dread."
+  ];
+  
+  // Use today's date as a seed for consistent randomization per day
+  const today = new Date().toDateString();
+  const randomPhrase = (() => {
+    const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const randomIndex = seed % inspirationalPhrases.length;
+    return inspirationalPhrases[randomIndex];
+  })();
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (showAddTaskModal) {
@@ -205,7 +223,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="text-center space-y-10 mx-auto px-6">
           {/* Icon and Date (no card) */}
           <div>
-            <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto">
+            <div className="w-16 h-16 rounded-xl overflow-hidden mx-auto mb-6">
               <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
             </div>
             <div className={`${isDarkMode ? 'text-gray-100' : 'text-gray-800'} text-5xl md:text-6xl font-extrabold tracking-tight mx-auto max-w-3xl`}>
@@ -216,10 +234,13 @@ const Dashboard: React.FC<DashboardProps> = ({
                 year: 'numeric'
               })}
             </div>
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-base md:text-lg mt-8 mb-8 animate-fade-in`}>
+              {randomPhrase}
+            </p>
           </div>
 
           {/* Start Button */}
-          <div className="space-y-4">
+          <div>
             <button
               onClick={onStartMorning}
               className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ease-out transform hover:scale-105 hover:shadow-2xl animate-pulse-glow"
@@ -251,6 +272,9 @@ const Dashboard: React.FC<DashboardProps> = ({
             Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}!
           </h2>
           <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm sm:text-base`}>Here is how today is looking...</p>
+          <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} text-sm mt-3 animate-fade-in`}>
+            {randomPhrase}
+          </p>
         </div>
 
         {/* Flow Buttons */}

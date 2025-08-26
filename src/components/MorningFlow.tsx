@@ -258,6 +258,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
             }`} style={{animationDelay: '0.2s'}}>
               Ready to start your day?
             </p>
+
             <button
               onClick={handleNext}
               className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-12 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 animate-pulse-glow"
