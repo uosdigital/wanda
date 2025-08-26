@@ -348,8 +348,8 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
             }`}>
               How are you feeling right now?
             </h3>
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-4">
+            <div className="w-full">
+              <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3 lg:gap-4">
                 {moodOptions.map((option, index) => (
                   <button
                     key={option.value}
