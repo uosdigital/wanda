@@ -8,7 +8,6 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,28 +39,16 @@ const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
     setMessage('');
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        setMessageType('success');
-        setMessage('Check your email for the confirmation link!');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        setMessageType('success');
-        setMessage('Signing you in...');
-        setTimeout(() => onAuthSuccess(), 1000);
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      setMessageType('success');
+      setMessage('Signing you in...');
+      setTimeout(() => onAuthSuccess(), 1000);
     } catch (error: any) {
       setMessageType('error');
       setMessage(error.message || 'An error occurred');
@@ -92,17 +79,18 @@ const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-50 via-white to-green-50'
+    }`}>
       <div className={`max-w-md w-full space-y-8 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
         <div className="text-center">
           <h2 className="text-3xl font-bold">
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
+            Welcome Back
           </h2>
           <p className={`mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            {isSignUp 
-              ? 'Sign up to sync your data across devices' 
-              : 'Sign in to access your data'
-            }
+            Sign in to access your data
           </p>
         </div>
 
@@ -159,8 +147,12 @@ const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
           {message && (
             <div className={`p-4 rounded-lg text-sm ${
               messageType === 'success' 
-                ? 'bg-green-100 text-green-700 border border-green-200' 
-                : 'bg-red-100 text-red-700 border border-red-200'
+                ? isDarkMode
+                  ? 'bg-green-900/50 text-green-300 border border-green-700'
+                  : 'bg-green-100 text-green-700 border border-green-200'
+                : isDarkMode
+                  ? 'bg-red-900/50 text-red-300 border border-red-700'
+                  : 'bg-red-100 text-red-700 border border-red-200'
             }`}>
               {message}
             </div>
@@ -177,7 +169,7 @@ const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
               }`}
             >
               {loading && <Loader2 className="animate-spin" size={20} />}
-              <span>{loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}</span>
+              <span>{loading ? 'Processing...' : 'Sign In'}</span>
             </button>
 
             <button
@@ -196,15 +188,9 @@ const Auth: React.FC<AuthProps> = ({ isDarkMode, onAuthSuccess }) => {
         </form>
 
         <div className="text-center">
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className={`text-sm hover:underline ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}
-          >
-            {isSignUp 
-              ? 'Already have an account? Sign in' 
-              : "Don't have an account? Sign up"
-            }
-          </button>
+          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Single-user application
+          </p>
         </div>
 
         <div className="text-center">

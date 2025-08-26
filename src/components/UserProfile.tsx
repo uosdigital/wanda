@@ -74,6 +74,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ isDarkMode, onSignOut }) => {
             <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               Cloud Sync Active
             </p>
+            <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Single-user app
+            </p>
           </div>
         </div>
         
