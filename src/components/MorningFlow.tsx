@@ -737,8 +737,8 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-4 md:p-8 overflow-y-auto">
-        <div className={`flex items-start justify-center transition-all duration-300 min-h-0 py-4 ${
+      <div className="flex-1 p-4 md:p-8 overflow-y-auto flex flex-col">
+        <div className={`flex items-start justify-center transition-all duration-300 min-h-0 py-4 flex-1 ${
           isAnimating ? 'opacity-0 transform translate-x-8' : 'opacity-100 transform translate-x-0'
         }`}>
           <div className={`w-full ${step === 5 ? 'max-w-4xl' : 'max-w-md'}`}>
@@ -747,7 +747,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between mt-8 mb-20">
+        <div className="flex justify-between mt-8 mb-20 md:mt-auto md:mb-0">
           <button
             onClick={handleBack}
             className={`flex items-center space-x-2 px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 ${
