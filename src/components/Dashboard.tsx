@@ -98,9 +98,9 @@ const Dashboard: React.FC<DashboardProps> = ({
     newCompleted[index] = !newCompleted[index];
     
     if (newCompleted[index]) {
-      // Play task completion sound
+      // Play completion sound
       try {
-        const audio = new Audio('/sounds/task.wav');
+        const audio = new Audio('/sounds/notify.wav');
         audio.volume = 0.5;
         audio.play().catch(e => {
           console.log('Task audio play failed:', e);
@@ -120,9 +120,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   const toggleMainTask = () => {
     const newCompleted = !todaysData.completedMainTask;
     if (newCompleted) {
-      // Play priority completion sound
+      // Play completion sound
       try {
-        const audio = new Audio('/sounds/priority.wav');
+        const audio = new Audio('/sounds/notify.wav');
         audio.volume = 0.5;
         audio.play().catch(e => {
           console.log('Priority audio play failed:', e);
@@ -142,6 +142,16 @@ const Dashboard: React.FC<DashboardProps> = ({
     newCompleted[index] = !newCompleted[index];
     
     if (newCompleted[index]) {
+      // Play completion sound
+      try {
+        const audio = new Audio('/sounds/notify.wav');
+        audio.volume = 0.5;
+        audio.play().catch(e => {
+          console.log('Connect audio play failed:', e);
+        });
+      } catch (error) {
+        console.log('Connect audio creation failed:', error);
+      }
       onAddPoints(30, 'Connected with someone');
     }
     
@@ -621,6 +631,16 @@ const Dashboard: React.FC<DashboardProps> = ({
                           ? completedHabits.filter(id => id !== habitId)
                           : [...completedHabits, habitId];
                         if (!isCompleted) {
+                          // Play completion sound
+                          try {
+                            const audio = new Audio('/sounds/notify.wav');
+                            audio.volume = 0.5;
+                            audio.play().catch(e => {
+                              console.log('Habit audio play failed:', e);
+                            });
+                          } catch (error) {
+                            console.log('Habit audio creation failed:', error);
+                          }
                           onAddPoints(30, 'Habit completed');
                         }
                         onUpdateData({ completedHabits: newCompletedHabits });
@@ -770,6 +790,16 @@ const Dashboard: React.FC<DashboardProps> = ({
                         };
                         onUpdateData({ basics: newBasics });
                         if (!isCompleted) {
+                          // Play completion sound
+                          try {
+                            const audio = new Audio('/sounds/notify.wav');
+                            audio.volume = 0.5;
+                            audio.play().catch(e => {
+                              console.log('Basics audio play failed:', e);
+                            });
+                          } catch (error) {
+                            console.log('Basics audio creation failed:', error);
+                          }
                           onAddPoints(10, `${basic.label} completed`);
                         }
                       }}

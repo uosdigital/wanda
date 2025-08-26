@@ -185,6 +185,16 @@ function App() {
       if (!timerIsBreak) {
         // Completed a focus session
         setTimerCompletedPomodoros(prev => prev + 1);
+        // Play completion sound
+        try {
+          const audio = new Audio('/sounds/notify.wav');
+          audio.volume = 0.5;
+          audio.play().catch(e => {
+            console.log('Timer audio play failed:', e);
+          });
+        } catch (error) {
+          console.log('Timer audio creation failed:', error);
+        }
         addPoints(15, 'Pomodoro focus session completed');
         setTimerIsBreak(true);
         setTimerMinutes(5);
