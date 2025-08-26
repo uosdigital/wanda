@@ -32,7 +32,7 @@ function App() {
   const [appData, setAppData] = useState<AppData>(() => loadAppData());
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
+    return saved ? JSON.parse(saved) : true;
   });
   const [timeblockIntent, setTimeblockIntent] = useState<{ label: string; category: Category } | null>(null);
 

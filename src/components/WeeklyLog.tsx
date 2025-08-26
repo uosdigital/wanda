@@ -50,6 +50,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
 
   // Mood categorization helper functions
   const getMoodCategory = (mood: string) => {
+    if (!mood || mood.trim() === '') return '';
+    
     const positiveMoods = ['energised', 'ready', 'upbeat'];
     const negativeMoods = ['low', 'struggling', 'tough mood', 'anxious', 'overwhelmed', 'unmotivated', 'sad', 'irritable', 'stuck', 'exhausted', 'frustrated', 'lonely', 'hopeless'];
     
@@ -59,6 +61,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
   };
 
   const getMoodCategoryColor = (category: string) => {
+    if (!category || category === '') return 'text-gray-400 bg-gray-100';
     switch (category) {
       case 'positive': return 'text-green-600 bg-green-100';
       case 'negative': return 'text-red-600 bg-red-100';
@@ -68,6 +71,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
   };
 
   const getMoodCategoryIcon = (category: string) => {
+    if (!category || category === '') return '';
     switch (category) {
       case 'positive': return '';
       case 'negative': return '';
@@ -153,101 +157,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
 
     const baseWeekData = getLast7Days();
 
-    // Create different dummy data based on the week offset
-    const getDummyDataForWeek = (weekOffset: number): ReadonlyArray<DummyDay> => {
-      // Comprehensive mood data for the last month
-      const moodData: Record<string, ReadonlyArray<DummyDay>> = {
-        0: [ // Current week
-          { sleepData: { sleepQuality: 4, bedTime: '23:30', wakeTime: '07:15', sleepHours: 7.75 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:15', wakeTime: '07:30', sleepHours: 7.25 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 5, bedTime: '22:45', wakeTime: '06:45', sleepHours: 8.0 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 2, bedTime: '01:00', wakeTime: '08:00', sleepHours: 7.0 }, morningMood: 'tired' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:15', wakeTime: '07:00', sleepHours: 7.75 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:30', wakeTime: '07:45', sleepHours: 7.25 }, morningMood: 'mixed' },
-          { sleepData: { sleepQuality: 5, bedTime: '22:30', wakeTime: '06:30', sleepHours: 8.0 }, morningMood: 'energised' }
-        ],
-        '-1': [ // Last week
-          { sleepData: { sleepQuality: 2, bedTime: '01:30', wakeTime: '08:30', sleepHours: 7.0 }, morningMood: 'tired' },
-          { sleepData: { sleepQuality: 1, bedTime: '02:00', wakeTime: '09:00', sleepHours: 7.0 }, morningMood: 'exhausted' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:45', wakeTime: '07:15', sleepHours: 6.5 }, morningMood: 'flat' },
-          { sleepData: { sleepQuality: 2, bedTime: '01:15', wakeTime: '08:15', sleepHours: 7.0 }, morningMood: 'stressed' },
-          { sleepData: { sleepQuality: 1, bedTime: '02:30', wakeTime: '09:30', sleepHours: 7.0 }, morningMood: 'overwhelmed' },
-          { sleepData: { sleepQuality: 2, bedTime: '01:00', wakeTime: '08:00', sleepHours: 7.0 }, morningMood: 'low' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:30', wakeTime: '07:00', sleepHours: 6.5 }, morningMood: 'meh' }
-        ],
-        '-2': [ // 2 weeks ago
-          { sleepData: { sleepQuality: 5, bedTime: '22:00', wakeTime: '06:30', sleepHours: 8.5 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 4, bedTime: '22:30', wakeTime: '06:45', sleepHours: 8.25 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 5, bedTime: '21:45', wakeTime: '06:15', sleepHours: 8.5 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 4, bedTime: '22:15', wakeTime: '06:30', sleepHours: 8.25 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 5, bedTime: '22:00', wakeTime: '06:45', sleepHours: 8.75 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 4, bedTime: '22:30', wakeTime: '07:00', sleepHours: 8.5 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 5, bedTime: '21:30', wakeTime: '06:00', sleepHours: 8.5 }, morningMood: 'ready' }
-        ],
-        '-3': [ // 3 weeks ago
-          { sleepData: { sleepQuality: 3, bedTime: '23:45', wakeTime: '07:30', sleepHours: 7.75 }, morningMood: 'mixed' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:15', wakeTime: '07:00', sleepHours: 7.75 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 4, bedTime: '22:45', wakeTime: '06:45', sleepHours: 8.0 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:00', wakeTime: '07:15', sleepHours: 7.25 }, morningMood: 'flat' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:30', wakeTime: '07:00', sleepHours: 7.5 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 5, bedTime: '22:30', wakeTime: '06:30', sleepHours: 8.0 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:00', wakeTime: '06:45', sleepHours: 7.75 }, morningMood: 'energised' }
-        ],
-        '-4': [ // 4 weeks ago
-          { sleepData: { sleepQuality: 2, bedTime: '01:00', wakeTime: '08:00', sleepHours: 7.0 }, morningMood: 'stressed' },
-          { sleepData: { sleepQuality: 1, bedTime: '02:15', wakeTime: '09:15', sleepHours: 7.0 }, morningMood: 'anxious' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:30', wakeTime: '07:00', sleepHours: 6.5 }, morningMood: 'tired' },
-          { sleepData: { sleepQuality: 2, bedTime: '01:45', wakeTime: '08:45', sleepHours: 7.0 }, morningMood: 'overwhelmed' },
-          { sleepData: { sleepQuality: 1, bedTime: '02:30', wakeTime: '09:30', sleepHours: 7.0 }, morningMood: 'exhausted' },
-          { sleepData: { sleepQuality: 2, bedTime: '01:15', wakeTime: '08:15', sleepHours: 7.0 }, morningMood: 'low' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:45', wakeTime: '07:15', sleepHours: 6.5 }, morningMood: 'flat' }
-        ],
-        '1': [ // Next week
-          { sleepData: { sleepQuality: 3, bedTime: '23:45', wakeTime: '07:30', sleepHours: 7.75 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:15', wakeTime: '07:00', sleepHours: 7.75 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 4, bedTime: '22:45', wakeTime: '06:45', sleepHours: 8.0 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 3, bedTime: '00:00', wakeTime: '07:15', sleepHours: 7.25 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:30', wakeTime: '07:00', sleepHours: 7.5 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 5, bedTime: '22:30', wakeTime: '06:30', sleepHours: 8.0 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:00', wakeTime: '06:45', sleepHours: 7.75 }, morningMood: 'ready' }
-        ],
-        '2': [ // 2 weeks in future
-          { sleepData: { sleepQuality: 4, bedTime: '22:45', wakeTime: '06:45', sleepHours: 8.0 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:00', wakeTime: '07:00', sleepHours: 8.0 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 5, bedTime: '22:30', wakeTime: '06:30', sleepHours: 8.0 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:15', wakeTime: '07:15', sleepHours: 8.0 }, morningMood: 'energised' },
-          { sleepData: { sleepQuality: 4, bedTime: '22:45', wakeTime: '06:45', sleepHours: 8.0 }, morningMood: 'ready' },
-          { sleepData: { sleepQuality: 5, bedTime: '22:00', wakeTime: '06:00', sleepHours: 8.0 }, morningMood: 'upbeat' },
-          { sleepData: { sleepQuality: 4, bedTime: '23:00', wakeTime: '07:00', sleepHours: 8.0 }, morningMood: 'energised' }
-        ]
-      };
-
-      const key = String(weekOffset);
-      return moodData[key] || moodData['0'];
-    };
-
-    const dummyData = getDummyDataForWeek(currentWeekOffset);
-
     return baseWeekData.map((day, index) => {
-      // Only apply dummy data if there's no real data for this day
-      const hasRealData = day.data && Object.keys(day.data).length > 0;
-      
-      if (!hasRealData) {
-        const dummy = dummyData[index];
-        if (dummy) {
-          return {
-            ...day,
-            data: {
-              sleepQuality: dummy.sleepData?.sleepQuality,
-              bedTime: dummy.sleepData?.bedTime,
-              wakeTime: dummy.sleepData?.wakeTime,
-              sleepHours: dummy.sleepData?.sleepHours,
-              morningMood: dummy.morningMood
-            }
-          };
-        }
-      }
-      
+      // Return only real data, no dummy data
       return day;
     });
   }, [currentWeekOffset]);

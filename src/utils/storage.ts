@@ -10,50 +10,20 @@ export const getEmptyAppData = (): AppData => ({
 });
 
 export const loadAppData = (): AppData => {
+  // NUCLEAR OPTION: Force complete fresh start
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const data = JSON.parse(stored);
-      
-      // AGGRESSIVE CLEANUP: Remove ALL legacy dummy data patterns
-      let shouldClearAll = false;
-      
-      // Check for any legacy patterns
-      if (data.dailyData && typeof data.dailyData === 'object') {
-        const hasLegacyData = Object.keys(data.dailyData).some(key => {
-          const dayData = data.dailyData[key];
-          return dayData && (
-            dayData.sleepQuality || 
-            dayData.morningMood || 
-            dayData.goodDayVision ||
-            dayData.habits?.length > 0 ||
-            dayData.completedHabits?.length > 0 ||
-            dayData.additionalTasks?.length > 0 ||
-            dayData.peopleToMessage?.length > 0
-          );
-        });
-        
-        if (hasLegacyData) {
-          shouldClearAll = true;
-        }
+      // NUCLEAR CLEAR: Remove app data but preserve dark mode preference
+      const darkModePreference = localStorage.getItem('darkMode');
+      localStorage.clear();
+      sessionStorage.clear();
+      // Restore dark mode preference
+      if (darkModePreference) {
+        localStorage.setItem('darkMode', darkModePreference);
       }
-      
-      // Also check for legacy totals
-      if (data.totalPoints > 0 || data.currentStreak > 0) {
-        shouldClearAll = true;
-      }
-      
-      if (shouldClearAll) {
-        localStorage.removeItem(STORAGE_KEY);
-        console.info('[storage] Aggressively cleared ALL legacy data');
-        return getEmptyAppData();
-      }
-      
-      // Ensure all required properties exist with safe defaults
-      return {
-        ...getEmptyAppData(),
-        ...data
-      } as AppData;
+      console.info('[storage] NUCLEAR CLEAR: Complete fresh start forced (preserved dark mode)');
+      return getEmptyAppData();
     }
   } catch (error) {
     console.error('Failed to load app data:', error);
@@ -75,5 +45,17 @@ export const clearAppData = (): void => {
     console.log('App data cleared successfully');
   } catch (error) {
     console.error('Failed to clear app data:', error);
+  }
+};
+
+export const nuclearClearAllData = (): void => {
+  try {
+    // Clear all localStorage
+    localStorage.clear();
+    // Also clear sessionStorage just in case
+    sessionStorage.clear();
+    console.log('NUCLEAR CLEAR: All data wiped completely');
+  } catch (error) {
+    console.error('Failed to nuclear clear data:', error);
   }
 };
