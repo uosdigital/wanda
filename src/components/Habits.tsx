@@ -1,13 +1,19 @@
 import React from 'react';
 import { CheckCircle2, Circle, Target, ArrowLeft, ArrowRight } from 'lucide-react';
 import { AppData, DailyData } from '../types';
+import guitarImg from '../../images/guitar.jpg';
+import writeImg from '../../images/write.jpg';
+import socialiseImg from '../../images/socialise.jpg';
+import runImg from '../../images/run.jpg';
+import readImg from '../../images/read.jpg';
 
 interface HabitsProps {
   appData: AppData;
   todaysData: DailyData;
   onUpdateData: (data: Partial<DailyData>) => void;
-  onAddPoints: (points: number) => void;
+  onAddPoints: (points: number, reason?: string) => void;
   isDarkMode: boolean;
+  onTimeblock?: (label: string, category: 'priority' | 'task' | 'habit' | 'connect' | 'custom') => void;
 }
 
 const Habits: React.FC<HabitsProps> = ({
@@ -15,7 +21,8 @@ const Habits: React.FC<HabitsProps> = ({
   todaysData,
   onUpdateData,
   onAddPoints,
-  isDarkMode
+  isDarkMode,
+  onTimeblock
 }) => {
   const [currentWeekOffset, setCurrentWeekOffset] = React.useState(0);
   const [selectedDay, setSelectedDay] = React.useState<{
@@ -25,12 +32,22 @@ const Habits: React.FC<HabitsProps> = ({
     dayName: string;
     dayNumber: number;
   } | null>(null);
+
+  // Map habit IDs to custom images
+  const habitImageMap: { [key: string]: string } = {
+    guitar: guitarImg,
+    write: writeImg,
+    socialise: socialiseImg,
+    exercise: runImg,
+    read: readImg,
+  };
+
   const habitOptions = [
-    { id: 'guitar', label: 'Guitar', icon: Target },
-    { id: 'write', label: 'Write', icon: Target },
-    { id: 'read', label: 'Read', icon: Target },
-    { id: 'exercise', label: 'Exercise', icon: Target },
-    { id: 'socialise', label: 'Socialise', icon: Target }
+    { id: 'guitar', label: 'Guitar' },
+    { id: 'write', label: 'Write' },
+    { id: 'read', label: 'Read' },
+    { id: 'exercise', label: 'Exercise' },
+    { id: 'socialise', label: 'Socialise' }
   ];
 
   const toggleHabit = (habitId: string) => {
@@ -42,7 +59,7 @@ const Habits: React.FC<HabitsProps> = ({
       updatedHabits = completedHabits.filter(id => id !== habitId);
     } else {
       updatedHabits = [...completedHabits, habitId];
-      onAddPoints(5); // Award points for completing a habit
+      onAddPoints(30, 'Habit completed');
     }
     
     onUpdateData({ completedHabits: updatedHabits });
@@ -112,7 +129,7 @@ const Habits: React.FC<HabitsProps> = ({
         {habitOptions.map((habit) => {
           const isPlanned = todaysData.habits?.includes(habit.id) || false;
           const isCompleted = todaysData.completedHabits?.includes(habit.id) || false;
-          const Icon = habit.icon;
+          const imageSrc = habitImageMap[habit.id];
 
           return (
             <div
@@ -131,7 +148,7 @@ const Habits: React.FC<HabitsProps> = ({
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  <div className={`w-10 h-10 rounded-lg overflow-hidden ${
                     isCompleted 
                       ? 'bg-green-500' 
                       : isPlanned 
@@ -140,14 +157,40 @@ const Habits: React.FC<HabitsProps> = ({
                           ? 'bg-gray-600' 
                           : 'bg-gray-200'
                   }`}>
-                    <Icon size={20} className="text-white" />
+                    {imageSrc ? (
+                      <img src={imageSrc} alt={habit.label} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Target size={20} className="text-white" />
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <h3 className={`font-semibold ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
-                      {habit.label}
-                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <h3 className={`font-semibold ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {habit.label}
+                      </h3>
+                      {isPlanned && (
+                        <button
+                          onClick={() => toggleHabit(habit.id)}
+                          className={`flex items-center space-x-1 px-2 py-0.5 rounded-md text-xs font-medium ${
+                            isCompleted
+                              ? (isDarkMode ? 'text-green-400 bg-green-900/20' : 'text-green-700 bg-green-100')
+                              : (isDarkMode ? 'text-gray-300 bg-gray-700' : 'text-gray-700 bg-gray-100')
+                          }`}
+                          title={isCompleted ? 'Mark as pending' : 'Mark as done'}
+                        >
+                          {isCompleted ? (
+                            <CheckCircle2 size={14} />
+                          ) : (
+                            <Circle size={14} />
+                          )}
+                          <span>{isCompleted ? 'Done' : 'Pending'}</span>
+                        </button>
+                      )}
+                    </div>
                     <p className={`text-sm ${
                       isCompleted 
                         ? 'text-green-600' 
@@ -161,24 +204,7 @@ const Habits: React.FC<HabitsProps> = ({
                     </p>
                   </div>
                 </div>
-                {isPlanned && (
-                  <button
-                    onClick={() => toggleHabit(habit.id)}
-                    className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                      isCompleted 
-                        ? 'text-green-500 hover:bg-green-100' 
-                        : isDarkMode 
-                          ? 'text-gray-400 hover:bg-gray-700' 
-                          : 'text-gray-400 hover:bg-gray-100'
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle2 size={24} />
-                    ) : (
-                      <Circle size={24} />
-                    )}
-                  </button>
-                )}
+
               </div>
               
               {!isPlanned ? (
@@ -232,6 +258,7 @@ const Habits: React.FC<HabitsProps> = ({
             {todaysData.habits.map((habitId) => {
               const habit = habitOptions.find(h => h.id === habitId);
               const isCompleted = todaysData.completedHabits?.includes(habitId) || false;
+              const imageSrc = habitImageMap[habitId];
               
               return (
                 <div 
@@ -244,32 +271,45 @@ const Habits: React.FC<HabitsProps> = ({
                       : [...completedHabits, habitId];
                     
                     if (!isCompleted) {
-                      onAddPoints(15); // Award points for completing habits
+                      onAddPoints(30, 'Habit completed');
                     }
                     
                     onUpdateData({ completedHabits: newCompletedHabits });
                   }}
                 >
-                  <span className={`${
-                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {habit?.label}
-                  </span>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     {isCompleted ? (
-                      <CheckCircle2 size={20} className="text-green-500" />
+                      <CheckCircle2 size={16} className="text-green-500" />
                     ) : (
-                      <Circle size={20} className="text-gray-400" />
+                      <Circle size={16} className="text-gray-400" />
                     )}
-                    <span className={`text-sm font-medium ${
-                      isCompleted 
-                        ? 'text-green-600' 
-                        : isDarkMode 
-                          ? 'text-gray-400' 
-                          : 'text-gray-500'
+                    <div className="w-6 h-6 rounded-md overflow-hidden bg-gray-200">
+                      {imageSrc ? (
+                        <img src={imageSrc} alt={habit?.label} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Target size={14} className="text-gray-500" />
+                        </div>
+                      )}
+                    </div>
+                    <span className={`${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
                     }`}>
-                      {isCompleted ? 'Done' : 'Pending'}
+                      {habit?.label}
                     </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {onTimeblock && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onTimeblock(habit?.label || '', 'habit'); }}
+                        className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Timeblock</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -284,9 +324,7 @@ const Habits: React.FC<HabitsProps> = ({
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-white border-gray-100'
       }`}>
-        <div className={`p-6 border-b ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-100'
-        }`}>
+        <div className="p-6 border-b">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -296,7 +334,6 @@ const Habits: React.FC<HabitsProps> = ({
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>Weekly Habits Tracking</h2>
             </div>
-            
             {/* Week Navigation */}
             <div className="flex items-center space-x-4">
               <button
@@ -310,39 +347,8 @@ const Habits: React.FC<HabitsProps> = ({
                 }`}
                 disabled={currentWeekOffset <= -2}
               >
-                <ArrowLeft size={16} />
                 <span className="text-sm">Previous</span>
               </button>
-              
-              <div className="text-center">
-                <div className={`text-sm font-medium ${
-                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}>
-                  {currentWeekOffset === 0 ? 'This Week' : 
-                   currentWeekOffset === -1 ? 'Last Week' : 
-                   `${Math.abs(currentWeekOffset)} weeks ago`}
-                </div>
-                <div className={`text-xs ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  {(() => {
-                    const startDate = new Date();
-                    startDate.setDate(startDate.getDate() - (6 - currentWeekOffset * 7));
-                    const endDate = new Date(startDate);
-                    endDate.setDate(startDate.getDate() + 6);
-                    
-                    return `${startDate.toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })} - ${endDate.toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}`;
-                  })()}
-                </div>
-              </div>
-              
               <button
                 onClick={() => setCurrentWeekOffset(prev => prev + 1)}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
@@ -355,12 +361,10 @@ const Habits: React.FC<HabitsProps> = ({
                 disabled={currentWeekOffset >= 2}
               >
                 <span className="text-sm">Next</span>
-                <ArrowRight size={16} />
               </button>
             </div>
           </div>
         </div>
-        
         <div className="p-6">
           {/* Weekly Calendar Grid */}
           <div className="grid grid-cols-7 gap-2 mb-6">
@@ -420,8 +424,6 @@ const Habits: React.FC<HabitsProps> = ({
               );
             })}
           </div>
-
-
         </div>
       </div>
 
@@ -480,23 +482,28 @@ const Habits: React.FC<HabitsProps> = ({
                 {selectedDay.data.habits && selectedDay.data.habits.length > 0 ? (
                   <div className="space-y-3">
                     {selectedDay.data.habits.map((habitId: string) => {
-                      const habit = habitOptions.find(h => h.id === habitId);
                       const isCompleted = selectedDay.data.completedHabits?.includes(habitId) || false;
+                      const imageSrc = habitImageMap[habitId];
+                      const label = habitOptions.find(h => h.id === habitId)?.label || habitId;
                       
                       return (
                         <div key={habitId} className="flex items-center justify-between p-3 rounded-lg border">
                           <div className="flex items-center space-x-3">
-                            {isCompleted ? (
-                              <CheckCircle2 className="text-green-500" size={20} />
-                            ) : (
-                              <Circle className="text-gray-400" size={20} />
-                            )}
+                            <div className="w-6 h-6 rounded-md overflow-hidden bg-gray-200">
+                              {imageSrc ? (
+                                <img src={imageSrc} alt={label} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Target size={14} className="text-gray-500" />
+                                </div>
+                              )}
+                            </div>
                             <span className={`font-medium ${
                               isCompleted 
                                 ? 'text-green-600 line-through' 
                                 : isDarkMode ? 'text-white' : 'text-gray-900'
                             }`}>
-                              {habit?.label}
+                              {label}
                             </span>
                           </div>
                           <span className={`text-sm ${
@@ -516,8 +523,6 @@ const Habits: React.FC<HabitsProps> = ({
                   }`}>No habits planned for this day</p>
                 )}
               </div>
-
-
             </div>
           </div>
         </div>

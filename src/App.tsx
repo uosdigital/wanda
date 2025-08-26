@@ -9,11 +9,20 @@ import Habits from './components/Habits';
 import Sidebar from './components/Sidebar';
 import FullScreenModal from './components/FullScreenModal';
 import { AppData, DailyData } from './types';
-import { initializeAppData, saveAppData, loadAppData, clearAppData } from './utils/storage';
+import { initializeAppData, saveAppData, loadAppData, clearAppData, resetToDummyData } from './utils/storage';
+import { useToast } from './components/ToastProvider';
+import Timeblocking from './components/Timeblocking';
+import Points from './components/Points';
+import { TimeBlock } from './types';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points';
+
+type AddPointsFn = (points: number, reason?: string) => void;
+
+type Category = 'priority' | 'task' | 'habit' | 'connect' | 'custom';
 
 function App() {
+  const { showToast } = useToast();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [morningFlowOpen, setMorningFlowOpen] = useState(false);
@@ -25,6 +34,7 @@ function App() {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
   });
+  const [timeblockIntent, setTimeblockIntent] = useState<{ label: string; category: Category } | null>(null);
 
   useEffect(() => {
     saveAppData(appData);
@@ -54,7 +64,12 @@ function App() {
 
   const handleResetData = () => {
     clearAppData();
-    setAppData(initializeAppData());
+    setAppData({
+      totalPoints: 0,
+      currentStreak: 0,
+      dailyData: {},
+      habits: []
+    });
   };
 
   const updateDailyData = (data: Partial<DailyData>) => {
@@ -75,51 +90,35 @@ function App() {
 
   const calculateTotalPoints = () => {
     let total = 0;
-    
-    // Calculate points from all daily data
     Object.values(appData.dailyData).forEach(dayData => {
-      // Morning flow completion: 5 points
-      if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) {
-        total += 5;
-      }
-      
-      // Evening flow completion: 5 points
-      if (dayData.eveningMood && dayData.winOfDay) {
-        total += 5;
-      }
-      
-      // Main priority completion: 50 points
-      if (dayData.completedMainTask) {
-        total += 50;
-      }
-      
-      // Additional tasks: 10 points each
-      if (dayData.completedTasks) {
-        total += dayData.completedTasks.filter(Boolean).length * 10;
-      }
-      
-      // People to message: 5 points each
-      if (dayData.completedPeople) {
-        total += dayData.completedPeople.filter(Boolean).length * 5;
-      }
-      
-      // Habits completion: 15 points each
-      if (dayData.completedHabits) {
-        total += dayData.completedHabits.length * 15;
-      }
-      
-      // Water glasses: 5 points each
-      if (dayData.waterGlasses) {
-        total += dayData.waterGlasses * 5;
+      // Morning check-in completed
+      if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) total += 10;
+      // Evening review completed (use dayDescription instead of winOfDay per current flow)
+      if (dayData.eveningMood && dayData.dayDescription) total += 10;
+      // Top priority completed
+      if (dayData.completedMainTask) total += 50;
+      // Tasks completed
+      if (dayData.completedTasks) total += dayData.completedTasks.filter(Boolean).length * 25;
+      // Connected with people
+      if (dayData.completedPeople) total += dayData.completedPeople.filter(Boolean).length * 30;
+      // Habits completed
+      if (dayData.completedHabits) total += dayData.completedHabits.length * 30;
+      // Basics (each 10 points)
+      if (dayData.basics) {
+        const { drankWater, ateHealthy, listenedToSomething, wasMindful } = dayData.basics;
+        total += (drankWater ? 10 : 0)
+          + (ateHealthy ? 10 : 0)
+          + (listenedToSomething ? 10 : 0)
+          + (wasMindful ? 10 : 0);
       }
     });
-    
     return total;
   };
 
-  const addPoints = (points: number) => {
-    // This function is kept for backward compatibility but points are now calculated automatically
-    console.log(`Points calculation is now automatic. ${points} points would have been added.`);
+  const addPoints: AddPointsFn = (points, reason) => {
+    if (points && points > 0) {
+      showToast(`+${points} points${reason ? ` — ${reason}` : ''}`);
+    }
   };
 
   const getTodaysData = (): DailyData => {
@@ -134,7 +133,30 @@ function App() {
 
   const hasCompletedEveningFlow = () => {
     const todaysData = getTodaysData();
-    return !!(todaysData.eveningMood && todaysData.winOfDay);
+    return !!(todaysData.eveningMood && todaysData.dayDescription);
+  };
+
+  const getTodaysKey = () => new Date().toDateString();
+
+  const saveTimeBlocks = (blocks: TimeBlock[]) => {
+    const key = getTodaysKey();
+    const updatedData = {
+      ...appData,
+      dailyData: {
+        ...appData.dailyData,
+        [key]: {
+          ...appData.dailyData[key],
+          timeBlocks: blocks,
+        }
+      }
+    };
+    setAppData(updatedData);
+    saveAppData(updatedData);
+  };
+
+  const triggerTimeblock = (label: string, category: Category) => {
+    setTimeblockIntent({ label, category });
+    setCurrentView('timeblocking');
   };
 
   return (
@@ -171,6 +193,7 @@ function App() {
             hasCompletedEvening={hasCompletedEveningFlow()}
             onResetData={handleResetData}
             isDarkMode={isDarkMode}
+            onTimeblock={(label: string, category: Category) => triggerTimeblock(label, category)}
           />
         )}
 
@@ -179,11 +202,12 @@ function App() {
           isOpen={morningFlowOpen}
           onClose={() => setMorningFlowOpen(false)}
           isCompleted={morningFlowCompleted}
+          isDarkMode={isDarkMode}
         >
           <MorningFlow
             onComplete={(data) => {
               updateDailyData(data);
-              addPoints(5);
+              addPoints(10, 'Morning check-in completed');
               setMorningFlowCompleted(true);
             }}
             onBack={() => setMorningFlowOpen(false)}
@@ -197,15 +221,17 @@ function App() {
           isOpen={eveningFlowOpen}
           onClose={() => setEveningFlowOpen(false)}
           isCompleted={eveningFlowCompleted}
+          isDarkMode={isDarkMode}
         >
           <EveningFlow
             onComplete={(data) => {
               updateDailyData(data);
-              addPoints(5);
+              addPoints(10, 'Evening review completed');
               setEveningFlowCompleted(true);
             }}
             onBack={() => setEveningFlowOpen(false)}
             existingData={getTodaysData()}
+            isDarkMode={isDarkMode}
           />
         </FullScreenModal>
 
@@ -223,6 +249,7 @@ function App() {
             onUpdateData={updateDailyData}
             onAddPoints={addPoints}
             isDarkMode={isDarkMode}
+            onTimeblock={(label: string, category: Category) => triggerTimeblock(label, category)}
           />
         )}
 
@@ -230,6 +257,24 @@ function App() {
           <TimerView
             onBack={() => setCurrentView('dashboard')}
             onAddPoints={addPoints}
+            isDarkMode={isDarkMode}
+          />
+        )}
+
+        {currentView === 'timeblocking' && (
+          <Timeblocking
+            isDarkMode={isDarkMode}
+            todaysDate={new Date()}
+            timeBlocks={getTodaysData().timeBlocks || []}
+            onSaveBlocks={saveTimeBlocks}
+            presetIntent={timeblockIntent}
+            onConsumeIntent={() => setTimeblockIntent(null)}
+          />
+        )}
+
+        {currentView === 'points' && (
+          <Points
+            onBack={() => setCurrentView('dashboard')}
             isDarkMode={isDarkMode}
           />
         )}

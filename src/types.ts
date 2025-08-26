@@ -1,3 +1,11 @@
+export interface TimeBlock {
+  id: string;
+  start: string; // ISO datetime
+  end: string;   // ISO datetime
+  category: 'priority' | 'task' | 'habit' | 'connect' | 'custom';
+  label: string;
+}
+
 export interface DailyData {
   sleepQuality?: number;
   bedTime?: string;
@@ -13,13 +21,28 @@ export interface DailyData {
   completedMainTask?: boolean;
   winOfDay?: string;
   obstacles?: string[];
-  eveningMood?: number;
-  completedHabits?: boolean[];
+  eveningMood?: string | number;
+  completedHabits?: string[];
+  habitDetails?: Record<string, string>;
   focusBlocks?: number;
   goodStuff?: string[];
   habits?: string[];
   goodDayVision?: string;
+  dayDescription?: string;
+  waterGlasses?: number;
+  basics?: {
+    drankWater?: boolean;
+    ateHealthy?: boolean;
+    listenedToSomething?: boolean;
+    wasMindful?: boolean;
+  };
   date?: string;
+  timeBlocks?: TimeBlock[];
+  meetings?: Array<{
+    title: string;
+    startTime: string;
+    endTime: string;
+  }>;
 }
 
 export interface AppData {

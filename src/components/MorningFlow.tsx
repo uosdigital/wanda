@@ -1,196 +1,38 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, ArrowRight, Sun, Clock, Heart, Target, Users, Star, Check, X, ChevronUp, ChevronDown } from 'lucide-react';
-import { DailyData } from '../types';
+import { ArrowLeft, ArrowRight, Sun, Clock, Heart, Target, Users, Star, Check, X, ChevronUp, ChevronDown, BookOpen, PenTool, Guitar } from 'lucide-react';
+import { DailyData, TimeBlock } from '../types';
 
-interface TimePickerProps {
+interface TimeInputProps {
   value: string | undefined;
   onChange: (time: string) => void;
   placeholder?: string;
   isDarkMode?: boolean;
 }
 
-const TimePicker: React.FC<TimePickerProps> = ({ value, onChange, placeholder, isDarkMode = false }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedHour, setSelectedHour] = useState(() => {
-    if (value) {
-      const [hour] = value.split(':');
-      return parseInt(hour, 10);
+const TimeInput: React.FC<TimeInputProps> = ({ value, onChange, placeholder, isDarkMode = false }) => {
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const timeValue = e.target.value;
+    // Allow partial input while typing, but validate final format
+    if (timeValue === '' || /^([0-9]|0[0-9]|1[0-9]|2[0-3])?(:[0-5]?[0-9]?)?$/.test(timeValue)) {
+      onChange(timeValue);
     }
-    return 12;
-  });
-  const [selectedMinute, setSelectedMinute] = useState(() => {
-    if (value) {
-      const [, minute] = value.split(':');
-      return parseInt(minute, 10);
-    }
-    return 0;
-  });
-  const [isAM, setIsAM] = useState(() => {
-    if (value) {
-      const [hour] = value.split(':');
-      return parseInt(hour, 10) < 12;
-    }
-    return true;
-  });
-
-  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
-  const minutes = Array.from({ length: 60 }, (_, i) => i);
-
-  const formatTime = (hour: number, minute: number, am: boolean) => {
-    const hour24 = am ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
-    return `${hour24.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
   };
-
-  const handleTimeChange = (hour: number, minute: number, am: boolean) => {
-    setSelectedHour(hour);
-    setSelectedMinute(minute);
-    setIsAM(am);
-    const timeString = formatTime(hour, minute, am);
-    onChange(timeString);
-  };
-
-  const displayValue = value ? 
-    `${selectedHour}:${selectedMinute.toString().padStart(2, '0')} ${isAM ? 'AM' : 'PM'}` : 
-    placeholder || 'Select time';
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full p-6 border-2 rounded-xl focus:border-blue-500 focus:outline-none text-xl text-center shadow-lg transition-all duration-200 flex items-center justify-between ${
-          isDarkMode
-            ? 'border-gray-600 bg-gray-700 hover:border-blue-400'
-            : 'border-gray-200 bg-white hover:border-blue-300'
-        }`}
-      >
-        <span className={value 
-          ? (isDarkMode ? 'text-white' : 'text-gray-900') 
-          : (isDarkMode ? 'text-gray-400' : 'text-gray-500')
-        }>{displayValue}</span>
-        <Clock size={20} className={isDarkMode ? 'text-gray-400' : 'text-gray-400'} />
-      </button>
-
-      {isOpen && (
-        <div className={`absolute top-full left-0 right-0 mt-2 border-2 rounded-xl shadow-lg z-10 p-4 ${
-          isDarkMode
-            ? 'bg-gray-700 border-gray-600'
-            : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex items-center justify-center space-x-4">
-            {/* Hour Selector */}
-            <div className="flex flex-col items-center">
-              <button
-                onClick={() => {
-                  const newHour = selectedHour === 12 ? 1 : selectedHour + 1;
-                  handleTimeChange(newHour, selectedMinute, isAM);
-                }}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
-                }`}
-              >
-                <ChevronUp size={20} className={isDarkMode ? 'text-gray-300' : 'text-gray-600'} />
-              </button>
-              <div className={`text-3xl font-bold py-2 min-w-[60px] text-center ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {selectedHour}
-              </div>
-              <button
-                onClick={() => {
-                  const newHour = selectedHour === 1 ? 12 : selectedHour - 1;
-                  handleTimeChange(newHour, selectedMinute, isAM);
-                }}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
-                }`}
-              >
-                <ChevronDown size={20} className={isDarkMode ? 'text-gray-300' : 'text-gray-600'} />
-              </button>
-              <div className={`text-xs mt-1 ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>Hour</div>
-            </div>
-
-            <div className={`text-3xl font-bold ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-400'
-            }`}>:</div>
-
-            {/* Minute Selector */}
-            <div className="flex flex-col items-center">
-              <button
-                onClick={() => {
-                  const newMinute = selectedMinute === 59 ? 0 : selectedMinute + 1;
-                  handleTimeChange(selectedHour, newMinute, isAM);
-                }}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
-                }`}
-              >
-                <ChevronUp size={20} className={isDarkMode ? 'text-gray-300' : 'text-gray-600'} />
-              </button>
-              <div className={`text-3xl font-bold py-2 min-w-[60px] text-center ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {selectedMinute.toString().padStart(2, '0')}
-              </div>
-              <button
-                onClick={() => {
-                  const newMinute = selectedMinute === 0 ? 59 : selectedMinute - 1;
-                  handleTimeChange(selectedHour, newMinute, isAM);
-                }}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
-                }`}
-              >
-                <ChevronDown size={20} className={isDarkMode ? 'text-gray-300' : 'text-gray-600'} />
-              </button>
-              <div className={`text-xs mt-1 ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>Minute</div>
-            </div>
-
-            {/* AM/PM Toggle */}
-            <div className="flex flex-col items-center ml-4">
-              <button
-                onClick={() => handleTimeChange(selectedHour, selectedMinute, true)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isAM 
-                    ? 'bg-blue-500 text-white' 
-                    : isDarkMode 
-                      ? 'bg-gray-600 text-gray-300 hover:bg-gray-500' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                AM
-              </button>
-              <button
-                onClick={() => handleTimeChange(selectedHour, selectedMinute, false)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors mt-2 ${
-                  !isAM 
-                    ? 'bg-blue-500 text-white' 
-                    : isDarkMode 
-                      ? 'bg-gray-600 text-gray-300 hover:bg-gray-500' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                PM
-              </button>
-            </div>
-          </div>
-
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <input
+      type="text"
+      value={value || ''}
+      onChange={handleTimeChange}
+      placeholder={placeholder || 'HH:MM'}
+      className={`w-full p-3 border rounded-lg focus:border-blue-500 focus:outline-none text-center ${
+        isDarkMode 
+          ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400' 
+          : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+      }`}
+    />
   );
 };
+
 
 interface MorningFlowProps {
   onComplete: (data: DailyData) => void;
@@ -213,15 +55,16 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
     additionalTasks: existingData.additionalTasks || ['', ''],
     peopleToMessage: existingData.peopleToMessage || [],
     habits: existingData.habits || [],
-    goodDayVision: existingData.goodDayVision || ''
+    goodDayVision: existingData.goodDayVision || '',
+    meetings: existingData.meetings || []
   });
 
-  const totalSteps = 13;
+  const totalSteps = 14;
 
   const habitOptions = [
-    { id: 'guitar', label: 'Guitar', icon: Star },
-    { id: 'write', label: 'Write', icon: Star },
-    { id: 'read', label: 'Read', icon: Star },
+    { id: 'guitar', label: 'Guitar', icon: Guitar },
+    { id: 'write', label: 'Write', icon: PenTool },
+    { id: 'read', label: 'Read', icon: BookOpen },
     { id: 'exercise', label: 'Exercise', icon: Target },
     { id: 'socialise', label: 'Socialise', icon: Users }
   ];
@@ -284,12 +127,36 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
         setIsAnimating(false);
       }, 300);
     } else {
+      // Convert meetings to timeblocks
+      const meetingTimeBlocks: TimeBlock[] = (formData.meetings || [])
+        .filter(meeting => meeting.title.trim() && meeting.startTime && meeting.endTime)
+        .map((meeting, index) => {
+          const today = new Date();
+          const [startHour, startMinute] = meeting.startTime.split(':').map(Number);
+          const [endHour, endMinute] = meeting.endTime.split(':').map(Number);
+          
+          const startTime = new Date(today);
+          startTime.setHours(startHour, startMinute, 0, 0);
+          
+          const endTime = new Date(today);
+          endTime.setHours(endHour, endMinute, 0, 0);
+          
+          return {
+            id: `meeting-${index}-${Date.now()}`,
+            start: startTime.toISOString(),
+            end: endTime.toISOString(),
+            category: 'custom' as const,
+            label: meeting.title
+          };
+        });
+
       onComplete({
         ...formData,
         additionalTasks: formData.additionalTasks?.filter(task => task.trim() !== ''),
         peopleToMessage: formData.peopleToMessage?.filter(person => person.trim() !== ''),
         habits: formData.habits || [],
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        timeBlocks: meetingTimeBlocks
       });
     }
   };
@@ -335,8 +202,9 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
       case 9: return true; // Optional tasks
       case 10: return true; // Optional people
       case 11: return true; // Optional good stuff
-      case 12: return formData.goodDayVision?.trim() !== '';
-      case 13: return true; // Wrap-up message
+      case 12: return true; // Meetings are optional
+      case 13: return formData.goodDayVision?.trim() !== '';
+      case 14: return true; // Completion step
       default: return false;
     }
   };
@@ -425,10 +293,10 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
               What time did you go to bed?
             </h3>
             <div className="max-w-md mx-auto animate-slide-up" style={{animationDelay: '0.2s'}}>
-              <TimePicker
+              <TimeInput
                 value={formData.bedTime}
                 onChange={(time) => handleTimeInput('bedTime', time)}
-                placeholder="Select bedtime"
+                placeholder="Bedtime (HH:MM)"
                 isDarkMode={isDarkMode}
               />
             </div>
@@ -444,10 +312,10 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
               What time did you wake up?
             </h3>
             <div className="max-w-md mx-auto animate-slide-up" style={{animationDelay: '0.2s'}}>
-              <TimePicker
+              <TimeInput
                 value={formData.wakeTime}
                 onChange={(time) => handleTimeInput('wakeTime', time)}
-                placeholder="Select wake time"
+                placeholder="Wake time (HH:MM)"
                 isDarkMode={isDarkMode}
               />
             </div>
@@ -648,18 +516,96 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
                 );
               })}
             </div>
-            <div className="text-center">
-              <button
-                onClick={handleHabitsComplete}
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
-              >
-                Continue
-              </button>
-            </div>
           </div>
         );
 
       case 12:
+        return (
+          <div className="animate-fade-in">
+            <h3 className={`text-3xl font-bold mb-8 text-center animate-slide-up ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              What meetings and appointments do you have today?
+            </h3>
+            <div className="max-w-2xl mx-auto animate-slide-up" style={{animationDelay: '0.2s'}}>
+              <div className="space-y-4">
+                {(formData.meetings || []).map((meeting, index) => (
+                  <div key={index} className={`p-4 rounded-xl border-2 ${
+                    isDarkMode 
+                      ? 'border-gray-600 bg-gray-700' 
+                      : 'border-gray-200 bg-white'
+                  }`}>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <input
+                        type="text"
+                        value={meeting.title}
+                        onChange={(e) => {
+                          const newMeetings = [...(formData.meetings || [])];
+                          newMeetings[index].title = e.target.value;
+                          setFormData({ ...formData, meetings: newMeetings });
+                        }}
+                        placeholder="Meeting title"
+                        className={`p-3 border rounded-lg focus:border-blue-500 focus:outline-none md:col-span-2 ${
+                          isDarkMode 
+                            ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400' 
+                            : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+                        }`}
+                      />
+                      <TimeInput
+                        value={meeting.startTime}
+                        onChange={(time) => {
+                          const newMeetings = [...(formData.meetings || [])];
+                          newMeetings[index].startTime = time;
+                          setFormData({ ...formData, meetings: newMeetings });
+                        }}
+                        placeholder="Start time"
+                        isDarkMode={isDarkMode}
+                      />
+                      <TimeInput
+                        value={meeting.endTime}
+                        onChange={(time) => {
+                          const newMeetings = [...(formData.meetings || [])];
+                          newMeetings[index].endTime = time;
+                          setFormData({ ...formData, meetings: newMeetings });
+                        }}
+                        placeholder="End time"
+                        isDarkMode={isDarkMode}
+                      />
+                    </div>
+                    <button
+                      onClick={() => {
+                        const newMeetings = (formData.meetings || []).filter((_, i) => i !== index);
+                        setFormData({ ...formData, meetings: newMeetings });
+                      }}
+                      className={`mt-2 px-3 py-1 rounded-lg text-sm ${
+                        isDarkMode 
+                          ? 'bg-red-900/30 text-red-200 hover:bg-red-900/40' 
+                          : 'bg-red-50 text-red-700 hover:bg-red-100'
+                      }`}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    const newMeetings = [...(formData.meetings || []), { title: '', startTime: '', endTime: '' }];
+                    setFormData({ ...formData, meetings: newMeetings });
+                  }}
+                  className={`w-full p-4 border-2 border-dashed rounded-xl transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
+                      : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  + Add Meeting
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 13:
         return (
           <div className="animate-fade-in">
             <h3 className={`text-3xl font-bold mb-8 text-center animate-slide-up ${
@@ -682,7 +628,7 @@ const MorningFlow: React.FC<MorningFlowProps> = ({ onComplete, onBack, existingD
           </div>
         );
 
-      case 13:
+      case 14:
         return (
           <div className="text-center animate-fade-in">
             <div className="w-24 h-24 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">

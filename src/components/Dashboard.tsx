@@ -1,7 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, CheckCircle2, Circle, Users, Play, Pause, RotateCcw, Trophy, Flame, RefreshCw, GlassWater } from 'lucide-react';
-import { AppData, DailyData } from '../types';
+import { Sun, Moon, CheckCircle2, Circle, Users, Play, Pause, RotateCcw, Trophy, Flame, RefreshCw, GlassWater, Target, TrendingUp, ClipboardList, Lightbulb, Clock, Calendar, Heart, Headphones, Brain } from 'lucide-react';
+import { AppData, DailyData, TimeBlock } from '../types';
 import { clearAppData } from '../utils/storage';
+import { useToast } from './ToastProvider';
+import guitarImg from '../../images/guitar.jpg';
+import writeImg from '../../images/write.jpg';
+import socialiseImg from '../../images/socialise.jpg';
+import runImg from '../../images/run.jpg';
+import readImg from '../../images/read.jpg';
+import priorityImg from '../../images/priority.jpg';
+import tasksImg from '../../images/tasks.jpg';
+import connectImg from '../../images/connect.jpg';
+import basicsImg from '../../images/basics.jpg';
+import meetingsImg from '../../images/meetings.jpg';
+import visionImg from '../../images/vision.jpg';
+import healthyImg from '../../images/healthy.jpg';
+import listenImg from '../../images/listen.jpg';
+import mindfulImg from '../../images/mindful.jpg';
+
+  // Map habit IDs to custom images for dashboard
+  const habitImageMap: { [key: string]: string } = {
+    guitar: guitarImg,
+    write: writeImg,
+    socialise: socialiseImg,
+    exercise: runImg,
+    read: readImg,
+  };
 
 interface DashboardProps {
   appData: AppData;
@@ -9,11 +33,12 @@ interface DashboardProps {
   onStartMorning: () => void;
   onStartEvening: () => void;
   onUpdateData: (data: Partial<DailyData>) => void;
-  onAddPoints: (points: number) => void;
+  onAddPoints: (points: number, reason?: string) => void;
   hasCompletedMorning: boolean;
   hasCompletedEvening: boolean;
   onResetData: () => void;
   isDarkMode: boolean;
+  onTimeblock?: (label: string, category: 'priority' | 'task' | 'habit' | 'connect' | 'custom') => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -26,26 +51,45 @@ const Dashboard: React.FC<DashboardProps> = ({
   hasCompletedMorning,
   hasCompletedEvening,
   onResetData,
-  isDarkMode
+  isDarkMode,
+  onTimeblock
 }) => {
+  const { showToast } = useToast();
   const [showPointsNotification, setShowPointsNotification] = useState(false);
   const [pointsEarned, setPointsEarned] = useState(0);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
+
+  // Map habit IDs to custom images for dashboard
+  const habitImageMap: { [key: string]: string } = {
+    guitar: guitarImg,
+    write: writeImg,
+    socialise: socialiseImg,
+    exercise: runImg,
+    read: readImg,
+  };
+
+  const todaysBlocks: TimeBlock[] = todaysData.timeBlocks || [];
+  const formatRange = (startIso: string, endIso: string) => {
+    const s = new Date(startIso);
+    const e = new Date(endIso);
+    const fmt = (d: Date) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${fmt(s)}–${fmt(e)}`;
+  };
 
   const calculateTotalPoints = () => {
     let total = 0;
     
     // Calculate points from all daily data
     Object.values(appData.dailyData).forEach(dayData => {
-      // Morning flow completion: 5 points
+      // Morning flow completion: 10 points
       if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) {
-        total += 5;
+        total += 10;
       }
       
-      // Evening flow completion: 5 points
-      if (dayData.eveningMood && dayData.winOfDay) {
-        total += 5;
+      // Evening flow completion: 10 points (use dayDescription per flow)
+      if (dayData.eveningMood && dayData.dayDescription) {
+        total += 10;
       }
       
       // Main priority completion: 50 points
@@ -53,24 +97,28 @@ const Dashboard: React.FC<DashboardProps> = ({
         total += 50;
       }
       
-      // Additional tasks: 10 points each
+      // Additional tasks: 25 points each
       if (dayData.completedTasks) {
-        total += dayData.completedTasks.filter(Boolean).length * 10;
+        total += dayData.completedTasks.filter(Boolean).length * 25;
       }
       
-      // People to message: 5 points each
+      // People to message: 30 points each
       if (dayData.completedPeople) {
-        total += dayData.completedPeople.filter(Boolean).length * 5;
+        total += dayData.completedPeople.filter(Boolean).length * 30;
       }
       
-      // Habits completion: 15 points each
+      // Habits completion: 30 points each
       if (dayData.completedHabits) {
-        total += dayData.completedHabits.length * 15;
+        total += dayData.completedHabits.length * 30;
       }
       
-      // Water glasses: 5 points each
-      if (dayData.waterGlasses) {
-        total += dayData.waterGlasses * 5;
+      // Basics: each 10 points
+      if (dayData.basics) {
+        const { drankWater, ateHealthy, listenedToSomething, wasMindful } = dayData.basics;
+        total += (drankWater ? 10 : 0)
+          + (ateHealthy ? 10 : 0)
+          + (listenedToSomething ? 10 : 0)
+          + (wasMindful ? 10 : 0);
       }
     });
     
@@ -78,7 +126,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const addPointsWithNotification = (points: number) => {
-    onAddPoints(points);
+    onAddPoints(points, points === 50 ? 'Priority task completed' : points === 10 ? 'Task completed' : '+points');
     setPointsEarned(points);
     setShowPointsNotification(true);
     setTimeout(() => setShowPointsNotification(false), 2000);
@@ -89,7 +137,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     newCompleted[index] = !newCompleted[index];
     
     if (newCompleted[index]) {
-      onAddPoints(10);
+      onAddPoints(25, 'Task completed');
     }
     
     onUpdateData({ completedTasks: newCompleted });
@@ -98,7 +146,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const toggleMainTask = () => {
     const newCompleted = !todaysData.completedMainTask;
     if (newCompleted) {
-      addPointsWithNotification(50);
+      onAddPoints(50, 'Priority task completed');
     }
     onUpdateData({ completedMainTask: newCompleted });
   };
@@ -109,7 +157,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     newCompleted[index] = !newCompleted[index];
     
     if (newCompleted[index]) {
-      onAddPoints(5);
+      onAddPoints(30, 'Connected with someone');
     }
     
     onUpdateData({ completedPeople: newCompleted });
@@ -258,9 +306,9 @@ const Dashboard: React.FC<DashboardProps> = ({
           <h2 className={`text-2xl font-bold ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
-            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}! 
+            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}!
           </h2>
-          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Ready to make today productive?</p>
+          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Here is how today is looking...</p>
         </div>
 
         {/* Flow Buttons */}
@@ -292,9 +340,20 @@ const Dashboard: React.FC<DashboardProps> = ({
           </button>
 
           <button
-            onClick={onResetData}
+            onClick={() => showToast('Test toast! This is working!', 3000)}
             className={`flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-105 ${
               isDarkMode 
+                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <span>Test Toast</span>
+          </button>
+
+          <button
+            onClick={onResetData}
+            className={`flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-105 ${
+              isDarkMode
                 ? 'text-gray-300 hover:bg-gray-700' 
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
@@ -314,11 +373,13 @@ const Dashboard: React.FC<DashboardProps> = ({
               ? 'bg-gray-800/80 border-gray-700' 
               : 'bg-white/80 border-gray-100'
           }`} style={{animationDelay: '0.05s'}}>
-            <h3 className={`text-lg font-semibold mb-4 flex items-center space-x-2 ${
+            <h3 className={`text-lg font-semibold mb-4 flex items-center space-x-3 ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>
-              <span>🌟</span>
-                              <span>Vision</span>
+              <div className="w-8 h-8 rounded-lg overflow-hidden">
+                <img src={visionImg} alt="Vision" className="w-full h-full object-cover" />
+              </div>
+              <span>Vision</span>
             </h3>
             <div className={`p-4 rounded-xl ${
               isDarkMode 
@@ -342,11 +403,27 @@ const Dashboard: React.FC<DashboardProps> = ({
                 ? 'bg-gray-800/80 border-gray-700' 
                 : 'bg-white/80 border-gray-100'
             }`} style={{animationDelay: '0.1s'}}>
-              <h3 className={`text-lg font-semibold mb-4 ${
+              <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>🎯 Priority</h3>
+              }`}>
+                <span className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden">
+                    <img src={priorityImg} alt="Priority" className="w-full h-full object-cover" />
+                  </div>
+                  <span>Priority</span>
+                </span>
+                {onTimeblock && (
+                  <button
+                    onClick={() => onTimeblock(todaysData.mainPriority || 'Priority', 'priority')}
+                    className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  >
+                    <Clock size={12} />
+                    <span>Timeblock</span>
+                  </button>
+                )}
+              </h3>
               <div 
-                className={`flex items-center space-x-3 p-4 rounded-xl cursor-pointer transition-colors ${
+                className={`flex items-center p-4 rounded-xl transition-colors cursor-pointer ${
                   isDarkMode 
                     ? 'bg-gray-700 hover:bg-gray-600' 
                     : 'bg-blue-50 hover:bg-blue-100'
@@ -354,127 +431,205 @@ const Dashboard: React.FC<DashboardProps> = ({
                 onClick={toggleMainTask}
               >
                 {todaysData.completedMainTask ? (
-                  <CheckCircle2 className="text-green-500 flex-shrink-0" size={24} />
+                  <CheckCircle2 className="text-green-500 flex-shrink-0 mr-3" size={20} />
                 ) : (
-                  <Circle className="text-gray-400 flex-shrink-0" size={24} />
+                  <Circle className="text-gray-400 flex-shrink-0 mr-3" size={20} />
                 )}
-                <span className={`font-medium ${
+                <span className={`font-medium flex-1 min-w-0 truncate ${
                   todaysData.completedMainTask 
                     ? 'text-green-400 line-through' 
                     : isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
                   {todaysData.mainPriority}
                 </span>
+                {/* Priority timeblocks to the right, label-exact matches only */}
+                <div className="ml-3 flex items-center gap-2">
+                  {todaysBlocks.filter(b => b.label === (todaysData.mainPriority || '')).map((b, i) => (
+                    <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] ${isDarkMode ? 'bg-purple-900/30 text-purple-200' : 'bg-purple-100 text-purple-700'}`}>
+                      <Clock size={10} className="mr-1" />
+                      {formatRange(b.start, b.end)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tiny first step tip */}
+              <div className={`mt-3 px-3 py-2 rounded-lg flex items-start space-x-2 ${
+                isDarkMode ? 'bg-gray-700/60' : 'bg-purple-50'
+              }`}>
+                <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
+                  isDarkMode ? 'bg-purple-900/40' : 'bg-purple-100'
+                }`}>
+                  <Lightbulb size={14} className={isDarkMode ? 'text-purple-300' : 'text-purple-600'} />
+                </div>
+                <div className="text-sm">
+                  {todaysData.firstStep ? (
+                    <div className="flex items-baseline space-x-2">
+                      <span className={isDarkMode ? 'text-purple-200 font-medium' : 'text-purple-900 font-medium'}>tiny task:</span>
+                      <span className={isDarkMode ? 'text-purple-200/80' : 'text-purple-800'}>{todaysData.firstStep}</span>
+                    </div>
+                  ) : (
+                    <div className={isDarkMode ? 'text-purple-200/90' : 'text-purple-800'}>
+                      What's the very first tiny step to get it started?
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
 
                           {/* Key Tasks */}
-          {todaysData.additionalTasks && todaysData.additionalTasks.length > 0 && (
+          {Array.isArray(todaysData.additionalTasks) && todaysData.additionalTasks.length > 0 && (
             <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
               isDarkMode 
                 ? 'bg-gray-800/80 border-gray-700' 
                 : 'bg-white/80 border-gray-100'
             }`} style={{animationDelay: '0.2s'}}>
-              <h3 className={`text-lg font-semibold mb-4 ${
+              <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>📋 Tasks</h3>
-              <div className="space-y-3">
-                {todaysData.additionalTasks.map((task, index) => (
-                  <div 
-                    key={index}
-                    className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-colors ${
-                      isDarkMode 
-                        ? 'bg-gray-700 hover:bg-gray-600' 
-                        : 'bg-gray-50 hover:bg-gray-100'
-                    }`}
-                    onClick={() => toggleTask(index)}
-                  >
-                    {(todaysData.completedTasks || [])[index] ? (
-                      <CheckCircle2 className="text-green-500 flex-shrink-0" size={20} />
-                    ) : (
-                      <Circle className="text-gray-400 flex-shrink-0" size={20} />
-                    )}
-                    <span className={`${
-                      (todaysData.completedTasks || [])[index] 
-                        ? 'text-green-400 line-through' 
-                        : isDarkMode ? 'text-gray-200' : 'text-gray-700'
-                    }`}>
-                      {task}
-                    </span>
+              }`}>
+                <span className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden">
+                    <img src={tasksImg} alt="Tasks" className="w-full h-full object-cover" />
                   </div>
-                ))}
-                <button
-                  onClick={addNewTask}
-                  className={`w-full p-3 rounded-xl border-2 border-dashed transition-colors ${
-                    isDarkMode 
-                      ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300 hover:bg-gray-700' 
-                      : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  + Add Task
-                </button>
+                  <span>Tasks</span>
+                </span>
+              </h3>
+              <div className="space-y-3">
+                {(Array.isArray(todaysData.additionalTasks) ? todaysData.additionalTasks : []).map((task, index) => {
+                  const taskBlocks = todaysBlocks.filter(b => b.label === task);
+                  return (
+                    <div 
+                      key={index}
+                      className={`flex items-center p-3 rounded-xl cursor-pointer transition-colors ${
+                        isDarkMode 
+                          ? 'bg-gray-700 hover:bg-gray-600' 
+                          : 'bg-gray-50 hover:bg-gray-100'
+                      }`}
+                      onClick={() => toggleTask(index)}
+                    >
+                      {(todaysData.completedTasks || [])[index] ? (
+                        <CheckCircle2 className="text-green-500 flex-shrink-0 mr-2" size={20} />
+                      ) : (
+                        <Circle className="text-gray-400 flex-shrink-0 mr-2" size={20} />
+                      )}
+                      <span className={`flex-1 min-w-0 truncate ${
+                        (todaysData.completedTasks || [])[index] 
+                          ? 'text-green-400 line-through' 
+                          : isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                      }`}>
+                        {task}
+                      </span>
+                      {/* Right-side time badges and per-item timeblock */}
+                      <div className="ml-3 flex items-center gap-2">
+                        {taskBlocks.map((b, i) => (
+                          <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] ${isDarkMode ? 'bg-indigo-900/30 text-indigo-200' : 'bg-indigo-100 text-indigo-700'}`}>
+                            <Clock size={10} className="mr-1" />
+                            {formatRange(b.start, b.end)}
+                          </span>
+                        ))}
+                        {onTimeblock && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onTimeblock(task, 'task'); }}
+                            className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                          >
+                            <Clock size={12} />
+                            <span>Timeblock</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
-                          {/* Connect */}
-          {todaysData.peopleToMessage && todaysData.peopleToMessage.length > 0 && (
+          {/* Connect */}
+          {Array.isArray(todaysData.peopleToMessage) && todaysData.peopleToMessage.length > 0 && (
             <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
               isDarkMode 
                 ? 'bg-gray-800/80 border-gray-700' 
                 : 'bg-white/80 border-gray-100'
             }`} style={{animationDelay: '0.3s'}}>
-              <h3 className={`text-lg font-semibold mb-4 flex items-center space-x-2 ${
+              <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
-                <Users size={20} />
-                <span>Connect</span>
+                <span className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden">
+                    <img src={connectImg} alt="Connect" className="w-full h-full object-cover" />
+                  </div>
+                  <span>Connect</span>
+                </span>
               </h3>
               <div className="space-y-3">
-                {todaysData.peopleToMessage.map((person, index) => (
-                  <div 
-                    key={index}
-                    className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-colors ${
-                      isDarkMode 
-                        ? 'bg-gray-700 hover:bg-gray-600' 
-                        : 'bg-gray-50 hover:bg-gray-100'
-                    }`}
-                    onClick={() => togglePerson(index)}
-                  >
-                    {(todaysData.completedPeople || [])[index] ? (
-                      <CheckCircle2 className="text-green-500 flex-shrink-0" size={20} />
-                    ) : (
-                      <Circle className="text-gray-400 flex-shrink-0" size={20} />
-                    )}
-                    <span className={`${
-                      (todaysData.completedPeople || [])[index] 
-                        ? 'text-green-600 line-through' 
-                        : isDarkMode ? 'text-gray-200' : 'text-gray-700'
-                    }`}>
-                      {person}
-                    </span>
-                  </div>
-                ))}
+                {(Array.isArray(todaysData.peopleToMessage) ? todaysData.peopleToMessage : []).map((person, index) => {
+                  const connectBlocks = todaysBlocks.filter(b => b.label === person);
+                  return (
+                    <div 
+                      key={index}
+                      className={`flex items-center p-3 rounded-xl cursor-pointer transition-colors ${
+                        isDarkMode 
+                          ? 'bg-gray-700 hover:bg-gray-600' 
+                          : 'bg-gray-50 hover:bg-gray-100'
+                      }`}
+                      onClick={() => togglePerson(index)}
+                    >
+                      {(todaysData.completedPeople || [])[index] ? (
+                        <CheckCircle2 className="text-green-500 flex-shrink-0 mr-2" size={20} />
+                      ) : (
+                        <Circle className="text-gray-400 flex-shrink-0 mr-2" size={20} />
+                      )}
+                      <span className={`flex-1 min-w-0 truncate ${
+                        (todaysData.completedPeople || [])[index] 
+                          ? 'text-green-600 line-through' 
+                          : isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                      }`}>
+                        {person}
+                      </span>
+                      <div className="ml-3 flex items-center gap-2">
+                        {connectBlocks.map((b, i) => (
+                          <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] ${isDarkMode ? 'bg-orange-900/30 text-orange-200' : 'bg-orange-100 text-orange-700'}`}>
+                            <Clock size={10} className="mr-1" />
+                            {formatRange(b.start, b.end)}
+                          </span>
+                        ))}
+                        {onTimeblock && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onTimeblock(person, 'connect'); }}
+                            className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                          >
+                            <Clock size={12} />
+                            <span>Timeblock</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
-                      {/* Habits */}
-          {todaysData.habits && todaysData.habits.length > 0 && (
+          {/* Habits */}
+          {Array.isArray(todaysData.habits) && todaysData.habits.length > 0 && (
             <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
               isDarkMode 
                 ? 'bg-gray-800/80 border-gray-700' 
                 : 'bg-white/80 border-gray-100'
             }`} style={{animationDelay: '0.35s'}}>
-              <h3 className={`text-lg font-semibold mb-4 flex items-center space-x-2 ${
+              <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
-                <span>🎯</span>
-                <span>Habits</span>
+                <span className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden">
+                    <img src={guitarImg} alt="Habits" className="w-full h-full object-cover" />
+                  </div>
+                  <span>Habits</span>
+                </span>
               </h3>
               <div className="space-y-3">
-                {todaysData.habits.map((habitId, index) => {
+                {(Array.isArray(todaysData.habits) ? todaysData.habits : []).map((habitId, index) => {
                   const habitLabels: { [key: string]: string } = {
                     'guitar': 'Guitar',
                     'write': 'Write',
@@ -483,12 +638,12 @@ const Dashboard: React.FC<DashboardProps> = ({
                     'socialise': 'Socialise'
                   };
                   const habitLabel = habitLabels[habitId] || habitId;
+                  const habitBlocks = todaysBlocks.filter(b => b.label === habitLabel);
                   const isCompleted = todaysData.completedHabits?.includes(habitId) || false;
-                  
                   return (
                     <div 
                       key={habitId}
-                      className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-colors ${
+                      className={`flex items-center p-3 rounded-xl cursor-pointer transition-colors ${
                         isDarkMode 
                           ? 'bg-gray-700 hover:bg-gray-600' 
                           : 'bg-gray-50 hover:bg-gray-100'
@@ -498,26 +653,50 @@ const Dashboard: React.FC<DashboardProps> = ({
                         const newCompletedHabits = isCompleted
                           ? completedHabits.filter(id => id !== habitId)
                           : [...completedHabits, habitId];
-                        
                         if (!isCompleted) {
-                          onAddPoints(15); // Award points for completing habits
+                          onAddPoints(30, 'Habit completed');
                         }
-                        
                         onUpdateData({ completedHabits: newCompletedHabits });
                       }}
                     >
                       {isCompleted ? (
-                        <CheckCircle2 className="text-green-500 flex-shrink-0" size={20} />
+                        <CheckCircle2 className="text-green-500 flex-shrink-0 mr-2" size={20} />
                       ) : (
-                        <Circle className="text-gray-400 flex-shrink-0" size={20} />
+                        <Circle className="text-gray-400 flex-shrink-0 mr-2" size={20} />
                       )}
-                      <span className={`${
+                      <div className="w-6 h-6 rounded-md overflow-hidden bg-gray-200 mr-3">
+                        {habitImageMap[habitId] ? (
+                          <img src={habitImageMap[habitId]} alt={habitLabel} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Target size={14} className="text-gray-500" />
+                          </div>
+                        )}
+                      </div>
+                      <span className={`flex-1 min-w-0 truncate ${
                         isCompleted 
                           ? 'text-green-600 line-through' 
                           : isDarkMode ? 'text-gray-200' : 'text-gray-700'
                       }`}>
                         {habitLabel}
                       </span>
+                      <div className="ml-3 flex items-center gap-2">
+                        {habitBlocks.map((b, i) => (
+                          <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] ${isDarkMode ? 'bg-teal-900/30 text-teal-200' : 'bg-teal-100 text-teal-700'}`}>
+                            <Clock size={10} className="mr-1" />
+                            {formatRange(b.start, b.end)}
+                          </span>
+                        ))}
+                        {onTimeblock && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onTimeblock(habitLabel, 'habit'); }}
+                            className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                          >
+                            <Clock size={12} />
+                            <span>Timeblock</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -525,9 +704,66 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           )}
 
+          {/* Meetings and Appointments */}
+          {Array.isArray(todaysData.meetings) && todaysData.meetings.length > 0 && (
+            <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
+              isDarkMode 
+                ? 'bg-gray-800/80 border-gray-700' 
+                : 'bg-white/80 border-gray-100'
+            }`} style={{animationDelay: '0.4s'}}>
+              <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                <span className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden">
+                    <img src={meetingsImg} alt="Meetings" className="w-full h-full object-cover" />
+                  </div>
+                  <span>Meetings & Appointments</span>
+                </span>
+              </h3>
+              <div className="space-y-3">
+                {todaysData.meetings.map((meeting, index) => (
+                  <div 
+                    key={index}
+                    className={`flex items-center p-3 rounded-xl ${
+                      isDarkMode 
+                        ? 'bg-gray-700' 
+                        : 'bg-gray-50'
+                    }`}
+                  >
+                    <div className="w-6 h-6 rounded-md overflow-hidden bg-blue-200 mr-3 flex items-center justify-center">
+                      <Calendar size={14} className="text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className={`font-medium truncate ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                      }`}>
+                        {meeting.title}
+                      </div>
+                      <div className={`text-sm truncate ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        {meeting.startTime} - {meeting.endTime}
+                      </div>
+                    </div>
+                    {onTimeblock && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onTimeblock(meeting.title, 'custom'); }}
+                        className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      >
+                        <Clock size={12} />
+                        <span>Timeblock</span>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Water Tracker and Today's Status - 2 Column Layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Water Tracker */}
+            {/* Basics */}
             <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
               isDarkMode 
                 ? 'bg-gray-800/80 border-gray-700' 
@@ -536,90 +772,57 @@ const Dashboard: React.FC<DashboardProps> = ({
               <h3 className={`text-lg font-semibold mb-4 flex items-center space-x-2 ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
-                                  <GlassWater className="text-blue-500" size={20} />
-                <span>Water Intake</span>
+                <div className="w-8 h-8 rounded-lg overflow-hidden">
+                  <img src={basicsImg} alt="Basics" className="w-full h-full object-cover" />
+                </div>
+                <span>Basics</span>
               </h3>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-2xl font-bold ${
-                      isDarkMode ? 'text-blue-400' : 'text-blue-600'
-                    }`}>
-                      {todaysData.waterGlasses || 0}
-                    </span>
-                    <span className={`text-sm ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                    }`}>
-                      glasses
-                    </span>
-                  </div>
-                  <div className={`text-sm ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    Goal: 8 glasses
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => {
-                      const currentGlasses = todaysData.waterGlasses || 0;
-                      if (currentGlasses > 0) {
-                        const newGlasses = currentGlasses - 1;
-                        onUpdateData({ waterGlasses: newGlasses });
-                      }
-                    }}
-                    disabled={(todaysData.waterGlasses || 0) === 0}
-                    className={`p-2 rounded-full transition-all duration-200 hover:scale-110 ${
-                      (todaysData.waterGlasses || 0) === 0
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : isDarkMode 
-                          ? 'text-red-400 hover:bg-red-900/20' 
-                          : 'text-red-500 hover:bg-red-50'
-                    }`}
-                    title="Remove a glass of water"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => {
-                      const currentGlasses = todaysData.waterGlasses || 0;
-                      const newGlasses = currentGlasses + 1;
-                      onUpdateData({ waterGlasses: newGlasses });
-                      addPointsWithNotification(5);
-                    }}
-                    className={`p-3 rounded-full transition-all duration-200 hover:scale-110 ${
-                      isDarkMode 
-                        ? 'bg-blue-600 hover:bg-blue-500 text-white' 
-                        : 'bg-blue-500 hover:bg-blue-600 text-white'
-                    }`}
-                    title="Add a glass of water"
-                  >
-                                          <GlassWater size={24} />
-                  </button>
-                </div>
-              </div>
-              {/* Progress Bar */}
-              <div className="mt-4">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(((todaysData.waterGlasses || 0) / 8) * 100, 100)}%` }}
-                  />
-                </div>
-                <div className="flex justify-between mt-2">
-                  <span className={`text-xs ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    {todaysData.waterGlasses || 0}/8 glasses
-                  </span>
-                  <span className={`text-xs ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    {Math.round(((todaysData.waterGlasses || 0) / 8) * 100)}% of daily goal
-                  </span>
-                </div>
+              <div className="space-y-3">
+                {[
+                  { id: 'drankWater', label: 'Drink enough water', image: basicsImg },
+                  { id: 'ateHealthy', label: 'Eat healthy meals', image: healthyImg },
+                  { id: 'listenedToSomething', label: 'Listen to something interesting', image: listenImg },
+                  { id: 'wasMindful', label: 'Be mindful', image: mindfulImg }
+                ].map((basic) => {
+                  const isCompleted = todaysData.basics?.[basic.id as keyof typeof todaysData.basics] || false;
+                  return (
+                    <div 
+                      key={basic.id}
+                      className={`flex items-center p-3 rounded-xl cursor-pointer transition-colors ${
+                        isDarkMode 
+                          ? 'bg-gray-700 hover:bg-gray-600' 
+                          : 'bg-gray-50 hover:bg-gray-100'
+                      }`}
+                      onClick={() => {
+                        const currentBasics = todaysData.basics || {};
+                        const newBasics = {
+                          ...currentBasics,
+                          [basic.id]: !isCompleted
+                        };
+                        onUpdateData({ basics: newBasics });
+                        if (!isCompleted) {
+                          onAddPoints(10, `${basic.label} completed`);
+                        }
+                      }}
+                    >
+                      <div className="w-6 h-6 rounded-md overflow-hidden mr-3 flex items-center justify-center bg-gray-200">
+                        <img src={basic.image} alt={basic.label} className="w-full h-full object-cover" />
+                      </div>
+                      <span className={`flex-1 min-w-0 truncate ${
+                        isCompleted 
+                          ? 'text-green-600 line-through' 
+                          : isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                      }`}>
+                        {basic.label}
+                      </span>
+                      {isCompleted ? (
+                        <CheckCircle2 className="text-green-500 flex-shrink-0 ml-2" size={20} />
+                      ) : (
+                        <Circle className="text-gray-400 flex-shrink-0 ml-2" size={20} />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -717,10 +920,22 @@ const Dashboard: React.FC<DashboardProps> = ({
                   {todaysData.eveningMood && (
                     <div className="flex items-center justify-between">
                       <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Evening Mood</span>
-                      <span className={`font-medium ${
-                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      <span className={`font-medium capitalize ${
+                        (() => {
+                          const mood = String(todaysData.eveningMood).toLowerCase();
+                          const positiveWords = ['energised', 'ready', 'upbeat', 'motivated', 'excited', 'confident', 'calm', 'focused', 'optimistic', 'happy', 'productive', 'content'];
+                          const negativeWords = ['tired', 'stressed', 'distracted', 'restless', 'anxious', 'overwhelmed', 'unmotivated', 'sad', 'irritable', 'stuck', 'exhausted', 'frustrated', 'lonely', 'hopeless'];
+                          
+                          if (positiveWords.includes(mood)) {
+                            return 'text-green-600';
+                          } else if (negativeWords.includes(mood)) {
+                            return 'text-red-600';
+                          } else {
+                            return isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
+                          }
+                        })()
                       }`}>
-                        {getMoodText(todaysData.eveningMood)}
+                        {todaysData.eveningMood}
                       </span>
                     </div>
                   )}

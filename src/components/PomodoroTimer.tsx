@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Coffee, Focus } from 'lucide-react';
 
 interface PomodoroTimerProps {
-  onAddPoints: (points: number) => void;
+  onAddPoints: (points: number, reason?: string) => void;
   isDarkMode?: boolean;
 }
 
@@ -31,7 +31,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints, isDarkMode =
       if (!isBreak) {
         // Completed a focus session
         setCompletedPomodoros(prev => prev + 1);
-        onAddPoints(10);
+        onAddPoints(15, 'Pomodoro focus session completed');
         setIsBreak(true);
         setMinutes(5);
         setSeconds(0);
@@ -55,9 +55,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints, isDarkMode =
   }, [isActive, minutes, seconds, isBreak, onAddPoints]);
 
   const toggleTimer = () => {
-    if (!isActive) {
-      onAddPoints(1); // Points for starting a session
-    }
+    // No points for starting, only on completion
     setIsActive(!isActive);
   };
 
@@ -144,7 +142,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ onAddPoints, isDarkMode =
               : `bg-${isBreak ? 'green' : 'blue'}-500 text-white hover:bg-${isBreak ? 'green' : 'blue'}-600 shadow-lg`
           }`}
         >
-          {isActive ? <Pause size={18} /> : <Play size={18} />}
+          {isActive ? <Pause size={18} /> : <Play size={18} />} 
           <span>{isActive ? 'Pause' : 'Start'}</span>
         </button>
 

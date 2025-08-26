@@ -9,10 +9,12 @@ import {
   Trophy,
   Sun,
   Moon,
-  Target
+  Target,
+  Calendar,
+  Goal
 } from 'lucide-react';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points';
 
 interface SidebarProps {
   currentView: View;
@@ -61,12 +63,28 @@ const Sidebar: React.FC<SidebarProps> = ({
       hoverColor: 'hover:bg-orange-50'
     },
     {
+      id: 'timeblocking' as View,
+      label: 'Timeblock',
+      icon: Calendar,
+      color: 'text-teal-600',
+      bgColor: 'bg-teal-100',
+      hoverColor: 'hover:bg-teal-50'
+    },
+    {
       id: 'timer' as View,
-      label: 'Focus Timer',
+      label: 'Timer',
       icon: Clock,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
       hoverColor: 'hover:bg-purple-50'
+    },
+    {
+      id: 'points' as View,
+      label: 'Points',
+      icon: Goal,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-100',
+      hoverColor: 'hover:bg-indigo-50'
     }
   ];
 

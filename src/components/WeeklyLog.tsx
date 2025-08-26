@@ -13,6 +13,13 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
+import priorityImg from '../../images/priority.jpg';
+import tasksImg from '../../images/tasks.jpg';
+import guitarImg from '../../images/guitar.jpg';
+import connectImg from '../../images/connect.jpg';
+import basicsImg from '../../images/basics.jpg';
+import visionImg from '../../images/vision.jpg';
+import mindfulImg from '../../images/mindful.jpg';
 
 ChartJS.register(
   CategoryScale,
@@ -84,14 +91,14 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
   const calculateDailyPoints = (dayData: any) => {
     let points = 0;
     
-    // Morning flow completion: 5 points
+    // Morning flow completion: 10 points
     if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) {
-      points += 5;
+      points += 10;
     }
     
-    // Evening flow completion: 5 points
-    if (dayData.eveningMood && dayData.winOfDay) {
-      points += 5;
+    // Evening flow completion: 10 points (use dayDescription per current flow)
+    if (dayData.eveningMood && dayData.dayDescription) {
+      points += 10;
     }
     
     // Main priority completion: 50 points
@@ -99,24 +106,28 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
       points += 50;
     }
     
-    // Additional tasks: 10 points each
+    // Additional tasks: 25 points each
     if (dayData.completedTasks) {
-      points += dayData.completedTasks.filter(Boolean).length * 10;
+      points += dayData.completedTasks.filter(Boolean).length * 25;
     }
     
-    // People to message: 5 points each
+    // People to message: 30 points each
     if (dayData.completedPeople) {
-      points += dayData.completedPeople.filter(Boolean).length * 5;
+      points += dayData.completedPeople.filter(Boolean).length * 30;
     }
     
-    // Habits completion: 15 points each
+    // Habits completion: 30 points each
     if (dayData.completedHabits) {
-      points += dayData.completedHabits.length * 15;
+      points += dayData.completedHabits.length * 30;
     }
     
-    // Water glasses: 5 points each
-    if (dayData.waterGlasses) {
-      points += dayData.waterGlasses * 5;
+    // Basics: each 10 points
+    if (dayData.basics) {
+      const { drankWater, ateHealthy, listenedToSomething, wasMindful } = dayData.basics;
+      points += (drankWater ? 10 : 0)
+        + (ateHealthy ? 10 : 0)
+        + (listenedToSomething ? 10 : 0)
+        + (wasMindful ? 10 : 0);
     }
     
     return points;
@@ -124,27 +135,27 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
 
   const weekDataWithDetails = React.useMemo(() => {
     // Get 7 days of data based on week offset
-    const getLast7Days = () => {
-      const days = [];
+  const getLast7Days = () => {
+    const days = [];
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - (6 - currentWeekOffset * 7));
       
-      for (let i = 6; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
         const date = new Date(startDate);
         date.setDate(startDate.getDate() + (6 - i));
-        const dateStr = date.toDateString();
-        const dayData = appData.dailyData[dateStr];
-        
-        days.push({
-          date: date,
-          dateStr: dateStr,
-          data: dayData || {},
-          dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-          dayNumber: date.getDate()
-        });
-      }
-      return days;
-    };
+      const dateStr = date.toDateString();
+      const dayData = appData.dailyData[dateStr];
+      
+      days.push({
+        date: date,
+        dateStr: dateStr,
+        data: dayData || {},
+        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        dayNumber: date.getDate()
+      });
+    }
+    return days;
+  };
 
     const baseWeekData = getLast7Days();
 
@@ -300,7 +311,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
         <div className="flex items-center space-x-4">
           <button
             onClick={() => setCurrentWeekOffset(prev => prev - 1)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-colors ${
+            className={`p-3 rounded-xl transition-colors ${
               currentWeekOffset <= -2 
                 ? 'text-gray-400 cursor-not-allowed' 
                 : isDarkMode 
@@ -309,8 +320,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
             }`}
             disabled={currentWeekOffset <= -2}
           >
-            <ArrowLeft size={16} />
-            <span>Previous Week</span>
+            <ArrowLeft size={20} />
           </button>
           
           <div className="text-center">
@@ -320,7 +330,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
               {currentWeekOffset === 0 ? 'This Week' : 
                currentWeekOffset === -1 ? 'Last Week' : 
                `${Math.abs(currentWeekOffset)} weeks ago`}
-            </div>
+          </div>
             <div className={`text-xs ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
@@ -342,12 +352,12 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                   year: 'numeric'
                 })}`;
               })()}
-            </div>
-          </div>
-          
+        </div>
+      </div>
+
           <button
             onClick={() => setCurrentWeekOffset(prev => prev + 1)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-colors ${
+            className={`p-3 rounded-xl transition-colors ${
               currentWeekOffset >= 2 
                 ? 'text-gray-400 cursor-not-allowed' 
                 : isDarkMode 
@@ -356,11 +366,10 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
             }`}
             disabled={currentWeekOffset >= 2}
           >
-            <span>Next Week</span>
-            <ArrowLeft size={16} className="rotate-180" />
+            <ArrowLeft size={20} className="rotate-180" />
           </button>
-        </div>
-      </div>
+            </div>
+            </div>
 
       {/* This Week's Progress - Separate card */}
       <div className={`rounded-2xl shadow-sm border mb-8 ${
@@ -372,15 +381,15 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           isDarkMode ? 'border-gray-700' : 'border-gray-100'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <Calendar className="text-green-600" size={16} />
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={visionImg} alt="This Week" className="w-full h-full object-cover" />
             </div>
             <h2 className={`text-xl font-semibold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>This Week's Progress</h2>
+            }`}>This Week</h2>
           </div>
         </div>
-        
+
         <div className="p-6">
           <div className="grid grid-cols-7 gap-4">
             {weekDataWithDetails.map((day, index) => (
@@ -396,7 +405,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                   isDarkMode ? 'text-gray-300' : 'text-gray-600'
                 }`}>
                   {day.dayName}
-                </div>
+            </div>
                 <div 
                   className={`w-12 h-12 mx-auto rounded-xl flex items-center justify-center text-sm font-semibold mb-3 transition-all duration-200 ${
                     isDarkMode 
@@ -418,14 +427,14 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
-      </div>
 
 
 
       {/* Priority Achievement Tracking */}
-      <div className={`rounded-2xl shadow-sm border mb-8 ${
+      <div className={`rounded-2xl shadow-sm border mb-12 ${
         isDarkMode 
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-white border-gray-100'
@@ -434,14 +443,14 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           isDarkMode ? 'border-gray-700' : 'border-gray-100'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Target className="text-purple-600" size={16} />
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={priorityImg} alt="Priority" className="w-full h-full object-cover" />
             </div>
             <h2 className={`text-xl font-semibold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>Priority Achievement</h2>
+            }`}>Priority</h2>
+            </div>
           </div>
-        </div>
         
         <div className="p-6">
           <div className="grid grid-cols-7 gap-4 mb-6">
@@ -461,6 +470,13 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                 }`}>
                   {day.data.completedMainTask ? '✓' : day.data.mainPriority ? '!' : '—'}
                 </div>
+                <div className={`text-[11px] mt-1 ${
+                  day.data.completedMainTask
+                    ? (isDarkMode ? 'text-green-300' : 'text-green-600')
+                    : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                }`}>
+                  {day.data.completedMainTask ? '+50 pts' : '+0 pts'}
+                </div>
                 <div className={`text-xs mt-1 ${
                   day.data.completedMainTask
                     ? 'text-green-600 font-medium'
@@ -473,26 +489,295 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
               </div>
             ))}
           </div>
-          
-          <div className="flex items-center justify-center space-x-6 text-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-100 border-2 border-green-200 rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-xs font-bold">✓</span>
-              </div>
-              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Completed</span>
+        </div>
+      </div>
+
+      {/* Additional Tasks Completed */}
+      <div className={`rounded-2xl shadow-sm border mb-8 ${
+        isDarkMode 
+          ? 'bg-gray-800 border-gray-700' 
+          : 'bg-white border-gray-100'
+      }`}>
+        <div className={`p-6 border-b ${
+          isDarkMode ? 'border-gray-700' : 'border-gray-100'
+        }`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={tasksImg} alt="Tasks" className="w-full h-full object-cover" />
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-yellow-100 border-2 border-yellow-200 rounded-full flex items-center justify-center">
-                <span className="text-yellow-600 text-xs font-bold">!</span>
-              </div>
-              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Set but not completed</span>
+            <h2 className={`text-xl font-semibold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Tasks</h2>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-7 gap-4 mb-6">
+            {weekDataWithDetails.map((day, index) => {
+              const completedCount = Array.isArray(day.data.completedTasks)
+                ? day.data.completedTasks.filter(Boolean).length
+                : 0;
+              const totalTasks = Array.isArray(day.data.additionalTasks) ? day.data.additionalTasks.length : 0;
+              const remaining = Math.max(totalTasks - completedCount, 0);
+              const hasTasks = totalTasks > 0;
+              const stateClass = completedCount > 0
+                ? 'bg-indigo-100 text-indigo-700 border-2 border-indigo-200'
+                : hasTasks
+                  ? 'bg-yellow-100 text-yellow-600 border-2 border-yellow-200'
+                  : 'bg-gray-100 text-gray-400 border-2 border-gray-200';
+              return (
+                <div key={index} className="text-center">
+                  <div className={`text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    {day.dayName}
+                  </div>
+                  <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-lg font-bold ${stateClass}`}>
+                    {hasTasks ? completedCount : '—'}
+                  </div>
+                  <div className={`text-[11px] mt-2 ${
+                    completedCount > 0
+                      ? (isDarkMode ? 'text-indigo-300' : 'text-indigo-600')
+                      : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {completedCount > 0 ? `+${completedCount * 25} pts` : '+0 pts'}
+                  </div>
+                  <div className={`text-xs mt-2 ${
+                    completedCount > 0
+                      ? (isDarkMode ? 'text-indigo-300 font-medium' : 'text-indigo-700 font-medium')
+                      : hasTasks
+                        ? 'text-yellow-600'
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {completedCount > 0 ? `${completedCount} done` : hasTasks ? 'No tasks done' : 'No tasks set'}
+                  </div>
+                  {hasTasks && (
+                    <div className={`text-[11px] mt-1 ${
+                      remaining > 0
+                        ? (isDarkMode ? 'text-yellow-300' : 'text-yellow-700')
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
+                      {remaining > 0 ? `${remaining} not done` : 'All done'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        </div>
+        
+      {/* Habits Completed */}
+      <div className={`rounded-2xl shadow-sm border mb-8 ${
+        isDarkMode 
+          ? 'bg-gray-800 border-gray-700' 
+          : 'bg-white border-gray-100'
+      }`}>
+        <div className={`p-6 border-b ${
+          isDarkMode ? 'border-gray-700' : 'border-gray-100'
+        }`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={guitarImg} alt="Habits" className="w-full h-full object-cover" />
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-gray-100 border-2 border-gray-200 rounded-full flex items-center justify-center">
-                <span className="text-gray-400 text-xs">—</span>
+            <h2 className={`text-xl font-semibold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Habits</h2>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-7 gap-4 mb-6">
+            {weekDataWithDetails.map((day, index) => {
+              const completedCount = Array.isArray(day.data.completedHabits)
+                ? day.data.completedHabits.length
+                : 0;
+              const totalHabits = Array.isArray(day.data.habits) ? day.data.habits.length : 0;
+              const remaining = Math.max(totalHabits - completedCount, 0);
+              const hasHabits = totalHabits > 0;
+              const stateClass = completedCount > 0
+                ? 'bg-teal-100 text-teal-700 border-2 border-teal-200'
+                : hasHabits
+                  ? 'bg-yellow-100 text-yellow-600 border-2 border-yellow-200'
+                  : 'bg-gray-100 text-gray-400 border-2 border-gray-200';
+              return (
+              <div key={index} className="text-center">
+                  <div className={`text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                  {day.dayName}
+                </div>
+                  <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-lg font-bold ${stateClass}`}>
+                    {hasHabits ? completedCount : '—'}
+                  </div>
+                  <div className={`text-[11px] mt-2 ${
+                    completedCount > 0
+                      ? (isDarkMode ? 'text-teal-300' : 'text-teal-700')
+                      : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {completedCount > 0 ? `+${completedCount * 30} pts` : '+0 pts'}
+                  </div>
+                  <div className={`text-xs mt-2 ${
+                    completedCount > 0
+                      ? (isDarkMode ? 'text-teal-300 font-medium' : 'text-teal-700 font-medium')
+                      : hasHabits
+                        ? 'text-yellow-600'
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {completedCount > 0 ? `${completedCount} done` : hasHabits ? 'No habits done' : 'No habits set'}
+                  </div>
+                  {hasHabits && (
+                    <div className={`text-[11px] mt-1 ${
+                      remaining > 0
+                        ? (isDarkMode ? 'text-yellow-300' : 'text-yellow-700')
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
+                      {remaining > 0 ? `${remaining} not done` : 'All done'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+                </div>
+                
+      {/* Connect Completed */}
+      <div className={`rounded-2xl shadow-sm border mb-8 ${
+        isDarkMode 
+          ? 'bg-gray-800 border-gray-700' 
+          : 'bg-white border-gray-100'
+      }`}>
+        <div className={`p-6 border-b ${
+          isDarkMode ? 'border-gray-700' : 'border-gray-100'
+        }`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={connectImg} alt="Connect" className="w-full h-full object-cover" />
+                  </div>
+            <h2 className={`text-xl font-semibold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Connect</h2>
+                  </div>
+                </div>
+        <div className="p-6">
+          <div className="grid grid-cols-7 gap-4 mb-6">
+            {weekDataWithDetails.map((day, index) => {
+              const completedCount = Array.isArray(day.data.completedPeople)
+                ? day.data.completedPeople.filter(Boolean).length
+                : 0;
+              const totalPeople = Array.isArray(day.data.peopleToMessage) ? day.data.peopleToMessage.length : 0;
+              const remaining = Math.max(totalPeople - completedCount, 0);
+              const hasPeople = totalPeople > 0;
+              const stateClass = completedCount > 0
+                ? 'bg-orange-100 text-orange-700 border-2 border-orange-200'
+                : hasPeople
+                  ? 'bg-yellow-100 text-yellow-600 border-2 border-yellow-200'
+                  : 'bg-gray-100 text-gray-400 border-2 border-gray-200';
+              return (
+                <div key={index} className="text-center">
+                  <div className={`text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    {day.dayName}
               </div>
-              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>No priority set</span>
+                  <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-lg font-bold ${stateClass}`}>
+                    {hasPeople ? completedCount : '—'}
+                  </div>
+                  <div className={`text-xs mt-2 ${
+                    completedCount > 0
+                      ? (isDarkMode ? 'text-orange-300 font-medium' : 'text-orange-700 font-medium')
+                      : hasPeople
+                        ? 'text-yellow-600'
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {completedCount > 0 ? `${completedCount} done` : hasPeople ? 'No connections done' : 'No connections set'}
+                  </div>
+                  {hasPeople && (
+                    <div className={`text-[11px] mt-1 ${
+                      remaining > 0
+                        ? (isDarkMode ? 'text-yellow-300' : 'text-yellow-700')
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
+                      {remaining > 0 ? `${remaining} not done` : 'All done'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Basics Completed */}
+      <div className={`rounded-2xl shadow-sm border mb-8 ${
+        isDarkMode 
+          ? 'bg-gray-800 border-gray-700' 
+          : 'bg-white border-gray-100'
+      }`}>
+        <div className={`p-6 border-b ${
+          isDarkMode ? 'border-gray-700' : 'border-gray-100'
+        }`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={basicsImg} alt="Basics" className="w-full h-full object-cover" />
             </div>
+            <h2 className={`text-xl font-semibold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Basics</h2>
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-7 gap-4 mb-6">
+            {weekDataWithDetails.map((day, index) => {
+              const basics = day.data.basics || {};
+              const achievedCount = ['drankWater','ateHealthy','listenedToSomething','wasMindful']
+                .map(k => (basics as any)[k])
+                .filter(Boolean).length;
+              const totalBasics = 4;
+              const remaining = totalBasics - achievedCount;
+              const hasBasics = Boolean(day.data.basics);
+              const stateClass = achievedCount > 0
+                ? 'bg-blue-100 text-blue-700 border-2 border-blue-200'
+                : hasBasics
+                  ? 'bg-yellow-100 text-yellow-600 border-2 border-yellow-200'
+                  : 'bg-gray-100 text-gray-400 border-2 border-gray-200';
+              return (
+                <div key={index} className="text-center">
+                  <div className={`text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>
+                    {day.dayName}
+                  </div>
+                  <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-lg font-bold ${stateClass}`}>
+                    {hasBasics ? achievedCount : '—'}
+                  </div>
+                  <div className={`text-[11px] mt-2 ${
+                    achievedCount > 0
+                      ? (isDarkMode ? 'text-blue-300' : 'text-blue-700')
+                      : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {achievedCount > 0 ? `+${achievedCount * 10} pts` : '+0 pts'}
+                  </div>
+                  <div className={`text-xs mt-2 ${
+                    achievedCount > 0
+                      ? (isDarkMode ? 'text-blue-300 font-medium' : 'text-blue-700 font-medium')
+                      : hasBasics
+                        ? 'text-yellow-600'
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {achievedCount > 0 ? `${achievedCount} done` : hasBasics ? 'No basics done' : 'No basics set'}
+                  </div>
+                  {hasBasics && (
+                    <div className={`text-[11px] mt-1 ${
+                      remaining > 0
+                        ? (isDarkMode ? 'text-yellow-300' : 'text-yellow-700')
+                        : isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                    }`}>
+                      {remaining > 0 ? `${remaining} not done` : 'All done'}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -507,8 +792,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           isDarkMode ? 'border-gray-700' : 'border-gray-100'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Moon className="text-blue-600" size={16} />
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={mindfulImg} alt="Sleep Tracking" className="w-full h-full object-cover" />
             </div>
             <h2 className={`text-xl font-semibold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
@@ -736,8 +1021,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           isDarkMode ? 'border-gray-700' : 'border-gray-100'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="text-purple-600" size={16} />
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={mindfulImg} alt="Morning Mood" className="w-full h-full object-cover" />
             </div>
             <h2 className={`text-xl font-semibold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
@@ -811,7 +1096,7 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
           </div>
 
           {/* Mood Details Table */}
-          <div>
+                <div>
             <h3 className={`text-lg font-medium mb-4 ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>Daily Mood Details</h3>
@@ -870,8 +1155,8 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
         </div>
       </div>
 
-      {/* Daily Journal Entries */}
-      <div className={`rounded-2xl shadow-sm border ${
+      {/* Evening Mood Panel */}
+      <div className={`rounded-2xl shadow-sm border mb-8 ${
         isDarkMode 
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-white border-gray-100'
@@ -879,90 +1164,144 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
         <div className={`p-6 border-b ${
           isDarkMode ? 'border-gray-700' : 'border-gray-100'
         }`}>
-          <h2 className={`text-xl font-semibold ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>Journal Entries</h2>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg overflow-hidden">
+              <img src={mindfulImg} alt="Evening Mood" className="w-full h-full object-cover" />
+            </div>
+            <h2 className={`text-xl font-semibold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Evening Mood</h2>
+          </div>
         </div>
         
-        <div className={`divide-y ${
-          isDarkMode ? 'divide-gray-700' : 'divide-gray-100'
-        }`}>
-          {weekDataWithDetails
-            .filter(day => day.data.winOfDay || day.data.obstacles?.length)
-            .reverse()
-            .map((day, index) => (
-            <div key={index} className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className={`font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {day.date.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </h3>
-                  <div className={`flex items-center space-x-4 text-sm mt-1 ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
-                    <span>Morning: {getMoodText(day.data.morningMood)}</span>
-                    <span>Evening: {getMoodText(day.data.eveningMood)}</span>
-                    {day.data.completedMainTask && (
-                      <span className="text-green-600 font-medium">Main task completed</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {day.data.winOfDay && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium text-green-700 mb-2">Win of the day:</h4>
-                  <p className={`p-3 rounded-lg ${
-                    isDarkMode 
-                      ? 'text-gray-200 bg-green-900/20' 
-                      : 'text-gray-700 bg-green-50'
-                  }`}>
-                    {day.data.winOfDay}
-                  </p>
-                </div>
-              )}
-
-              {day.data.obstacles && day.data.obstacles.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-orange-700 mb-2">Obstacles:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {day.data.obstacles.map((obstacle, obstacleIndex) => (
-                      <span 
-                        key={obstacleIndex}
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          isDarkMode 
-                            ? 'bg-orange-900/30 text-orange-300' 
-                            : 'bg-orange-100 text-orange-700'
-                        }`}
-                      >
-                        {obstacle}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+        <div className="p-6">
+          {/* Mood Distribution Pie Chart */}
+          <div className="mb-8">
+            <h3 className={`text-lg font-medium mb-4 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Mood Distribution</h3>
+            <div className="h-64 mb-4">
+              <Doughnut
+                data={{
+                  labels: ['Positive', 'Neutral', 'Negative'],
+                  datasets: [
+                    {
+                      data: [
+                        weekDataWithDetails.filter(day => getMoodCategory(String(day.data.eveningMood || '').toLowerCase()) === 'positive').length,
+                        weekDataWithDetails.filter(day => getMoodCategory(String(day.data.eveningMood || '').toLowerCase()) === 'neutral').length,
+                        weekDataWithDetails.filter(day => getMoodCategory(String(day.data.eveningMood || '').toLowerCase()) === 'negative').length,
+                      ],
+                      backgroundColor: [
+                        '#10B981',
+                        '#F59E0B',
+                        '#EF4444',
+                      ],
+                      borderColor: 'transparent',
+                      borderWidth: 0,
+                      hoverBorderWidth: 0,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        color: '#ffffff',
+                        font: { size: 12 },
+                      },
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      titleColor: '#ffffff',
+                      bodyColor: '#ffffff',
+                      borderColor: '#8B5CF6',
+                      borderWidth: 1,
+                      cornerRadius: 8,
+                      callbacks: {
+                        label: function(context) {
+                          const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                          const percentage = total ? ((context.parsed / total) * 100).toFixed(1) : '0.0';
+                          return `${context.label}: ${context.parsed} days (${percentage}%)`;
+                        }
+                      }
+                    },
+                  },
+                  cutout: '60%',
+                }}
+              />
             </div>
-          ))}
+          </div>
 
-          {weekDataWithDetails.filter(day => day.data.winOfDay || day.data.obstacles?.length).length === 0 && (
-            <div className="p-6 text-center text-gray-500">
-              <p>No journal entries yet this week.</p>
-              <p className="text-sm mt-1">Complete your daily reviews to see entries here.</p>
+          {/* Mood Details Table */}
+          <div>
+            <h3 className={`text-lg font-medium mb-4 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Daily Mood Details</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className={`border-b ${
+                    isDarkMode ? 'border-gray-700' : 'border-gray-200'
+                  }`}>
+                    <th className={`text-left py-3 px-4 font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>Day</th>
+                    <th className={`text-left py-3 px-4 font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>Mood</th>
+                    <th className={`text-left py-3 px-4 font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>Category</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${
+                  isDarkMode ? 'divide-gray-700' : 'divide-gray-100'
+                }`}>
+                  {weekDataWithDetails.map((day, index) => {
+                    const moodValue = String(day.data.eveningMood || '').toLowerCase();
+                    const moodCategory = getMoodCategory(moodValue);
+                    return (
+                      <tr key={index} className={isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-2">
+                            <span className={`text-sm font-medium ${
+                              isDarkMode ? 'text-white' : 'text-gray-900'
+                            }`}>{day.dayName}</span>
+                            <span className={`text-xs ${
+                              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                            }`}>{day.dayNumber}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`text-sm capitalize ${
+                            isDarkMode ? 'text-white' : 'text-gray-900'
+                          }`}>{String(day.data.eveningMood || '—')}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMoodCategoryColor(moodCategory)}`}>
+                            <span className="mr-1">{getMoodCategoryIcon(moodCategory)}</span>
+                            {moodCategory.charAt(0).toUpperCase() + moodCategory.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
       {/* Day Details Modal */}
       {isModalOpen && selectedDay !== null && weekDataWithDetails[selectedDay] && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto ${
+          <div className={`rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto ${
             isDarkMode 
               ? 'bg-gray-800 border border-gray-700' 
               : 'bg-white'
@@ -976,12 +1315,12 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
                 {weekDataWithDetails[selectedDay].dayName} - {weekDataWithDetails[selectedDay].date.toLocaleDateString('en-US', { 
-                  weekday: 'long', 
+                      weekday: 'long', 
                   year: 'numeric', 
                   month: 'long', 
-                  day: 'numeric' 
-                })}
-              </h3>
+                      day: 'numeric' 
+                    })}
+                  </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className={`transition-colors ${
@@ -996,41 +1335,30 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
               </button>
             </div>
             
-            <div className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Morning Flow Details */}
-                <div>
-                  <h4 className={`text-lg font-medium mb-4 flex items-center ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                    Morning Check-in
-                  </h4>
-                  {(weekDataWithDetails[selectedDay].data.sleepQuality || weekDataWithDetails[selectedDay].data.morningMood || weekDataWithDetails[selectedDay].data.mainPriority) ? (
-                    <div className="space-y-4">
+                          <div className="p-6">
+                {/* Daily Overview */}
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-6">
+                    {/* Sleep */}
+                    {(weekDataWithDetails[selectedDay].data.bedTime || weekDataWithDetails[selectedDay].data.wakeTime || weekDataWithDetails[selectedDay].data.sleepQuality) && (
                       <div className={`rounded-lg p-4 ${
                         isDarkMode 
                           ? 'bg-blue-900/20 border border-blue-700/30' 
                           : 'bg-blue-50'
                       }`}>
-                        <h5 className={`font-medium mb-2 ${
+                        <h5 className={`font-medium mb-3 ${
                           isDarkMode ? 'text-blue-300' : 'text-blue-900'
-                        }`}>Sleep & Mood</h5>
-                        <div className="space-y-2 text-sm">
-                          {weekDataWithDetails[selectedDay].data.sleepQuality && (
-                            <div className="flex justify-between">
-                              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Sleep Rating:</span>
-                              <span className={`font-medium ${
-                                isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>{weekDataWithDetails[selectedDay].data.sleepQuality}/5</span>
-                            </div>
-                          )}
+                        }`}>Sleep</h5>
+                        <div className="space-y-3 text-sm">
                           {weekDataWithDetails[selectedDay].data.bedTime && (
                             <div className="flex justify-between">
                               <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Bed Time:</span>
                               <span className={`font-medium ${
                                 isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>{formatTime(weekDataWithDetails[selectedDay].data.bedTime)}</span>
+                              }`}>
+                                {formatTime(weekDataWithDetails[selectedDay].data.bedTime)}
+                              </span>
                             </div>
                           )}
                           {weekDataWithDetails[selectedDay].data.wakeTime && (
@@ -1038,277 +1366,324 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
                               <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Wake Time:</span>
                               <span className={`font-medium ${
                                 isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>{formatTime(weekDataWithDetails[selectedDay].data.wakeTime)}</span>
-                            </div>
+                              }`}>
+                                {formatTime(weekDataWithDetails[selectedDay].data.wakeTime)}
+                              </span>
+                  </div>
                           )}
-                          {weekDataWithDetails[selectedDay].data.morningMood && (
+                          {(weekDataWithDetails[selectedDay].data.bedTime && weekDataWithDetails[selectedDay].data.wakeTime) && (
                             <div className="flex justify-between">
-                              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Morning Mood:</span>
-                              <span className={`font-medium capitalize ${
+                              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Sleep Duration:</span>
+                              <span className={`font-medium ${
+                                (() => {
+                                  const duration = calculateSleepDuration(weekDataWithDetails[selectedDay].data.bedTime!, weekDataWithDetails[selectedDay].data.wakeTime!);
+                                  return duration && duration >= 7 ? 'text-green-600' : 'text-red-600';
+                                })()
+                              }`}>
+                                {(() => {
+                                  const duration = calculateSleepDuration(weekDataWithDetails[selectedDay].data.bedTime!, weekDataWithDetails[selectedDay].data.wakeTime!);
+                                  return duration ? `${duration}h` : '—';
+                                })()}
+                              </span>
+                </div>
+                          )}
+                          {weekDataWithDetails[selectedDay].data.sleepQuality && (
+                            <div className="flex justify-between">
+                              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Sleep Quality:</span>
+                              <span className={`font-medium ${
                                 isDarkMode ? 'text-white' : 'text-gray-900'
-                              }`}>{weekDataWithDetails[selectedDay].data.morningMood}</span>
+                              }`}>{weekDataWithDetails[selectedDay].data.sleepQuality}/5</span>
+              </div>
+                          )}
+
+                        </div>
+                </div>
+              )}
+
+                    {/* Priority */}
+                    {weekDataWithDetails[selectedDay].data.mainPriority && (
+                      <div className={`rounded-lg p-4 ${
+                        isDarkMode 
+                          ? 'bg-green-900/20 border border-green-700/30' 
+                          : 'bg-green-50'
+                      }`}>
+                        <h5 className={`font-medium mb-3 ${
+                          isDarkMode ? 'text-green-300' : 'text-green-900'
+                        }`}>Priority</h5>
+                        <div className="space-y-2">
+                          <p className={`text-sm ${
+                            isDarkMode ? 'text-green-100' : 'text-green-900'
+                          }`}>{weekDataWithDetails[selectedDay].data.mainPriority}</p>
+                          {weekDataWithDetails[selectedDay].data.firstStep && (
+                            <p className={`text-xs ${
+                              isDarkMode ? 'text-green-200/70' : 'text-green-700'
+                            }`}>First step: {weekDataWithDetails[selectedDay].data.firstStep}</p>
+                          )}
+                          {weekDataWithDetails[selectedDay].data.completedMainTask !== undefined && (
+                            <div className="flex items-center text-sm mt-2">
+                              <div className={`w-2 h-2 rounded-full mr-2 ${
+                                weekDataWithDetails[selectedDay].data.completedMainTask ? 'bg-green-500' : 'bg-red-500'
+                              }`}></div>
+                              <span className={`font-medium ${
+                                weekDataWithDetails[selectedDay].data.completedMainTask ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {weekDataWithDetails[selectedDay].data.completedMainTask ? 'Completed' : 'Not completed'}
+                      </span>
                             </div>
                           )}
+                  </div>
+                </div>
+              )}
+
+                    {/* Tasks */}
+                    {weekDataWithDetails[selectedDay].data.additionalTasks && weekDataWithDetails[selectedDay].data.additionalTasks.length > 0 && (
+                      <div className={`rounded-lg p-4 ${
+                        isDarkMode 
+                          ? 'bg-purple-900/20 border border-purple-700/30' 
+                          : 'bg-purple-50'
+                      }`}>
+                        <h5 className={`font-medium mb-3 ${
+                          isDarkMode ? 'text-purple-300' : 'text-purple-900'
+                        }`}>Tasks</h5>
+                        <div className="space-y-2">
+                          {weekDataWithDetails[selectedDay].data.additionalTasks.map((task, idx) => {
+                            const isCompleted = weekDataWithDetails[selectedDay].data.completedTasks?.[idx];
+                            return (
+                              <div key={idx} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center flex-1 min-w-0">
+                                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2 flex-shrink-0"></div>
+                                  <span className={`truncate ${isDarkMode ? 'text-purple-100' : 'text-purple-900'}`}>{task}</span>
+                                </div>
+                                <span className={`text-xs font-medium ml-2 flex-shrink-0 ${
+                                  isCompleted 
+                                    ? 'text-green-500' 
+                                    : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                }`}>
+                                  {isCompleted ? '✓' : '—'}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                      
-                      {weekDataWithDetails[selectedDay].data.mainPriority && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-green-900/20 border border-green-700/30' 
-                            : 'bg-green-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-green-300' : 'text-green-900'
-                          }`}>Daily Focus</h5>
-                          <div className="space-y-2 text-sm">
-                            <div>
-                              <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Main Priority:</span>
-                              <p className={`font-medium mt-1 ${
-                                isDarkMode ? 'text-green-200' : 'text-green-900'
-                              }`}>{weekDataWithDetails[selectedDay].data.mainPriority}</p>
-                            </div>
-                            {weekDataWithDetails[selectedDay].data.firstStep && (
-                              <div>
-                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>First Step:</span>
-                                <p className={`font-medium mt-1 ${
-                                  isDarkMode ? 'text-green-200' : 'text-green-900'
-                                }`}>{weekDataWithDetails[selectedDay].data.firstStep}</p>
+                    )}
+                  </div>
+
+                  {/* Right Column content moved below in single column */}
+                  <div className="space-y-6">
+                    {/* Connect */}
+                    {weekDataWithDetails[selectedDay].data.peopleToMessage && weekDataWithDetails[selectedDay].data.peopleToMessage.length > 0 && (
+                      <div className={`rounded-lg p-4 ${
+                        isDarkMode 
+                          ? 'bg-orange-900/20 border border-orange-700/30' 
+                          : 'bg-orange-50'
+                      }`}>
+                        <h5 className={`font-medium mb-3 ${
+                          isDarkMode ? 'text-orange-300' : 'text-orange-900'
+                        }`}>Connect</h5>
+                        <div className="space-y-2">
+                          {weekDataWithDetails[selectedDay].data.peopleToMessage.map((person, idx) => {
+                            const isCompleted = weekDataWithDetails[selectedDay].data.completedPeople?.[idx];
+                            return (
+                              <div key={idx} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center flex-1 min-w-0">
+                                  <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2 flex-shrink-0"></div>
+                                  <span className={`truncate ${isDarkMode ? 'text-orange-100' : 'text-orange-900'}`}>{person}</span>
+                                </div>
+                                <span className={`text-xs font-medium ml-2 flex-shrink-0 ${
+                                  isCompleted 
+                                    ? 'text-green-500' 
+                                    : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                }`}>
+                                  {isCompleted ? '✓' : '—'}
+                                </span>
                               </div>
-                            )}
-                          </div>
+                            );
+                          })}
                         </div>
-                      )}
-                      
-                      {weekDataWithDetails[selectedDay].data.additionalTasks && weekDataWithDetails[selectedDay].data.additionalTasks.length > 0 && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-purple-900/20 border border-purple-700/30' 
-                            : 'bg-purple-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-purple-300' : 'text-purple-900'
-                          }`}>Additional Tasks</h5>
-                          <div className="space-y-1">
-                            {weekDataWithDetails[selectedDay].data.additionalTasks.map((task, idx) => (
-                              <div key={idx} className="flex items-center text-sm">
-                                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2"></div>
-                                <span className={isDarkMode ? 'text-purple-200' : 'text-purple-900'}>{task}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {weekDataWithDetails[selectedDay].data.peopleToMessage && weekDataWithDetails[selectedDay].data.peopleToMessage.length > 0 && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-orange-900/20 border border-orange-700/30' 
-                            : 'bg-orange-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-orange-300' : 'text-orange-900'
-                          }`}>People to Connect With</h5>
-                          <div className="space-y-1">
-                            {weekDataWithDetails[selectedDay].data.peopleToMessage.map((person, idx) => (
-                              <div key={idx} className="flex items-center text-sm">
-                                <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2"></div>
-                                <span className={isDarkMode ? 'text-orange-200' : 'text-orange-900'}>{person}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {weekDataWithDetails[selectedDay].data.goodStuff && weekDataWithDetails[selectedDay].data.goodStuff.length > 0 && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-indigo-900/20 border border-indigo-700/30' 
-                            : 'bg-indigo-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-indigo-300' : 'text-indigo-900'
-                          }`}>Good Stuff Planned</h5>
-                          <div className="flex flex-wrap gap-2">
-                            {weekDataWithDetails[selectedDay].data.goodStuff.map((item, idx) => (
-                              <span key={idx} className={`px-2 py-1 text-xs rounded-full ${
-                                isDarkMode 
-                                  ? 'bg-indigo-800 text-indigo-200' 
-                                  : 'bg-indigo-100 text-indigo-800'
-                              }`}>
-                                {item}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {weekDataWithDetails[selectedDay].data.habits && weekDataWithDetails[selectedDay].data.habits.length > 0 && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-teal-900/20 border border-teal-700/30' 
-                            : 'bg-teal-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-teal-300' : 'text-teal-900'
-                          }`}>Daily Habits</h5>
-                          <div className="space-y-2">
-                            {weekDataWithDetails[selectedDay].data.habits.map((habitId, idx) => {
-                              const habitLabels: { [key: string]: string } = {
-                                'guitar': 'Guitar',
-                                'write': 'Write',
-                                'read': 'Read',
-                                'exercise': 'Exercise',
-                                'socialise': 'Socialise'
-                              };
-                              const habitLabel = habitLabels[habitId] || habitId;
-                              const isCompleted = weekDataWithDetails[selectedDay].data.completedHabits?.includes(habitId) || false;
-                              
-                              return (
-                                <div key={idx} className="flex items-center justify-between text-sm">
-                                  <div className="flex items-center">
-                                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full mr-2"></div>
-                                    <span className={isDarkMode ? 'text-teal-200' : 'text-teal-900'}>
+                      </div>
+                    )}
+
+                    {/* Habits */}
+                    {weekDataWithDetails[selectedDay].data.habits && weekDataWithDetails[selectedDay].data.habits.length > 0 && (
+                      <div className={`rounded-lg p-4 ${
+                        isDarkMode 
+                          ? 'bg-teal-900/20 border border-teal-700/30' 
+                          : 'bg-teal-50'
+                      }`}>
+                        <h5 className={`font-medium mb-3 ${
+                          isDarkMode ? 'text-teal-300' : 'text-teal-900'
+                        }`}>Habits</h5>
+                        <div className="space-y-3">
+                          {weekDataWithDetails[selectedDay].data.habits.map((habitId, idx) => {
+                            const habitLabels: { [key: string]: string } = {
+                              'guitar': 'Guitar',
+                              'write': 'Write',
+                              'read': 'Read',
+                              'exercise': 'Exercise',
+                              'socialise': 'Socialise'
+                            };
+                            const habitLabel = habitLabels[habitId] || habitId;
+                            const isCompleted = weekDataWithDetails[selectedDay].data.completedHabits?.includes(habitId) || false;
+                            const habitDetails = weekDataWithDetails[selectedDay].data.habitDetails?.[habitId];
+                            
+                            return (
+                              <div key={idx} className="text-sm">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center flex-1 min-w-0">
+                                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full mr-2 flex-shrink-0"></div>
+                                    <span className={`truncate ${isDarkMode ? 'text-teal-100' : 'text-teal-900'}`}>
                                       {habitLabel}
                                     </span>
                                   </div>
-                                  <span className={`text-xs font-medium ${
+                                  <span className={`text-xs font-medium ml-2 flex-shrink-0 ${
                                     isCompleted 
                                       ? 'text-green-500' 
                                       : isDarkMode ? 'text-gray-400' : 'text-gray-500'
                                   }`}>
-                                    {isCompleted ? 'Completed' : 'Not completed'}
+                                    {isCompleted ? '✓' : '—'}
                                   </span>
                                 </div>
-                              );
-                            })}
-                          </div>
+                                {isCompleted && habitDetails && (
+                                  <div className="ml-3.5 mt-1 text-xs opacity-75">
+                                    <span className={`truncate block ${isDarkMode ? 'text-teal-200' : 'text-teal-700'}`}>{habitDetails}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      )}
-                      
-                      {(weekDataWithDetails[selectedDay].data.morningFeelings || weekDataWithDetails[selectedDay].data.goodDayVision) && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-gray-700/50 border border-gray-600/30' 
-                            : 'bg-gray-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-gray-200' : 'text-gray-900'
-                          }`}>Morning Feelings & Vision</h5>
-                          {weekDataWithDetails[selectedDay].data.morningFeelings && (
-                            <p className={`text-sm mb-3 ${
-                              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                            }`}>{weekDataWithDetails[selectedDay].data.morningFeelings}</p>
-                          )}
-                          {weekDataWithDetails[selectedDay].data.goodDayVision && (
+                      </div>
+                    )}
+
+                    {/* Meetings and Appointments */}
+                    {weekDataWithDetails[selectedDay].data.meetings && weekDataWithDetails[selectedDay].data.meetings.length > 0 && (
+                      <div className={`rounded-lg p-4 ${
+                        isDarkMode 
+                          ? 'bg-blue-900/20 border border-blue-700/30' 
+                          : 'bg-blue-50'
+                      }`}>
+                        <h5 className={`font-medium mb-3 ${
+                          isDarkMode ? 'text-blue-300' : 'text-blue-900'
+                        }`}>Meetings & Appointments</h5>
+                        <div className="space-y-2">
+                          {weekDataWithDetails[selectedDay].data.meetings.map((meeting, idx) => (
+                            <div key={idx} className="text-sm">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center flex-1 min-w-0">
+                                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
+                                  <span className={`truncate ${isDarkMode ? 'text-blue-100' : 'text-blue-900'}`}>
+                                    {meeting.title}
+                                  </span>
+                                </div>
+                                <span className={`text-xs font-medium ml-2 flex-shrink-0 ${
+                                  isDarkMode ? 'text-blue-200' : 'text-blue-700'
+                                }`}>
+                                  {meeting.startTime} - {meeting.endTime}
+                                </span>
+                              </div>
+            </div>
+          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Journals */}
+                    {(weekDataWithDetails[selectedDay].data.morningMood || weekDataWithDetails[selectedDay].data.morningFeelings || weekDataWithDetails[selectedDay].data.eveningMood || weekDataWithDetails[selectedDay].data.dayDescription) && (
+                      <div className={`rounded-lg p-4 ${
+                        isDarkMode 
+                          ? 'bg-purple-900/20 border border-purple-700/30' 
+                          : 'bg-purple-50'
+                      }`}>
+                        <h5 className={`font-medium mb-3 ${
+                          isDarkMode ? 'text-purple-300' : 'text-purple-900'
+                        }`}>Journals</h5>
+                        <div className="space-y-4">
+                          {/* Morning Mood */}
+                          {weekDataWithDetails[selectedDay].data.morningMood && (
                             <div>
-                              <span className={`text-sm ${
-                                isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                              }`}>Good Day Vision:</span>
-                              <p className={`text-sm mt-1 ${
-                                isDarkMode ? 'text-gray-200' : 'text-gray-900'
-                              }`}>{weekDataWithDetails[selectedDay].data.goodDayVision}</p>
+                              <div className={`text-sm font-medium mb-2 ${
+                                isDarkMode ? 'text-purple-200' : 'text-purple-800'
+                              }`}>Morning Mood</div>
+                              <p className={`text-sm font-medium capitalize ${
+                                (() => {
+                                  const mood = weekDataWithDetails[selectedDay].data.morningMood.toLowerCase();
+                                  const positiveWords = ['energised', 'ready', 'upbeat', 'motivated', 'excited', 'confident', 'calm', 'focused', 'optimistic', 'happy', 'productive', 'content'];
+                                  const negativeWords = ['tired', 'stressed', 'distracted', 'restless', 'anxious', 'overwhelmed', 'unmotivated', 'sad', 'irritable', 'stuck', 'exhausted', 'frustrated', 'lonely', 'hopeless'];
+                                  
+                                  if (positiveWords.includes(mood)) {
+                                    return 'text-green-600';
+                                  } else if (negativeWords.includes(mood)) {
+                                    return 'text-red-600';
+                                  } else {
+                                    return isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
+                                  }
+                                })()
+                              }`}>
+                                {weekDataWithDetails[selectedDay].data.morningMood}
+                              </p>
+            </div>
+          )}
+
+                          {/* Morning Journal */}
+                          {weekDataWithDetails[selectedDay].data.morningFeelings && (
+                            <div>
+                              <div className={`text-sm font-medium mb-2 ${
+                                isDarkMode ? 'text-purple-200' : 'text-purple-800'
+                              }`}>Morning Journal</div>
+                              <p className={`text-sm ${
+                                isDarkMode ? 'text-purple-100' : 'text-purple-900'
+                              }`}>{weekDataWithDetails[selectedDay].data.morningFeelings}</p>
+        </div>
+                          )}
+                          
+                          {/* Evening Mood */}
+                          {weekDataWithDetails[selectedDay].data.eveningMood && (
+                            <div>
+                              <div className={`text-sm font-medium mb-2 ${
+                                isDarkMode ? 'text-purple-200' : 'text-purple-800'
+                              }`}>Evening Mood</div>
+                              <p className={`text-sm font-medium capitalize ${
+                                (() => {
+                                  const mood = weekDataWithDetails[selectedDay].data.eveningMood.toLowerCase();
+                                  const positiveWords = ['energised', 'ready', 'upbeat', 'motivated', 'excited', 'confident', 'calm', 'focused', 'optimistic', 'happy', 'productive', 'content'];
+                                  const negativeWords = ['tired', 'stressed', 'distracted', 'restless', 'anxious', 'overwhelmed', 'unmotivated', 'sad', 'irritable', 'stuck', 'exhausted', 'frustrated', 'lonely', 'hopeless'];
+                                  
+                                  if (positiveWords.includes(mood)) {
+                                    return 'text-green-600';
+                                  } else if (negativeWords.includes(mood)) {
+                                    return 'text-red-600';
+                                  } else {
+                                    return isDarkMode ? 'text-yellow-400' : 'text-yellow-600';
+                                  }
+                                })()
+                              }`}>
+                                {weekDataWithDetails[selectedDay].data.eveningMood}
+                              </p>
+      </div>
+                          )}
+
+                          {/* Evening Journal */}
+                          {weekDataWithDetails[selectedDay].data.dayDescription && (
+                            <div>
+                              <div className={`text-sm font-medium mb-2 ${
+                                isDarkMode ? 'text-purple-200' : 'text-purple-800'
+                              }`}>Evening Journal</div>
+                              <p className={`text-sm ${
+                                isDarkMode ? 'text-purple-100' : 'text-purple-900'
+                              }`}>{weekDataWithDetails[selectedDay].data.dayDescription}</p>
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className={`text-center py-8 ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
-                      <p>No morning check-in data for this day</p>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Evening Flow Details */}
-                <div>
-                  <h4 className={`text-lg font-medium mb-4 flex items-center ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
-                    Evening Review
-                  </h4>
-                  {(weekDataWithDetails[selectedDay].data.eveningMood || weekDataWithDetails[selectedDay].data.winOfDay || weekDataWithDetails[selectedDay].data.completedMainTask) ? (
-                    <div className="space-y-4">
-                      {(weekDataWithDetails[selectedDay].data.completedMainTask !== undefined || weekDataWithDetails[selectedDay].data.eveningMood) && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-red-900/20 border border-red-700/30' 
-                            : 'bg-red-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-red-300' : 'text-red-900'
-                          }`}>Daily Outcome</h5>
-                          <div className="space-y-2 text-sm">
-                            {weekDataWithDetails[selectedDay].data.completedMainTask !== undefined && (
-                              <div className="flex justify-between">
-                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Main Task Completed:</span>
-                                <span className={`font-medium ${weekDataWithDetails[selectedDay].data.completedMainTask ? 'text-green-500' : 'text-red-500'}`}>
-                                  {weekDataWithDetails[selectedDay].data.completedMainTask ? 'Yes' : 'No'}
-                                </span>
-                              </div>
-                            )}
-                            {weekDataWithDetails[selectedDay].data.eveningMood && (
-                              <div className="flex justify-between">
-                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Evening Mood:</span>
-                                <span className={`font-medium ${
-                                  isDarkMode ? 'text-white' : 'text-gray-900'
-                                }`}>{weekDataWithDetails[selectedDay].data.eveningMood}/5</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {weekDataWithDetails[selectedDay].data.winOfDay && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-green-900/20 border border-green-700/30' 
-                            : 'bg-green-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-green-300' : 'text-green-900'
-                          }`}>Today's Win</h5>
-                          <p className={`text-sm ${
-                            isDarkMode ? 'text-green-200' : 'text-green-900'
-                          }`}>{weekDataWithDetails[selectedDay].data.winOfDay}</p>
-                        </div>
-                      )}
-                      
-                      {weekDataWithDetails[selectedDay].data.obstacles && weekDataWithDetails[selectedDay].data.obstacles.length > 0 && (
-                        <div className={`rounded-lg p-4 ${
-                          isDarkMode 
-                            ? 'bg-yellow-900/20 border border-yellow-700/30' 
-                            : 'bg-yellow-50'
-                        }`}>
-                          <h5 className={`font-medium mb-2 ${
-                            isDarkMode ? 'text-yellow-300' : 'text-yellow-900'
-                          }`}>Main Obstacles</h5>
-                          <div className="space-y-1">
-                            {weekDataWithDetails[selectedDay].data.obstacles.map((obstacle, idx) => (
-                              <div key={idx} className="flex items-center text-sm">
-                                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-2"></div>
-                                <span className={isDarkMode ? 'text-yellow-200' : 'text-yellow-900'}>{obstacle}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className={`text-center py-8 ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
-                      <p>No evening review data for this day</p>
-                    </div>
-                  )}
+                      </div>
+                    )}
+
+
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
       )}
     </div>
   );

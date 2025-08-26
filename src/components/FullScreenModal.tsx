@@ -7,6 +7,7 @@ interface FullScreenModalProps {
   children: React.ReactNode;
   title?: string;
   isCompleted?: boolean;
+  isDarkMode?: boolean;
 }
 
 const FullScreenModal: React.FC<FullScreenModalProps> = ({ 
@@ -14,7 +15,8 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
   onClose, 
   children, 
   title,
-  isCompleted = false
+  isCompleted = false,
+  isDarkMode = false
 }) => {
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const [showCompletionAnimation, setShowCompletionAnimation] = useState(false);
@@ -125,7 +127,11 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
       
       {/* Modal Content */}
       <div className="relative w-full h-full flex items-center justify-center p-4">
-        <div className={`w-full max-w-5xl h-full max-h-[95vh] bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 ${
+        <div className={`w-full max-w-5xl h-full max-h-[95vh] rounded-3xl shadow-2xl overflow-hidden ${
+          isDarkMode
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-100'
+        } border ${
           isAnimatingOut 
             ? 'animate-modal-exit' 
             : showCompletionAnimation
