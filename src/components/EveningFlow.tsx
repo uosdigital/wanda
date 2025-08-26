@@ -141,7 +141,7 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
         isDarkMode 
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-white border-gray-100'
-      } border-b p-4 flex-shrink-0`}>
+      } border-b p-3 md:p-4 flex-shrink-0`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-lg overflow-hidden">
@@ -192,7 +192,7 @@ const EveningFlow: React.FC<EveningFlowProps> = ({ onComplete, onBack, existingD
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-8 flex flex-col justify-between overflow-y-auto">
+      <div className="flex-1 p-4 md:p-8 flex flex-col justify-between overflow-y-auto">
         <div className="flex-1 flex items-center justify-center">
           {step === 1 && (
             <div className="text-center">

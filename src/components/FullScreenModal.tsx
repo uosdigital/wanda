@@ -83,8 +83,8 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
       {/* Completion animation removed */}
       
       {/* Modal Content */}
-      <div className="relative w-full h-full flex items-center justify-center p-4">
-        <div className={`w-full max-w-5xl h-full max-h-[95vh] rounded-3xl shadow-2xl overflow-hidden ${
+      <div className="relative w-full h-full flex items-center justify-center p-2 md:p-4">
+        <div className={`w-full max-w-5xl h-full max-h-[98vh] md:max-h-[95vh] rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden ${
           isDarkMode
             ? 'bg-gray-800 border-gray-700'
             : 'bg-white border-gray-100'
