@@ -345,7 +345,7 @@ function App() {
 
   const addPoints: AddPointsFn = (points, reason) => {
     if (points && points > 0) {
-      showToast(`+${points} points${reason ? ` — ${reason}` : ''}`);
+      showToast(`+${points} points${reason ? ` — ${reason}` : ''}`, 3000, reason);
     }
   };
 
