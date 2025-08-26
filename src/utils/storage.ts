@@ -16,18 +16,25 @@ export const loadAppData = async (): Promise<AppData> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        console.info('[storage] Attempting to load from Supabase for user:', user.id);
         const { data, error } = await supabase
           .from('user_data')
           .select('*')
           .eq('user_id', user.id)
           .single();
         
-        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-          console.error('Supabase load error:', error);
-        } else if (data) {
-          console.info('[storage] Loaded data from Supabase');
+        if (error) {
+          if (error.code === 'PGRST116') { // PGRST116 = no rows returned
+            console.info('[storage] No data found in Supabase, user is new');
+          } else {
+            console.error('Supabase load error:', error);
+          }
+        } else if (data && data.app_data) {
+          console.info('[storage] Successfully loaded data from Supabase');
           return data.app_data as AppData;
         }
+      } else {
+        console.info('[storage] No authenticated user, falling back to localStorage');
       }
     } catch (error) {
       console.error('Supabase connection failed, falling back to localStorage:', error);
@@ -38,16 +45,8 @@ export const loadAppData = async (): Promise<AppData> => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      // NUCLEAR CLEAR: Remove app data but preserve dark mode preference
-      const darkModePreference = localStorage.getItem('darkMode');
-      localStorage.clear();
-      sessionStorage.clear();
-      // Restore dark mode preference
-      if (darkModePreference) {
-        localStorage.setItem('darkMode', darkModePreference);
-      }
-      console.info('[storage] NUCLEAR CLEAR: Complete fresh start forced (preserved dark mode)');
-      return getEmptyAppData();
+      console.info('[storage] Loaded data from localStorage');
+      return JSON.parse(stored) as AppData;
     }
   } catch (error) {
     console.error('Failed to load app data:', error);
@@ -61,6 +60,7 @@ export const saveAppData = async (data: AppData): Promise<void> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        console.info('[storage] Attempting to save to Supabase for user:', user.id);
         const { error } = await supabase
           .from('user_data')
           .upsert({
@@ -72,9 +72,17 @@ export const saveAppData = async (data: AppData): Promise<void> => {
         if (error) {
           console.error('Supabase save error:', error);
         } else {
-          console.info('[storage] Saved data to Supabase');
-          return; // Success, don't fall back to localStorage
+          console.info('[storage] Successfully saved data to Supabase');
+          // Also save to localStorage as backup
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          } catch (localError) {
+            console.error('Failed to save to localStorage backup:', localError);
+          }
+          return;
         }
+      } else {
+        console.info('[storage] No authenticated user, saving to localStorage only');
       }
     } catch (error) {
       console.error('Supabase connection failed, falling back to localStorage:', error);
