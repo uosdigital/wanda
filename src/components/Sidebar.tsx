@@ -39,6 +39,7 @@ interface SidebarProps {
   timerSeconds?: number;
   onToggleTimer?: () => void;
   syncStatus?: 'synced' | 'syncing' | 'error' | 'offline';
+  originalFocusMinutes?: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -59,7 +60,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   timerMinutes = 25,
   timerSeconds = 0,
   onToggleTimer,
-  syncStatus = 'offline'
+  syncStatus = 'offline',
+  originalFocusMinutes = 25
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   // Disable page scroll when mobile menu is open

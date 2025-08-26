@@ -103,6 +103,7 @@ function App() {
   const [timerIsActive, setTimerIsActive] = useState(false);
   const [timerIsBreak, setTimerIsBreak] = useState(false);
   const [timerCompletedPomodoros, setTimerCompletedPomodoros] = useState(0);
+  const [originalFocusMinutes, setOriginalFocusMinutes] = useState(25);
 
   useEffect(() => {
     // Only save if we have actual data (not just the initial empty state)
@@ -191,7 +192,7 @@ function App() {
       } else {
         // Completed a break
         setTimerIsBreak(false);
-        setTimerMinutes(25);
+        setTimerMinutes(originalFocusMinutes);
         setTimerSeconds(0);
       }
     }
@@ -217,6 +218,7 @@ function App() {
     setTimerIsBreak(false);
     setTimerMinutes(25);
     setTimerSeconds(0);
+    setOriginalFocusMinutes(25);
   };
 
   const setCustomTimer = (minutes: number) => {
@@ -224,6 +226,7 @@ function App() {
     setTimerIsBreak(false);
     setTimerMinutes(minutes);
     setTimerSeconds(0);
+    setOriginalFocusMinutes(minutes);
   };
 
   // Reset completion states when modals close
@@ -475,6 +478,7 @@ function App() {
         timerSeconds={timerSeconds}
         onToggleTimer={toggleTimer}
         syncStatus={syncStatus}
+        originalFocusMinutes={originalFocusMinutes}
       />
 
       {/* Mobile Header */}
@@ -605,6 +609,7 @@ function App() {
             onToggleTimer={toggleTimer}
             onResetTimer={resetTimer}
             onSetCustomTimer={setCustomTimer}
+            originalFocusMinutes={originalFocusMinutes}
           />
         )}
 

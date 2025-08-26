@@ -13,6 +13,7 @@ interface TimerViewProps {
   onToggleTimer: () => void;
   onResetTimer: () => void;
   onSetCustomTimer?: (minutes: number) => void;
+  originalFocusMinutes?: number;
 }
 
 const TimerView: React.FC<TimerViewProps> = ({ 
@@ -26,7 +27,8 @@ const TimerView: React.FC<TimerViewProps> = ({
   timerCompletedPomodoros,
   onToggleTimer,
   onResetTimer,
-  onSetCustomTimer
+  onSetCustomTimer,
+  originalFocusMinutes = 25
 }) => {
   const [showCustomTimer, setShowCustomTimer] = useState(false);
   const [customMinutes, setCustomMinutes] = useState(25);
@@ -36,7 +38,7 @@ const TimerView: React.FC<TimerViewProps> = ({
 
   const progress = timerIsBreak 
     ? ((5 * 60 - (timerMinutes * 60 + timerSeconds)) / (5 * 60)) * 100
-    : ((25 * 60 - (timerMinutes * 60 + timerSeconds)) / (25 * 60)) * 100;
+    : ((originalFocusMinutes * 60 - (timerMinutes * 60 + timerSeconds)) / (originalFocusMinutes * 60)) * 100;
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
