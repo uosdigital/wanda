@@ -125,8 +125,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           ? 'bg-gray-900/90 border-gray-700' 
           : 'bg-white/90 border-gray-200'
       } ${
-        // Mobile responsive classes
-        'md:translate-x-0' + 
+        // Mobile responsive classes - full width on mobile, fixed width on desktop
+        'w-full md:w-64' +
         (isMobileOpen ? ' translate-x-0' : ' -translate-x-full md:translate-x-0')
       }`}>
       {/* Header Section */}
