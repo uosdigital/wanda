@@ -374,6 +374,31 @@ function App() {
     return !!(todaysData.eveningMood && todaysData.dayDescription);
   };
 
+  const calculateMorningStreak = (): number => {
+    let streak = 0;
+    const date = new Date();
+
+    const isMorningComplete = (data: DailyData | undefined): boolean => {
+      if (!data) return false;
+      return !!(data.sleepQuality && data.morningMood && data.mainPriority);
+    };
+
+    // Count consecutive days ending today where morning check-in is complete
+    while (true) {
+      const key = date.toDateString();
+      const dayData = appData.dailyData[key];
+      if (isMorningComplete(dayData)) {
+        streak += 1;
+        // Move to previous day
+        date.setDate(date.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  };
+
   const getTodaysKey = () => new Date().toDateString();
 
   const saveTimeBlocks = async (blocks: TimeBlock[]) => {
@@ -475,7 +500,7 @@ function App() {
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         totalPoints={calculateTotalPoints()}
-        currentStreak={appData.currentStreak}
+        currentStreak={calculateMorningStreak()}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         todaysPoints={calculateTodaysPoints()}

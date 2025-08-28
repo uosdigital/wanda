@@ -52,6 +52,8 @@ const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
+  const [showAddPersonModal, setShowAddPersonModal] = useState(false);
+  const [newPersonText, setNewPersonText] = useState('');
 
   // Random inspirational phrases
   const inspirationalPhrases = [
@@ -183,6 +185,33 @@ const Dashboard: React.FC<DashboardProps> = ({
   const handleCancelNewTask = () => {
     setNewTaskText('');
     setShowAddTaskModal(false);
+  };
+
+  const addNewPerson = () => {
+    setShowAddPersonModal(true);
+  };
+
+  const handleSubmitNewPerson = () => {
+    if (newPersonText.trim()) {
+      const currentPeople = todaysData.peopleToMessage || [];
+      const currentCompleted = todaysData.completedPeople || [];
+
+      const updatedPeople = [...currentPeople, newPersonText.trim()];
+      const updatedCompleted = [...currentCompleted, false];
+
+      onUpdateData({
+        peopleToMessage: updatedPeople,
+        completedPeople: updatedCompleted
+      });
+
+      setNewPersonText('');
+      setShowAddPersonModal(false);
+    }
+  };
+
+  const handleCancelNewPerson = () => {
+    setNewPersonText('');
+    setShowAddPersonModal(false);
   };
 
   const calculateSleepDuration = (bedTime: string, wakeTime: string) => {
@@ -523,70 +552,80 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Connect */}
-          {Array.isArray(todaysData.peopleToMessage) && todaysData.peopleToMessage.length > 0 && (
-            <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
-              isDarkMode 
-                ? 'bg-gray-800/80 border-gray-700' 
-                : 'bg-white/80 border-gray-100'
-            }`} style={{animationDelay: '0.3s'}}>
-              <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                <span className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden">
-                    <img src={connectImg} alt="Connect" className="w-full h-full object-cover" />
-                  </div>
-                  <span>Connect</span>
-                </span>
-              </h3>
-              <div className="space-y-3">
-                {(Array.isArray(todaysData.peopleToMessage) ? todaysData.peopleToMessage : []).map((person, index) => {
-                  const connectBlocks = todaysBlocks.filter(b => b.label === person);
-                  return (
-                    <div 
-                      key={index}
-                      className={`flex items-center p-3 rounded-xl cursor-pointer transition-colors ${
-                        isDarkMode 
-                          ? 'bg-gray-700 hover:bg-gray-600' 
-                          : 'bg-gray-50 hover:bg-gray-100'
-                      }`}
-                      onClick={() => togglePerson(index)}
-                    >
-                      {(todaysData.completedPeople || [])[index] ? (
-                        <CheckCircle2 className="text-green-500 flex-shrink-0 mr-2" size={20} />
-                      ) : (
-                        <Circle className="text-gray-400 flex-shrink-0 mr-2" size={20} />
+          <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
+            isDarkMode 
+              ? 'bg-gray-800/80 border-gray-700' 
+              : 'bg-white/80 border-gray-100'
+          }`} style={{animationDelay: '0.3s'}}>
+            <h3 className={`text-lg font-semibold mb-4 flex items-center justify-between ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              <span className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg overflow-hidden">
+                  <img src={connectImg} alt="Connect" className="w-full h-full object-cover" />
+                </div>
+                <span>Connect</span>
+              </span>
+              <button
+                onClick={addNewPerson}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
+                <Plus size={14} />
+                <span>Add Person</span>
+              </button>
+            </h3>
+            <div className="space-y-3">
+              {(!Array.isArray(todaysData.peopleToMessage) || todaysData.peopleToMessage.length === 0) && (
+                <div className={`${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-600'} p-4 rounded-xl text-sm`}>
+                  No people yet. Click "Add Person" to add someone to connect with.
+                </div>
+              )}
+              {(Array.isArray(todaysData.peopleToMessage) ? todaysData.peopleToMessage : []).map((person, index) => {
+                const connectBlocks = todaysBlocks.filter(b => b.label === person);
+                return (
+                  <div 
+                    key={index}
+                    className={`flex items-center p-3 rounded-xl cursor-pointer transition-colors ${
+                      isDarkMode 
+                        ? 'bg-gray-700 hover:bg-gray-600' 
+                        : 'bg-gray-50 hover:bg-gray-100'
+                    }`}
+                    onClick={() => togglePerson(index)}
+                  >
+                    {(todaysData.completedPeople || [])[index] ? (
+                      <CheckCircle2 className="text-green-500 flex-shrink-0 mr-2" size={20} />
+                    ) : (
+                      <Circle className="text-gray-400 flex-shrink-0 mr-2" size={20} />
+                    )}
+                    <span className={`flex-1 min-w-0 truncate ${
+                      (todaysData.completedPeople || [])[index] 
+                        ? 'text-green-600 line-through' 
+                        : isDarkMode ? 'text-gray-200' : 'text-gray-700'
+                    }`}>
+                      {person}
+                    </span>
+                    <div className="ml-3 flex items-center gap-2">
+                      {connectBlocks.map((b, i) => (
+                        <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] ${isDarkMode ? 'bg-orange-900/30 text-orange-200' : 'bg-orange-100 text-orange-700'}`}>
+                          <Clock size={10} className="mr-1" />
+                          {formatRange(b.start, b.end)}
+                        </span>
+                      ))}
+                      {onTimeblock && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onTimeblock(person, 'connect'); }}
+                          className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        >
+                          <Clock size={12} />
+                          <span>Timeblock</span>
+                        </button>
                       )}
-                      <span className={`flex-1 min-w-0 truncate ${
-                        (todaysData.completedPeople || [])[index] 
-                          ? 'text-green-600 line-through' 
-                          : isDarkMode ? 'text-gray-200' : 'text-gray-700'
-                      }`}>
-                        {person}
-                      </span>
-                      <div className="ml-3 flex items-center gap-2">
-                        {connectBlocks.map((b, i) => (
-                          <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] ${isDarkMode ? 'bg-orange-900/30 text-orange-200' : 'bg-orange-100 text-orange-700'}`}>
-                            <Clock size={10} className="mr-1" />
-                            {formatRange(b.start, b.end)}
-                          </span>
-                        ))}
-                        {onTimeblock && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onTimeblock(person, 'connect'); }}
-                            className={`px-2 py-1 rounded-lg text-xs font-medium flex items-center space-x-1 transition-colors ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                          >
-                            <Clock size={12} />
-                            <span>Timeblock</span>
-                          </button>
-                        )}
-                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
 
           {/* Habits */}
           {Array.isArray(todaysData.habits) && todaysData.habits.length > 0 && (
@@ -1018,6 +1057,70 @@ const Dashboard: React.FC<DashboardProps> = ({
                     }`}
                   >
                     Add Task
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Person Modal */}
+        {showAddPersonModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" style={{ overflow: 'hidden' }}>
+            <div className={`rounded-2xl p-6 shadow-xl border max-w-md w-full mx-4 animate-slide-up ${
+              isDarkMode 
+                ? 'bg-gray-800 border-gray-700' 
+                : 'bg-white border-gray-200'
+            }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>Add Person to Connect</h3>
+              
+              <div>
+                <div className="mb-4">
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newPersonText}
+                    onChange={(e) => setNewPersonText(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSubmitNewPerson()}
+                    placeholder="Enter a name..."
+                    className={`w-full p-3 rounded-xl border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      isDarkMode 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    }`}
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleCancelNewPerson}
+                    className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
+                      isDarkMode 
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmitNewPerson}
+                    disabled={!newPersonText.trim()}
+                    className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
+                      newPersonText.trim()
+                        ? 'bg-blue-600 text-white hover:bg-blue-500'
+                        : isDarkMode
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Add Person
                   </button>
                 </div>
               </div>

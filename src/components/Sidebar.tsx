@@ -214,11 +214,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             }`}>
               <div className="flex items-center space-x-2 text-blue-600">
                 <Trophy size={16} />
-                <span className="font-bold text-sm">{totalPoints}</span>
+                <span className="font-bold text-sm">{todaysPoints}</span>
               </div>
               <p className={`text-xs mt-1 ${
                 isDarkMode ? 'text-blue-300' : 'text-blue-700'
-              }`}>Total points</p>
+              }`}>Points</p>
             </div>
           </div>
         )}
