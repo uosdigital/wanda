@@ -27,9 +27,12 @@ interface SidebarProps {
   onToggleCollapse: () => void;
   totalPoints: number;
   currentStreak: number;
+  longestStreak: number;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   todaysPoints: number;
+  highScore: number;
+  pointsDeltaFromHigh: number;
   onSignOut: () => void;
   isMobileOpen: boolean;
   onMobileToggle: () => void;
@@ -49,9 +52,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
   totalPoints,
   currentStreak,
+  longestStreak,
   isDarkMode,
   onToggleDarkMode,
   todaysPoints,
+  highScore,
+  pointsDeltaFromHigh,
   onSignOut,
   isMobileOpen,
   onMobileToggle,
@@ -194,6 +200,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Stats Section */}
         {!isCollapsed && (
           <div className="grid grid-cols-2 gap-3 animate-slide-up">
+            {/* Current Streak */}
             <div className={`rounded-lg p-3 border ${
               isDarkMode 
                 ? 'bg-gradient-to-r from-rose-900/50 to-rose-800/50 border-rose-700' 
@@ -205,20 +212,66 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <p className={`text-xs mt-1 ${
                 isDarkMode ? 'text-rose-300' : 'text-rose-700'
-              }`}>Day streak</p>
+              }`}>Streak</p>
             </div>
+            {/* Longest Streak */}
+            <div className={`rounded-lg p-3 border ${
+              isDarkMode 
+                ? 'bg-gradient-to-r from-pink-900/50 to-pink-800/50 border-pink-700' 
+                : 'bg-gradient-to-r from-pink-50 to-pink-100 border-pink-200'
+            }`}>
+              <div className="flex items-center space-x-2 text-pink-600">
+                <Flame size={16} />
+                <span className="font-bold text-sm">{longestStreak}</span>
+              </div>
+              <p className={`text-xs mt-1 ${
+                isDarkMode ? 'text-pink-300' : 'text-pink-700'
+              }`}>All-time</p>
+            </div>
+            {/* Today's Points */}
             <div className={`rounded-lg p-3 border ${
               isDarkMode 
                 ? 'bg-gradient-to-r from-blue-900/50 to-blue-800/50 border-blue-700' 
                 : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200'
             }`}>
-              <div className="flex items-center space-x-2 text-blue-600">
-                <Trophy size={16} />
-                <span className="font-bold text-sm">{todaysPoints}</span>
+              <div className="flex items-center text-blue-600">
+                <div className="flex items-center space-x-2">
+                  <Trophy size={16} />
+                  <span className="font-bold text-sm">{todaysPoints}</span>
+                </div>
               </div>
-              <p className={`text-xs mt-1 ${
+              <div className={`flex items-center text-xs mt-1 ${
                 isDarkMode ? 'text-blue-300' : 'text-blue-700'
-              }`}>Points</p>
+              }`}>
+                <span>Points</span>
+                <span className={`ml-2 px-1 py-0 rounded-full text-[9px] leading-none font-medium ${
+                  pointsDeltaFromHigh === 0
+                    ? isDarkMode ? 'bg-gray-800 text-gray-300 border border-gray-700' : 'bg-gray-100 text-gray-600 border border-gray-200'
+                    : pointsDeltaFromHigh > 0
+                      ? (isDarkMode ? 'bg-green-900/40 text-green-300 border border-green-700' : 'bg-green-50 text-green-700 border border-green-200')
+                      : (isDarkMode ? 'bg-red-900/40 text-red-300 border border-red-700' : 'bg-red-50 text-red-700 border border-red-200')
+                }`}>
+                  {pointsDeltaFromHigh > 0 ? '+' : ''}{pointsDeltaFromHigh}
+                </span>
+              </div>
+            </div>
+            {/* High Score */}
+            <div className={`rounded-lg p-3 border ${
+              isDarkMode 
+                ? 'bg-gradient-to-r from-indigo-900/50 to-indigo-800/50 border-indigo-700' 
+                : 'bg-gradient-to-r from-indigo-50 to-indigo-100 border-indigo-200'
+            }`}>
+              <div className="flex items-center text-indigo-600">
+                <div className="flex items-center space-x-2">
+                  <Goal size={16} />
+                  <span className="font-bold text-sm">{highScore}</span>
+                </div>
+              </div>
+              <div className={`flex items-center text-xs mt-1 ${
+                isDarkMode ? 'text-indigo-300' : 'text-indigo-700'
+              }`}>
+                <span>All-time</span>
+              </div>
             </div>
           </div>
         )}

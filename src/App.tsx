@@ -353,6 +353,27 @@ function App() {
     return points;
   };
 
+  const calculatePointsForDay = (dayData?: DailyData): number => {
+    if (!dayData) return 0;
+    let points = 0;
+    if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) points += 10;
+    if (dayData.eveningMood && dayData.dayDescription) points += 10;
+    if (dayData.completedMainTask) points += 50;
+    if (dayData.completedTasks) points += dayData.completedTasks.filter(Boolean).length * 25;
+    if (dayData.completedPeople) points += dayData.completedPeople.filter(Boolean).length * 30;
+    if (dayData.completedHabits) points += dayData.completedHabits.length * 30;
+    if (dayData.basics) {
+      const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
+      points += (drankWater ? 10 : 0)
+        + (ateHealthy ? 10 : 0)
+        + (listenedToSomething ? 10 : 0)
+        + (wasMindful ? 10 : 0)
+        + (steps10k ? 10 : 0)
+        + (sleep7h ? 10 : 0);
+    }
+    return points;
+  };
+
   const addPoints: AddPointsFn = (points, reason) => {
     if (points && points > 0) {
       showToast(`+${points} points${reason ? ` — ${reason}` : ''}`, 3000, reason);
@@ -397,6 +418,51 @@ function App() {
     }
 
     return streak;
+  };
+
+  const calculateLongestMorningStreak = (): number => {
+    // Build a set of date-only strings for days with completed morning
+    const completeDays = new Set<string>();
+    Object.entries(appData.dailyData).forEach(([key, data]) => {
+      if (data && data.sleepQuality && data.morningMood && data.mainPriority) {
+        completeDays.add(new Date(key).toDateString());
+      }
+    });
+
+    const allDates = Array.from(completeDays)
+      .map(d => new Date(d))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    let longest = 0;
+    let current = 0;
+    let prev: Date | null = null;
+    for (const d of allDates) {
+      if (prev) {
+        const prevNext = new Date(prev);
+        prevNext.setDate(prevNext.getDate() + 1);
+        if (prevNext.toDateString() === d.toDateString()) {
+          current += 1;
+        } else {
+          current = 1;
+        }
+      } else {
+        current = 1;
+      }
+      if (current > longest) longest = current;
+      prev = d;
+    }
+    return longest;
+  };
+
+  const calculatePreviousHighScore = (): number => {
+    // Highest score before today
+    let high = 0;
+    const todayKey = new Date().toDateString();
+    Object.entries(appData.dailyData).forEach(([key, day]) => {
+      if (key === todayKey) return;
+      high = Math.max(high, calculatePointsForDay(day));
+    });
+    return high;
   };
 
   const getTodaysKey = () => new Date().toDateString();
@@ -501,9 +567,12 @@ function App() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         totalPoints={calculateTotalPoints()}
         currentStreak={calculateMorningStreak()}
+        longestStreak={calculateLongestMorningStreak()}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         todaysPoints={calculateTodaysPoints()}
+        highScore={calculatePreviousHighScore()}
+        pointsDeltaFromHigh={calculateTodaysPoints() - calculatePreviousHighScore()}
         onSignOut={handleSignOut}
         isMobileOpen={mobileSidebarOpen}
         onMobileToggle={() => setMobileSidebarOpen(!mobileSidebarOpen)}
