@@ -14,12 +14,13 @@ import { useToast } from './components/ToastProvider';
 import Timeblocking from './components/Timeblocking';
 import Points from './components/Points';
 import Notes from './components/Notes';
+import Basics from './components/Basics';
 import { TimeBlock } from './types';
 import { supabase, hasSupabaseConfig } from './utils/supabase';
 import visionImg from '../images/vision.jpg';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'timeblocking' | 'points' | 'notes';
 
 type AddPointsFn = (points: number, reason?: string) => void;
 
@@ -691,6 +692,17 @@ function App() {
 
         {currentView === 'habits' && (
           <Habits
+            appData={appData}
+            todaysData={getTodaysData()}
+            onUpdateData={updateDailyData}
+            onAddPoints={addPoints}
+            isDarkMode={isDarkMode}
+            onTimeblock={(label: string, category: Category) => triggerTimeblock(label, category)}
+          />
+        )}
+
+        {currentView === 'basics' && (
+          <Basics
             appData={appData}
             todaysData={getTodaysData()}
             onUpdateData={updateDailyData}

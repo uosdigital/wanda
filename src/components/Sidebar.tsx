@@ -14,11 +14,12 @@ import {
   Goal,
   StickyNote,
   LogOut,
-  Settings
+  Settings,
+  Heart
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'timeblocking' | 'points' | 'notes';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'timeblocking' | 'points' | 'notes';
 
 interface SidebarProps {
   currentView: View;
@@ -106,6 +107,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
       hoverColor: 'hover:bg-orange-50'
+    },
+    {
+      id: 'basics' as View,
+      label: 'Basics',
+      icon: Heart,
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-100',
+      hoverColor: 'hover:bg-pink-50'
     },
     {
       id: 'timeblocking' as View,
@@ -285,7 +294,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            const isDisabled = item.disabled;
 
             return (
               <li key={item.id}>
