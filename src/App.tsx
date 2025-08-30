@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, LogOut } from 'lucide-react';
+import { Sun, Moon, LogOut, X, Trophy } from 'lucide-react';
 import MorningFlow from './components/MorningFlow';
 import Dashboard from './components/Dashboard';
 import EveningFlow from './components/EveningFlow';
@@ -20,6 +20,13 @@ import Dread from './components/Dread';
 import { TimeBlock } from './types';
 import { supabase, hasSupabaseConfig } from './utils/supabase';
 import visionImg from '../images/vision.jpg';
+import priorityImg from '../images/priority.jpg';
+import tasksImg from '../images/tasks.jpg';
+import guitarImg from '../images/guitar.jpg';
+import basicsImg from '../images/basics.jpg';
+import connectImg from '../images/connect.jpg';
+import monsterImg from '../images/monster.jpg';
+import focusImg from '../images/focus.jpg';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
@@ -104,6 +111,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showPointsReset, setShowPointsReset] = useState(false);
   const [pointsResetValue, setPointsResetValue] = useState('');
+  const [showPointsBreakdown, setShowPointsBreakdown] = useState(false);
   
   // Global timer state
   const [timerMinutes, setTimerMinutes] = useState(25);
@@ -318,28 +326,7 @@ function App() {
   const calculateTotalPoints = () => {
     let total = 0;
     Object.values(appData.dailyData).forEach(dayData => {
-      // Morning check-in completed
-      if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) total += 10;
-      // Evening review completed (use dayDescription instead of winOfDay per current flow)
-      if (dayData.eveningMood && dayData.dayDescription) total += 10;
-      // Top priority completed
-      if (dayData.completedMainTask) total += 50;
-      // Tasks completed
-      if (dayData.completedTasks) total += dayData.completedTasks.filter(Boolean).length * 25;
-      // Connected with people
-      if (dayData.completedPeople) total += dayData.completedPeople.filter(Boolean).length * 30;
-      // Habits completed
-      if (dayData.completedHabits) total += dayData.completedHabits.length * 30;
-      // Basics (each 10 points)
-      if (dayData.basics) {
-        const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
-        total += (drankWater ? 10 : 0)
-          + (ateHealthy ? 10 : 0)
-          + (listenedToSomething ? 10 : 0)
-          + (wasMindful ? 10 : 0)
-          + (steps10k ? 10 : 0)
-          + (sleep7h ? 10 : 0);
-      }
+      total += calculatePointsForDay(dayData);
     });
     return total;
   };
@@ -347,12 +334,20 @@ function App() {
   const calculateTodaysPoints = (): number => {
     const dayData = getTodaysData();
     let points = 0;
+    
+    // Morning check-in completed
     if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) points += 10;
+    // Evening review completed
     if (dayData.eveningMood && dayData.dayDescription) points += 10;
+    // Top priority completed
     if (dayData.completedMainTask) points += 50;
+    // Tasks completed
     if (dayData.completedTasks) points += dayData.completedTasks.filter(Boolean).length * 25;
+    // Connected with people
     if (dayData.completedPeople) points += dayData.completedPeople.filter(Boolean).length * 30;
+    // Habits completed
     if (dayData.completedHabits) points += dayData.completedHabits.length * 30;
+    // Basics (each 10 points)
     if (dayData.basics) {
       const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
       points += (drankWater ? 10 : 0)
@@ -366,18 +361,27 @@ function App() {
     if (dayData.points) {
       points += dayData.points;
     }
+    
     return points;
   };
 
   const calculatePointsForDay = (dayData?: DailyData): number => {
     if (!dayData) return 0;
     let points = 0;
+    
+    // Morning check-in completed
     if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) points += 10;
+    // Evening review completed
     if (dayData.eveningMood && dayData.dayDescription) points += 10;
+    // Top priority completed
     if (dayData.completedMainTask) points += 50;
+    // Tasks completed
     if (dayData.completedTasks) points += dayData.completedTasks.filter(Boolean).length * 25;
+    // Connected with people
     if (dayData.completedPeople) points += dayData.completedPeople.filter(Boolean).length * 30;
+    // Habits completed
     if (dayData.completedHabits) points += dayData.completedHabits.length * 30;
+    // Basics (each 10 points)
     if (dayData.basics) {
       const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
       points += (drankWater ? 10 : 0)
@@ -391,7 +395,73 @@ function App() {
     if (dayData.points) {
       points += dayData.points;
     }
+    
     return points;
+  };
+
+  const calculatePointsBreakdown = () => {
+    const dayData = getTodaysData();
+    const breakdown = {
+      morningCheckin: 0,
+      eveningReview: 0,
+      priorityTask: 0,
+      tasks: 0,
+      habits: 0,
+      basics: 0,
+      connections: 0,
+      dread: 0,
+      pomodoro: 0
+    };
+
+    // Morning check-in completed
+    if (dayData.sleepQuality && dayData.morningMood && dayData.mainPriority) {
+      breakdown.morningCheckin = 10;
+    }
+
+    // Evening review completed
+    if (dayData.eveningMood && dayData.dayDescription) {
+      breakdown.eveningReview = 10;
+    }
+
+    // Top priority completed
+    if (dayData.completedMainTask) {
+      breakdown.priorityTask = 50;
+    }
+
+    // Tasks completed
+    if (dayData.completedTasks) {
+      breakdown.tasks = dayData.completedTasks.filter(Boolean).length * 25;
+    }
+
+    // Connected with people
+    if (dayData.completedPeople) {
+      breakdown.connections = dayData.completedPeople.filter(Boolean).length * 30;
+    }
+
+    // Habits completed
+    if (dayData.completedHabits) {
+      breakdown.habits = dayData.completedHabits.length * 30;
+    }
+
+    // Basics (each 10 points)
+    if (dayData.basics) {
+      const { drankWater, ateHealthy, listenedToSomething, wasMindful, steps10k, sleep7h } = dayData.basics;
+      breakdown.basics = (drankWater ? 10 : 0)
+        + (ateHealthy ? 10 : 0)
+        + (listenedToSomething ? 10 : 0)
+        + (wasMindful ? 10 : 0)
+        + (steps10k ? 10 : 0)
+        + (sleep7h ? 10 : 0);
+    }
+
+    // Points from onAddPoints calls (dread, reframes, pomodoro, etc.)
+    if (dayData.points) {
+      // We'll need to track these separately, but for now we'll show them as "dread"
+      // This is a simplified approach - in a real app you might want to track each type separately
+      breakdown.dread = dayData.points;
+    }
+
+    return breakdown;
   };
 
   const handlePointsReset = () => {
@@ -643,7 +713,200 @@ function App() {
         originalFocusMinutes={originalFocusMinutes}
         onUpdateDailyData={updateDailyData}
         onOpenSettings={() => setShowSettings(true)}
+        onOpenPointsBreakdown={() => setShowPointsBreakdown(true)}
+        pointsBreakdown={calculatePointsBreakdown()}
       />
+
+      {/* Points Breakdown Modal */}
+      {showPointsBreakdown && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowPointsBreakdown(false)}
+          />
+          
+          {/* Modal */}
+          <div className={`relative w-full max-w-lg rounded-2xl shadow-2xl border animate-slide-up ${
+            isDarkMode 
+              ? 'bg-gray-900 border-gray-700' 
+              : 'bg-white border-gray-200'
+          }`}>
+            {/* Header */}
+            <div className={`flex items-center justify-between p-6 border-b ${
+              isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            }`}>
+              <div>
+                <h3 className={`text-xl font-bold ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>Today's Points Breakdown</h3>
+                <p className={`text-sm mt-1 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>Total: {calculateTodaysPoints()} points</p>
+              </div>
+              <button
+                onClick={() => setShowPointsBreakdown(false)}
+                className={`p-2 rounded-lg transition-colors ${
+                  isDarkMode 
+                    ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              {calculatePointsBreakdown() ? (
+                <>
+                  {/* Morning Check-in */}
+                  {calculatePointsBreakdown().morningCheckin > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={visionImg} alt="Morning Check-in" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Morning Check-in</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().morningCheckin}</span>
+                    </div>
+                  )}
+
+                  {/* Evening Review */}
+                  {calculatePointsBreakdown().eveningReview > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={visionImg} alt="Evening Review" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Evening Review</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().eveningReview}</span>
+                    </div>
+                  )}
+
+                  {/* Priority Task */}
+                  {calculatePointsBreakdown().priorityTask > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={priorityImg} alt="Priority Task" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Priority Task</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().priorityTask}</span>
+                    </div>
+                  )}
+
+                  {/* Tasks */}
+                  {calculatePointsBreakdown().tasks > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={tasksImg} alt="Tasks" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Tasks Completed</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().tasks}</span>
+                    </div>
+                  )}
+
+                  {/* Habits */}
+                  {calculatePointsBreakdown().habits > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={guitarImg} alt="Habits" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Habits Completed</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().habits}</span>
+                    </div>
+                  )}
+
+                  {/* Basics */}
+                  {calculatePointsBreakdown().basics > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={basicsImg} alt="Basics" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Basics Completed</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().basics}</span>
+                    </div>
+                  )}
+
+                  {/* Connections */}
+                  {calculatePointsBreakdown().connections > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={connectImg} alt="Connections" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Connections</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().connections}</span>
+                    </div>
+                  )}
+
+                  {/* Dread */}
+                  {calculatePointsBreakdown().dread > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={monsterImg} alt="Dread" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Dread Management</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().dread}</span>
+                    </div>
+                  )}
+
+                  {/* Pomodoro */}
+                  {calculatePointsBreakdown().pomodoro > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-6 h-6 rounded-lg overflow-hidden">
+                          <img src={focusImg} alt="Pomodoro" className="w-full h-full object-cover" />
+                        </div>
+                        <span className={`text-sm ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>Pomodoro Sessions</span>
+                      </div>
+                      <span className="text-sm font-medium text-green-600">+{calculatePointsBreakdown().pomodoro}</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={`text-center py-8 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  <Trophy size={48} className="mx-auto mb-4 opacity-50" />
+                  <p>No points breakdown available</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Header */}
       <header className={`fixed top-0 left-0 right-0 z-30 md:hidden ${
@@ -714,7 +977,6 @@ function App() {
           <MorningFlow
             onComplete={(data) => {
               updateDailyData(data);
-              addPoints(10, 'Morning check-in completed');
               setMorningFlowCompleted(true);
             }}
             onBack={() => setMorningFlowOpen(false)}
@@ -733,7 +995,6 @@ function App() {
           <EveningFlow
             onComplete={(data) => {
               updateDailyData(data);
-              addPoints(10, 'Evening review completed');
               setEveningFlowCompleted(true);
             }}
             onBack={() => setEveningFlowOpen(false)}

@@ -16,7 +16,13 @@ import {
   LogOut,
   Settings,
   Heart,
-  Ghost
+  Ghost,
+  X,
+  CheckCircle2,
+  Coffee,
+  Brain,
+  Users,
+  Zap
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
 
@@ -47,6 +53,18 @@ interface SidebarProps {
   originalFocusMinutes?: number;
   onUpdateDailyData?: (data: any) => void;
   onOpenSettings: () => void;
+  onOpenPointsBreakdown: () => void;
+  pointsBreakdown?: {
+    morningCheckin: number;
+    eveningReview: number;
+    priorityTask: number;
+    tasks: number;
+    habits: number;
+    basics: number;
+    connections: number;
+    dread: number;
+    pomodoro: number;
+  };
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -73,8 +91,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   syncStatus = 'offline',
   originalFocusMinutes = 25,
   onUpdateDailyData,
-  onOpenSettings
+  onOpenSettings,
+  onOpenPointsBreakdown,
+  pointsBreakdown
 }) => {
+  
   // Disable page scroll when mobile menu is open
   React.useEffect(() => {
     if (isMobileOpen) {
@@ -253,11 +274,14 @@ const Sidebar: React.FC<SidebarProps> = ({
               }`}>All-time</p>
             </div>
             {/* Today's Points */}
-            <div className={`rounded-lg p-3 border ${
-              isDarkMode 
-                ? 'bg-gradient-to-r from-blue-900/50 to-blue-800/50 border-blue-700' 
-                : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200'
-            }`}>
+            <button
+              onClick={onOpenPointsBreakdown}
+              className={`rounded-lg p-3 border transition-all duration-200 hover:scale-105 cursor-pointer ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-blue-900/50 to-blue-800/50 border-blue-700 hover:from-blue-800/60 hover:to-blue-700/60' 
+                  : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100/80 hover:to-blue-200/80'
+              }`}
+            >
               <div className="flex items-center text-blue-600">
                 <div className="flex items-center space-x-2">
                   <Trophy size={16} />
@@ -278,7 +302,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   {pointsDeltaFromHigh > 0 ? '+' : ''}{pointsDeltaFromHigh}
                 </span>
               </div>
-            </div>
+            </button>
             {/* High Score */}
             <div className={`rounded-lg p-3 border ${
               isDarkMode 
@@ -454,6 +478,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
+      
 
     </div>
     </>

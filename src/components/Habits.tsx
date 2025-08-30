@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, Circle, Target, ArrowLeft, ArrowRight } from 'lucide-react';
 import { AppData, DailyData } from '../types';
+import { useToast } from './ToastProvider';
 import guitarImg from '../../images/guitar.jpg';
 import writeImg from '../../images/write.jpg';
 import socialiseImg from '../../images/socialise.jpg';
@@ -24,6 +25,7 @@ const Habits: React.FC<HabitsProps> = ({
   isDarkMode,
   onTimeblock
 }) => {
+  const { showToast } = useToast();
   const [currentWeekOffset, setCurrentWeekOffset] = React.useState(0);
   const [selectedDay, setSelectedDay] = React.useState<{
     date: Date;
@@ -57,9 +59,10 @@ const Habits: React.FC<HabitsProps> = ({
     let updatedHabits;
     if (isCompleted) {
       updatedHabits = completedHabits.filter(id => id !== habitId);
+      showToast('-30 points — Habit unchecked', 3000, 'Habit unchecked');
     } else {
       updatedHabits = [...completedHabits, habitId];
-      onAddPoints(30, 'Habit completed');
+      showToast('+30 points — Habit completed', 3000, 'Habit completed');
     }
     
     onUpdateData({ completedHabits: updatedHabits });

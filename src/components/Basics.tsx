@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DailyData, AppData } from '../types';
+import { useToast } from './ToastProvider';
 import healthyImg from '../../images/healthy.jpg';
 import listenImg from '../../images/listen.jpg';
 import mindfulImg from '../../images/mindful.jpg';
@@ -23,6 +24,7 @@ const Basics: React.FC<BasicsProps> = ({
   isDarkMode,
   onTimeblock
 }) => {
+  const { showToast } = useToast();
   const [currentWeekOffset, setCurrentWeekOffset] = React.useState(0);
   const [selectedDay, setSelectedDay] = React.useState<{
     date: Date;
@@ -61,7 +63,9 @@ const Basics: React.FC<BasicsProps> = ({
     };
     
     if (!isCompleted) {
-      onAddPoints(10, 'Basic completed');
+      showToast('+10 points — Basic completed', 3000, 'Basic completed');
+    } else {
+      showToast('-10 points — Basic unchecked', 3000, 'Basic unchecked');
     }
     
     onUpdateData({ basics: newBasics });

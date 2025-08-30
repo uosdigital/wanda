@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sun, Moon, CheckCircle2, Circle, RefreshCw, Target, Lightbulb, Clock, Calendar, Plus } from 'lucide-react';
 import { DailyData, TimeBlock } from '../types';
+import { useToast } from './ToastProvider';
 import guitarImg from '../../images/guitar.jpg';
 import writeImg from '../../images/write.jpg';
 import socialiseImg from '../../images/socialise.jpg';
@@ -50,6 +51,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   isDarkMode,
   onTimeblock
 }) => {
+  const { showToast } = useToast();
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
   const [showAddPersonModal, setShowAddPersonModal] = useState(false);
@@ -111,7 +113,10 @@ const Dashboard: React.FC<DashboardProps> = ({
         console.log('Task audio creation failed:', error);
       }
       
-      onAddPoints(25, 'Task completed');
+      // Show toast for points (calculated from data, not added manually)
+      showToast('+25 points — Task completed', 3000, 'Task completed');
+    } else {
+      showToast('-25 points — Task unchecked', 3000, 'Task unchecked');
     }
     
     onUpdateData({ completedTasks: newCompleted });
@@ -133,7 +138,10 @@ const Dashboard: React.FC<DashboardProps> = ({
         console.log('Priority audio creation failed:', error);
       }
       
-      onAddPoints(50, 'Priority task completed');
+      // Show toast for points
+      showToast('+50 points — Priority task completed', 3000, 'Priority task completed');
+    } else {
+      showToast('-50 points — Priority task unchecked', 3000, 'Priority task unchecked');
     }
     onUpdateData({ completedMainTask: newCompleted });
   };
@@ -154,7 +162,11 @@ const Dashboard: React.FC<DashboardProps> = ({
       } catch (error) {
         console.log('Connect audio creation failed:', error);
       }
-      onAddPoints(30, 'Connected with someone');
+      
+      // Show toast for points
+      showToast('+30 points — Connected with someone', 3000, 'Connected with someone');
+    } else {
+      showToast('-30 points — Connection unchecked', 3000, 'Connection unchecked');
     }
     
     onUpdateData({ completedPeople: newCompleted });
@@ -241,10 +253,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     const currentBasics = todaysData.basics || {};
     if ((currentBasics.sleep7h || false) !== has7h) {
       onUpdateData({ basics: { ...currentBasics, sleep7h: has7h } });
-      // Add points when sleep7h becomes true
-      if (has7h && !currentBasics.sleep7h) {
-        onAddPoints(10, '7+ hours sleep completed');
-      }
     }
   }, [todaysData.bedTime, todaysData.wakeTime]);
 
