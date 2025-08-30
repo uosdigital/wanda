@@ -15,11 +15,12 @@ import {
   StickyNote,
   LogOut,
   Settings,
-  Heart
+  Heart,
+  Ghost
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'timeblocking' | 'points' | 'notes';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
 
 interface SidebarProps {
   currentView: View;
@@ -44,6 +45,8 @@ interface SidebarProps {
   onToggleTimer?: () => void;
   syncStatus?: 'synced' | 'syncing' | 'error' | 'offline';
   originalFocusMinutes?: number;
+  onUpdateDailyData?: (data: any) => void;
+  onOpenSettings: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -68,9 +71,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   timerSeconds = 0,
   onToggleTimer,
   syncStatus = 'offline',
-  originalFocusMinutes = 25
+  originalFocusMinutes = 25,
+  onUpdateDailyData,
+  onOpenSettings
 }) => {
-  const [showSettings, setShowSettings] = useState(false);
   // Disable page scroll when mobile menu is open
   React.useEffect(() => {
     if (isMobileOpen) {
@@ -83,6 +87,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       document.body.style.overflow = 'unset';
     };
   }, [isMobileOpen]);
+
+
+
   const menuItems = [
     {
       id: 'dashboard' as View,
@@ -115,6 +122,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       color: 'text-pink-600',
       bgColor: 'bg-pink-100',
       hoverColor: 'hover:bg-pink-50'
+    },
+    {
+      id: 'dread' as View,
+      label: 'Dread',
+      icon: Ghost,
+      color: 'text-red-600',
+      bgColor: 'bg-red-100',
+      hoverColor: 'hover:bg-red-50'
     },
     {
       id: 'timeblocking' as View,
@@ -403,7 +418,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Settings Button */}
           <button
-            onClick={() => setShowSettings(true)}
+            onClick={onOpenSettings}
             className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
               isDarkMode 
                 ? 'hover:bg-gray-800 text-gray-300' 
@@ -439,63 +454,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className={`w-full max-w-md rounded-2xl shadow-xl border transform transition-all duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-            <div className={`px-5 py-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-              <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Settings</h2>
-            </div>
-            <div className="p-5 space-y-4">
-              {/* Dark Mode Toggle */}
-              <button
-                onClick={() => {
-                  onToggleDarkMode();
-                  setShowSettings(false);
-                }}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'hover:bg-gray-700 text-yellow-400' 
-                    : 'hover:bg-gray-100 text-gray-600'
-                }`}
-              >
-                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                <span className="font-medium">
-                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                </span>
-              </button>
 
-              {/* Sign Out Button */}
-              <button
-                onClick={() => {
-                  onSignOut();
-                  setShowSettings(false);
-                }}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 ${
-                  isDarkMode 
-                    ? 'hover:bg-gray-700 text-red-400' 
-                    : 'hover:bg-gray-100 text-red-600'
-                }`}
-              >
-                <LogOut size={20} />
-                <span className="font-medium">Sign Out</span>
-              </button>
-            </div>
-            <div className={`px-5 py-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-              <button
-                onClick={() => setShowSettings(false)}
-                className={`w-full px-4 py-2 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
     </>
   );

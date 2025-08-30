@@ -14,6 +14,26 @@ export interface Note {
   updatedAt?: string; // ISO datetime
 }
 
+export interface WorryEntry {
+  id: string;
+  createdAt: string; // ISO datetime
+  worry: string;
+  evidence: string;
+  physicalThoughts: string;
+  previousExperience: string;
+  balancedPerspective: string;
+  friendAdvice: string;
+  selfKindness: string;
+  reframe?: string; // Added later when reviewing
+  reframeDate?: string; // When reframe was added
+}
+
+export interface WorryReframe {
+  worryId: string;
+  reframe: string;
+  reframeDate: string; // ISO datetime
+}
+
 export interface DailyData {
   sleepQuality?: number;
   bedTime?: string;
@@ -54,6 +74,8 @@ export interface DailyData {
     startTime: string;
     endTime: string;
   }>;
+  worries?: WorryEntry[];
+  points?: number; // Daily points total from onAddPoints calls
 }
 
 export interface AppData {
@@ -63,3 +85,5 @@ export interface AppData {
   habits: string[];
   notes?: Note[];
 }
+
+export type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';

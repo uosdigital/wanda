@@ -11,6 +11,7 @@ import listenImg from '../../images/listen.jpg';
 import mindfulImg from '../../images/mindful.jpg';
 import healthyImg from '../../images/healthy.jpg';
 import runImg from '../../images/run.jpg';
+import monsterImg from '../../images/monster.jpg';
 
 interface PointsProps {
   onBack: () => void;
@@ -30,9 +31,11 @@ const Points: React.FC<PointsProps> = ({ onBack, isDarkMode = false }) => {
     { label: 'Complete habit', points: 30, icon: 'habits', image: guitarImg },
     { label: 'Connect with someone', points: 30, icon: 'connect', image: connectImg },
     { label: 'Complete additional task', points: 25, icon: 'tasks', image: tasksImg },
+    { label: 'Add a dread', points: 20, icon: 'dread', image: monsterImg },
     { label: 'Complete a focus session (25 min)', points: 15, icon: 'focus', image: focusImg },
     { label: 'Complete morning check-in', points: 10, icon: 'vision', image: visionImg },
     { label: 'Complete evening review', points: 10, icon: 'vision', image: visionImg },
+    { label: 'Reframe a dread', points: 10, icon: 'reframe', image: monsterImg },
     { label: 'Drink enough water', points: 10, icon: 'basics', image: basicsImg },
     { label: 'Eat healthy meals', points: 10, icon: 'healthy', image: healthyImg },
     { label: 'Listen to something interesting', points: 10, icon: 'listen', image: listenImg },

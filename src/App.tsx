@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Sun, Moon, LogOut } from 'lucide-react';
 import MorningFlow from './components/MorningFlow';
 import Dashboard from './components/Dashboard';
 import EveningFlow from './components/EveningFlow';
@@ -15,12 +16,13 @@ import Timeblocking from './components/Timeblocking';
 import Points from './components/Points';
 import Notes from './components/Notes';
 import Basics from './components/Basics';
+import Dread from './components/Dread';
 import { TimeBlock } from './types';
 import { supabase, hasSupabaseConfig } from './utils/supabase';
 import visionImg from '../images/vision.jpg';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'timeblocking' | 'points' | 'notes';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
 
 type AddPointsFn = (points: number, reason?: string) => void;
 
@@ -97,6 +99,11 @@ function App() {
     return saved ? JSON.parse(saved) : true;
   });
   const [timeblockIntent, setTimeblockIntent] = useState<{ label: string; category: Category } | null>(null);
+  
+  // Settings modal state
+  const [showSettings, setShowSettings] = useState(false);
+  const [showPointsReset, setShowPointsReset] = useState(false);
+  const [pointsResetValue, setPointsResetValue] = useState('');
   
   // Global timer state
   const [timerMinutes, setTimerMinutes] = useState(25);
@@ -279,7 +286,9 @@ function App() {
 
   const updateDailyData = async (data: Partial<DailyData>) => {
     const today = new Date().toDateString();
-    console.log('[DEBUG] Updating daily data for:', today, 'with:', data);
+    console.log('updateDailyData called with:', { today, data });
+    console.log('appData.dailyData[today] before:', appData.dailyData[today]);
+    
     const updatedData = {
       ...appData,
       dailyData: {
@@ -290,7 +299,9 @@ function App() {
         }
       }
     };
-    console.log('[DEBUG] Updated appData:', updatedData);
+    
+    console.log('updatedData.dailyData[today] after:', updatedData.dailyData[today]);
+    
     setAppData(updatedData);
     
     // Update sync status
@@ -351,6 +362,10 @@ function App() {
         + (steps10k ? 10 : 0)
         + (sleep7h ? 10 : 0);
     }
+    // Add points from onAddPoints calls (dread, reframes, etc.)
+    if (dayData.points) {
+      points += dayData.points;
+    }
     return points;
   };
 
@@ -372,12 +387,54 @@ function App() {
         + (steps10k ? 10 : 0)
         + (sleep7h ? 10 : 0);
     }
+    // Add points from onAddPoints calls (dread, reframes, etc.)
+    if (dayData.points) {
+      points += dayData.points;
+    }
     return points;
   };
 
+  const handlePointsReset = () => {
+    const newPoints = parseInt(pointsResetValue);
+    if (!isNaN(newPoints) && newPoints >= 0) {
+      // Update today's points to the new value
+      const today = new Date().toDateString();
+      updateDailyData({ points: newPoints });
+      
+      // Reset the input and hide the reset section
+      setPointsResetValue('');
+      setShowPointsReset(false);
+      setShowSettings(false);
+    }
+  };
+
   const addPoints: AddPointsFn = (points, reason) => {
-    if (points && points > 0) {
-      showToast(`+${points} points${reason ? ` — ${reason}` : ''}`, 3000, reason);
+    if (points !== 0) {
+      // Store points in today's daily data
+      const today = getTodaysKey();
+      
+      // Use a callback to get the most up-to-date state
+      setAppData(prevAppData => {
+        const todaysData = prevAppData.dailyData[today] || {};
+        const currentPoints = todaysData.points || 0;
+        
+        const updatedData = {
+          ...prevAppData,
+          dailyData: {
+            ...prevAppData.dailyData,
+            [today]: {
+              ...todaysData,
+              points: currentPoints + points
+            }
+          }
+        };
+        
+        return updatedData;
+      });
+      
+      // Show toast
+      const sign = points > 0 ? '+' : '';
+      showToast(`${sign}${points} points${reason ? ` — ${reason}` : ''}`, 3000, reason);
     }
   };
 
@@ -584,6 +641,8 @@ function App() {
         onToggleTimer={toggleTimer}
         syncStatus={syncStatus}
         originalFocusMinutes={originalFocusMinutes}
+        onUpdateDailyData={updateDailyData}
+        onOpenSettings={() => setShowSettings(true)}
       />
 
       {/* Mobile Header */}
@@ -712,6 +771,17 @@ function App() {
           />
         )}
 
+        {currentView === 'dread' && (
+          <Dread
+            appData={appData}
+            todaysData={getTodaysData()}
+            onUpdateData={updateDailyData}
+            onAddPoints={addPoints}
+            isDarkMode={isDarkMode}
+            onTimeblock={(label: string, category: Category) => triggerTimeblock(label, category)}
+          />
+        )}
+
         {currentView === 'timer' && (
           <TimerView
             onBack={() => setCurrentView('dashboard')}
@@ -755,6 +825,120 @@ function App() {
             onDelete={deleteNote}
             isDarkMode={isDarkMode}
           />
+        )}
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className={`w-full max-w-md rounded-2xl shadow-xl border transform transition-all duration-200 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <div className={`px-5 py-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Settings</h2>
+              </div>
+              <div className="p-5 space-y-4">
+                {/* Dark Mode Toggle */}
+                <button
+                  onClick={() => {
+                    setIsDarkMode(!isDarkMode);
+                    setShowSettings(false);
+                  }}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 ${
+                    isDarkMode 
+                      ? 'hover:bg-gray-700 text-yellow-400' 
+                      : 'hover:bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                  <span className="font-medium">
+                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                  </span>
+                </button>
+
+                {/* Points Reset Section */}
+                <div className={`p-4 rounded-lg border ${
+                  isDarkMode ? 'border-gray-600 bg-gray-700/50' : 'border-gray-200 bg-gray-50'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className={`text-sm font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>Reset Today's Points</h3>
+                    <button
+                      onClick={() => setShowPointsReset(!showPointsReset)}
+                      className={`text-xs px-2 py-1 rounded transition-colors ${
+                        isDarkMode 
+                          ? 'text-blue-400 hover:text-blue-300' 
+                          : 'text-blue-600 hover:text-blue-700'
+                      }`}
+                    >
+                      {showPointsReset ? 'Cancel' : 'Reset'}
+                    </button>
+                  </div>
+                  
+                  {showPointsReset && (
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="number"
+                          value={pointsResetValue}
+                          onChange={(e) => setPointsResetValue(e.target.value)}
+                          placeholder="Enter new points total"
+                          className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
+                            isDarkMode 
+                              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                          }`}
+                          min="0"
+                        />
+                        <button
+                          onClick={handlePointsReset}
+                          disabled={!pointsResetValue.trim()}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            pointsResetValue.trim()
+                              ? 'bg-red-500 hover:bg-red-600 text-white'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                        >
+                          Set
+                        </button>
+                      </div>
+                      <p className={`text-xs ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Current: {calculateTodaysPoints()} points • This will overwrite today's points total
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sign Out Button */}
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setShowSettings(false);
+                  }}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 ${
+                    isDarkMode 
+                      ? 'hover:bg-gray-700 text-red-400' 
+                      : 'hover:bg-gray-100 text-red-600'
+                  }`}
+                >
+                  <LogOut size={20} />
+                  <span className="font-medium">Sign Out</span>
+                </button>
+              </div>
+              <div className={`px-5 py-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className={`w-full px-4 py-2 rounded-lg transition-colors ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>

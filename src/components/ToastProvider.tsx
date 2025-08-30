@@ -49,6 +49,8 @@ const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     if (lowerReason.includes('mindful')) return mindfulImg;
     if (lowerReason.includes('steps') || lowerReason.includes('10k')) return runImg;
     if (lowerReason.includes('sleep') || lowerReason.includes('7+')) return basicsImg;
+    if (lowerReason.includes('worry') || lowerReason.includes('dread')) return mindfulImg;
+    if (lowerReason.includes('reframe')) return visionImg;
     
     // Default icon
     return priorityImg;

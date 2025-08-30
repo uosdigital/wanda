@@ -124,6 +124,11 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
         + (sleep7h ? 10 : 0);
     }
     
+    // Add points from onAddPoints calls (dread, reframes, etc.)
+    if (dayData.points) {
+      points += dayData.points;
+    }
+    
     return points;
   };
 
