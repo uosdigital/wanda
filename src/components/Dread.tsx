@@ -391,32 +391,8 @@ const Dread: React.FC<DreadProps> = ({
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>Ready to submit your worry?</h3>
               <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                Review your responses and submit when ready
+                Click submit when you're ready to save your worry
               </p>
-            </div>
-            <div className={`p-6 rounded-lg border ${
-              isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
-            }`}>
-              <h4 className={`font-semibold mb-3 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>Your worry:</h4>
-              <p className={`mb-4 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>{worryForm.worry}</p>
-              
-              <h4 className={`font-semibold mb-3 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>Balanced perspective:</h4>
-              <p className={`mb-4 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>{worryForm.balancedPerspective}</p>
-              
-              <h4 className={`font-semibold mb-3 ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>Self-kindness:</h4>
-              <p className={`${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>{worryForm.selfKindness}</p>
             </div>
           </div>
         );
