@@ -978,6 +978,8 @@ function App() {
             onComplete={(data) => {
               updateDailyData(data);
               setMorningFlowCompleted(true);
+              // Show toast for morning check-in completion
+              showToast('+10 points — Morning check-in completed', 3000, 'Morning check-in completed');
             }}
             onBack={() => setMorningFlowOpen(false)}
             existingData={getTodaysData()}
@@ -996,6 +998,8 @@ function App() {
             onComplete={(data) => {
               updateDailyData(data);
               setEveningFlowCompleted(true);
+              // Show toast for evening review completion
+              showToast('+10 points — Evening review completed', 3000, 'Evening review completed');
             }}
             onBack={() => setEveningFlowOpen(false)}
             existingData={getTodaysData()}

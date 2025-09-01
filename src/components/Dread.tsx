@@ -153,17 +153,15 @@ const Dread: React.FC<DreadProps> = ({
     console.log('Current worries from appData:', currentWorries);
     console.log('Updated worries:', updatedWorries);
     
-    // Save the updated worries and wait for completion
-    onUpdateData({ worries: updatedWorries }).then(() => {
-      console.log('Data update completed, checking if it appears...');
-      
-      // Add points for completing the worry workflow
-      onAddPoints(20, 'Dread added');
-      
-      // Reset workflow and close modal
-      resetWorkflow();
-      setShowWorryWorkflow(false);
-    });
+    // Save the updated worries
+    onUpdateData({ worries: updatedWorries });
+    
+    // Add points for completing the worry workflow
+    onAddPoints(20, 'Dread added');
+    
+    // Reset workflow and close modal
+    resetWorkflow();
+    setShowWorryWorkflow(false);
   };
 
   const getStepContent = () => {
@@ -405,6 +403,9 @@ const Dread: React.FC<DreadProps> = ({
   const handleReframeSubmit = () => {
     if (!selectedWorry) return;
 
+    // Check if this worry already has a reframe
+    const hasExistingReframe = selectedWorry.reframe && selectedWorry.reframe.trim() !== '';
+
     const updatedWorries = todaysWorries.map(worry => {
       if (worry.id === selectedWorry.id) {
         return {
@@ -418,8 +419,10 @@ const Dread: React.FC<DreadProps> = ({
 
     onUpdateData({ worries: updatedWorries });
     
-    // Add points for adding a reframe
-    onAddPoints(10, 'Dread reframed');
+    // Only add points if this is a NEW reframe (not editing an existing one)
+    if (!hasExistingReframe) {
+      onAddPoints(10, 'Dread reframed');
+    }
     
     // Reset and close
     setReframeText('');
@@ -752,7 +755,7 @@ const Dread: React.FC<DreadProps> = ({
                        className={`p-2 rounded-lg transition-colors ${
                          isDarkMode
                            ? 'text-red-400 hover:text-red-200 hover:bg-red-900/20'
-                           : 'text-red-500 hover:text-red-700 hover:bg-red-100'
+                           : 'text-red-500 hover:text-red-700 hover:bg-gray-100'
                        }`}
                        title="Delete worry"
                      >
