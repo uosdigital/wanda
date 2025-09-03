@@ -369,8 +369,8 @@ const Habits: React.FC<HabitsProps> = ({
           </div>
         </div>
         <div className="p-6">
-          {/* Weekly Calendar Grid */}
-          <div className="grid grid-cols-7 gap-2 mb-6">
+          {/* Desktop Weekly Calendar Grid */}
+          <div className="hidden md:grid md:grid-cols-7 gap-2 mb-6">
             {getWeeklyHabitsData.map((day, index) => {
               const hasHabits = day.data.habits && day.data.habits.length > 0;
               const completedHabits = day.data.completedHabits || [];
@@ -422,6 +422,106 @@ const Habits: React.FC<HabitsProps> = ({
                         {Math.round(completionRate)}%
                       </div>
                     )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Mobile Vertical List View */}
+          <div className="md:hidden space-y-3">
+            {getWeeklyHabitsData.map((day, index) => {
+              const hasHabits = day.data.habits && day.data.habits.length > 0;
+              const completedHabits = day.data.completedHabits || [];
+              const completionRate = hasHabits ? (completedHabits.length / day.data.habits.length) * 100 : 0;
+              
+              return (
+                <div
+                  key={index}
+                  onClick={() => setSelectedDay(day)}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
+                    hasHabits
+                      ? completionRate === 100
+                        ? 'bg-green-100 border-green-300 hover:bg-green-200'
+                        : completionRate > 0
+                          ? 'bg-yellow-100 border-yellow-300 hover:bg-yellow-200'
+                          : 'bg-red-100 border-red-300 hover:bg-red-200'
+                      : isDarkMode
+                        ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${
+                        hasHabits
+                          ? completionRate === 100
+                            ? 'bg-green-200 border-green-400'
+                            : completionRate > 0
+                              ? 'bg-yellow-200 border-yellow-400'
+                              : 'bg-red-200 border-red-400'
+                          : isDarkMode
+                            ? 'bg-gray-600 border-gray-500'
+                            : 'bg-gray-200 border-gray-300'
+                      }`}>
+                        <div className={`text-lg font-bold ${
+                          hasHabits
+                            ? completionRate === 100
+                              ? 'text-green-700'
+                              : completionRate > 0
+                                ? 'text-yellow-700'
+                                : 'text-red-700'
+                            : isDarkMode
+                              ? 'text-gray-300'
+                              : 'text-gray-600'
+                        }`}>
+                          {day.dayNumber}
+                        </div>
+                      </div>
+                      <div>
+                        <div className={`text-sm font-medium ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {day.dayName}
+                        </div>
+                        <div className={`text-xs ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          {day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right">
+                      {hasHabits ? (
+                        <>
+                          <div className={`text-sm font-medium ${
+                            completionRate === 100
+                              ? 'text-green-600'
+                              : completionRate > 0
+                                ? 'text-yellow-600'
+                                : 'text-red-600'
+                          }`}>
+                            {Math.round(completionRate)}%
+                          </div>
+                          <div className={`text-xs ${
+                            completionRate === 100
+                              ? 'text-green-600'
+                              : completionRate > 0
+                                ? 'text-yellow-600'
+                                : 'text-red-600'
+                          }`}>
+                            {completedHabits.length}/{day.data.habits.length} habits
+                          </div>
+                        </>
+                      ) : (
+                        <div className={`text-xs ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          No habits planned
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
