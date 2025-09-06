@@ -105,25 +105,39 @@ const Habits: React.FC<HabitsProps> = ({
           ? 'bg-gray-800/80 border-gray-700' 
           : 'bg-white/80 border-gray-100'
       }`}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className={`text-3xl font-bold ${
+            <h1 className={`text-2xl font-bold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>Daily Habits</h1>
-            <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+            }`}>Habits</h1>
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>
               Track your daily habits and build consistency
             </p>
           </div>
-          <div className="text-center">
+          
+          {/* Progress */}
+          <div className="text-right">
             <div className={`text-2xl font-bold ${
-              isDarkMode ? 'text-orange-400' : 'text-orange-600'
+              isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>
-              {getHabitProgress()}%
+              {Math.round(getHabitProgress())}%
             </div>
-            <p className={`text-sm ${
+            <div className={`text-sm ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>Complete</p>
+            }`}>
+              {todaysData.completedHabits?.length || 0} of {todaysData.habits?.length || 0}
+            </div>
           </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className={`w-full h-2 rounded-full overflow-hidden ${
+          isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+        }`}>
+          <div 
+            className="h-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-500 ease-out"
+            style={{ width: `${getHabitProgress()}%` }}
+          />
         </div>
       </div>
 
@@ -321,315 +335,197 @@ const Habits: React.FC<HabitsProps> = ({
         </div>
       )}
 
-      {/* Weekly Habits Tracking */}
-      <div className={`backdrop-blur-sm rounded-2xl shadow-sm border ${
+      {/* Weekly Overview */}
+      <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
         isDarkMode 
-          ? 'bg-gray-800 border-gray-700' 
-          : 'bg-white border-gray-100'
+          ? 'bg-gray-800/80 border-gray-700' 
+          : 'bg-white/80 border-gray-100'
       }`}>
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Target className="text-orange-600" size={16} />
-              </div>
-              <h2 className={`text-xl font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>Weekly Habits Tracking</h2>
-            </div>
-            {/* Week Navigation */}
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setCurrentWeekOffset(prev => prev - 1)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                  currentWeekOffset <= -2 
-                    ? 'text-gray-400 cursor-not-allowed' 
-                    : isDarkMode 
-                      ? 'text-gray-300 hover:bg-gray-700' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                }`}
-                disabled={currentWeekOffset <= -2}
-              >
-                <span className="text-sm">Previous</span>
-              </button>
-              <button
-                onClick={() => setCurrentWeekOffset(prev => prev + 1)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                  currentWeekOffset >= 2 
-                    ? 'text-gray-400 cursor-not-allowed' 
-                    : isDarkMode 
-                      ? 'text-gray-300 hover:bg-gray-700' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                }`}
-                disabled={currentWeekOffset >= 2}
-              >
-                <span className="text-sm">Next</span>
-              </button>
-            </div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className={`text-lg font-semibold ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>Weekly Overview</h2>
+          
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev - 1)}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              ←
+            </button>
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev + 1)}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              →
+            </button>
           </div>
         </div>
-        <div className="p-6">
-          {/* Desktop Weekly Calendar Grid */}
-          <div className="hidden md:grid md:grid-cols-7 gap-2 mb-6">
-            {getWeeklyHabitsData.map((day, index) => {
-              const hasHabits = day.data.habits && day.data.habits.length > 0;
-              const completedHabits = day.data.completedHabits || [];
-              const completionRate = hasHabits ? (completedHabits.length / day.data.habits.length) * 100 : 0;
-              
-              return (
-                <div
-                  key={index}
-                  onClick={() => setSelectedDay(day)}
-                  className={`aspect-square rounded-lg border-2 p-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
-                    hasHabits
-                      ? completionRate === 100
-                        ? 'bg-green-100 border-green-300 hover:bg-green-200'
-                        : completionRate > 0
-                          ? 'bg-yellow-100 border-yellow-300 hover:bg-yellow-200'
-                          : 'bg-red-100 border-red-300 hover:bg-red-200'
-                      : isDarkMode
-                        ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                  }`}
-                >
-                  <div className="text-center">
-                    <div className={`text-xs font-medium ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
-                      {day.dayName}
-                    </div>
-                    <div className={`text-lg font-bold ${
-                      hasHabits
-                        ? completionRate === 100
-                          ? 'text-green-700'
-                          : completionRate > 0
-                            ? 'text-yellow-700'
-                            : 'text-red-700'
-                        : isDarkMode
-                          ? 'text-gray-300'
-                          : 'text-gray-600'
-                    }`}>
-                      {day.dayNumber}
-                    </div>
-                    {hasHabits && (
-                      <div className={`text-xs font-medium ${
-                        completionRate === 100
-                          ? 'text-green-600'
-                          : completionRate > 0
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                      }`}>
-                        {Math.round(completionRate)}%
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
 
-          {/* Mobile Vertical List View */}
-          <div className="md:hidden space-y-3">
-            {getWeeklyHabitsData.map((day, index) => {
-              const hasHabits = day.data.habits && day.data.habits.length > 0;
-              const completedHabits = day.data.completedHabits || [];
-              const completionRate = hasHabits ? (completedHabits.length / day.data.habits.length) * 100 : 0;
-              
-              return (
-                <div
-                  key={index}
-                  onClick={() => setSelectedDay(day)}
-                  className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:scale-105 ${
-                    hasHabits
+        {/* Week Grid */}
+        <div className="grid grid-cols-7 gap-2 mb-4">
+          {getWeeklyHabitsData.map((day, index) => {
+            const hasHabits = day.data.habits && day.data.habits.length > 0;
+            const completedHabits = day.data.completedHabits || [];
+            const completionRate = hasHabits ? (completedHabits.length / day.data.habits.length) * 100 : 0;
+            
+            return (
+              <div
+                key={day.dateStr}
+                className={`text-center p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedDay?.dateStr === day.dateStr
+                    ? isDarkMode 
+                      ? 'bg-blue-900/50 border border-blue-700' 
+                      : 'bg-blue-50 border border-blue-200'
+                    : hasHabits
                       ? completionRate === 100
-                        ? 'bg-green-100 border-green-300 hover:bg-green-200'
-                        : completionRate > 0
-                          ? 'bg-yellow-100 border-yellow-300 hover:bg-yellow-200'
-                          : 'bg-red-100 border-red-300 hover:bg-red-200'
-                      : isDarkMode
-                        ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${
-                        hasHabits
-                          ? completionRate === 100
-                            ? 'bg-green-200 border-green-400'
-                            : completionRate > 0
-                              ? 'bg-yellow-200 border-yellow-400'
-                              : 'bg-red-200 border-red-400'
-                          : isDarkMode
-                            ? 'bg-gray-600 border-gray-500'
-                            : 'bg-gray-200 border-gray-300'
-                      }`}>
-                        <div className={`text-lg font-bold ${
-                          hasHabits
-                            ? completionRate === 100
-                              ? 'text-green-700'
-                              : completionRate > 0
-                                ? 'text-yellow-700'
-                                : 'text-red-700'
+                        ? isDarkMode
+                          ? 'bg-green-900/30 border border-green-700 hover:bg-green-900/40'
+                          : 'bg-green-100 border border-green-300 hover:bg-green-200'
+                        : completionRate >= 50
+                          ? isDarkMode
+                            ? 'bg-orange-900/30 border border-orange-700 hover:bg-orange-900/40'
+                            : 'bg-orange-100 border border-orange-300 hover:bg-orange-200'
+                          : completionRate > 0
+                            ? isDarkMode
+                              ? 'bg-red-900/30 border border-red-700 hover:bg-red-900/40'
+                              : 'bg-red-100 border border-red-300 hover:bg-red-200'
                             : isDarkMode
-                              ? 'text-gray-300'
-                              : 'text-gray-600'
-                        }`}>
-                          {day.dayNumber}
-                        </div>
-                      </div>
-                      <div>
-                        <div className={`text-sm font-medium ${
-                          isDarkMode ? 'text-white' : 'text-gray-900'
-                        }`}>
-                          {day.dayName}
-                        </div>
-                        <div className={`text-xs ${
-                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                        }`}>
-                          {day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right">
-                      {hasHabits ? (
-                        <>
-                          <div className={`text-sm font-medium ${
-                            completionRate === 100
-                              ? 'text-green-600'
-                              : completionRate > 0
-                                ? 'text-yellow-600'
-                                : 'text-red-600'
-                          }`}>
-                            {Math.round(completionRate)}%
-                          </div>
-                          <div className={`text-xs ${
-                            completionRate === 100
-                              ? 'text-green-600'
-                              : completionRate > 0
-                                ? 'text-yellow-600'
-                                : 'text-red-600'
-                          }`}>
-                            {completedHabits.length}/{day.data.habits.length} habits
-                          </div>
-                        </>
+                              ? 'bg-gray-700 border border-gray-600 hover:bg-gray-600'
+                              : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                      : isDarkMode 
+                        ? 'bg-gray-700 border border-gray-600 hover:bg-gray-600' 
+                        : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                }`}
+                onClick={() => setSelectedDay(day)}
+              >
+                <div className={`text-xs font-medium ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  {day.dayName}
+                </div>
+                <div className={`text-lg font-bold ${
+                  hasHabits
+                    ? completionRate === 100
+                      ? 'text-green-700'
+                      : completionRate >= 50
+                        ? 'text-orange-700'
+                        : completionRate > 0
+                          ? 'text-red-700'
+                          : isDarkMode ? 'text-white' : 'text-gray-900'
+                    : isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {day.dayNumber}
+                </div>
+                <div className={`text-xs ${
+                  hasHabits
+                    ? completionRate === 100
+                      ? 'text-green-600'
+                      : completionRate >= 50
+                        ? 'text-orange-600'
+                        : completionRate > 0
+                          ? 'text-red-600'
+                          : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  {hasHabits ? `${completedHabits.length}/${day.data.habits.length}` : '0/0'}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Selected Day Details */}
+        {selectedDay && (
+          <div className={`p-4 rounded-xl ${
+            isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+          }`}>
+            <h3 className={`font-semibold mb-3 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              {selectedDay.date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {habitOptions.map((habit) => {
+                const isPlanned = selectedDay.data.habits?.includes(habit.id) || false;
+                const isCompleted = selectedDay.data.completedHabits?.includes(habit.id) || false;
+                const imageSrc = habitImageMap[habit.id];
+                
+                return (
+                  <div
+                    key={habit.id}
+                    className={`flex items-center p-3 rounded-lg ${
+                      isCompleted
+                        ? isDarkMode 
+                          ? 'bg-green-900/20' 
+                          : 'bg-green-50'
+                        : isPlanned
+                          ? isDarkMode 
+                            ? 'bg-orange-900/20' 
+                            : 'bg-orange-50'
+                          : isDarkMode 
+                            ? 'bg-gray-600' 
+                            : 'bg-gray-100'
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-md overflow-hidden mr-3">
+                      {imageSrc ? (
+                        <img src={imageSrc} alt={habit.label} className="w-full h-full object-cover" />
                       ) : (
-                        <div className={`text-xs ${
-                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                        }`}>
-                          No habits planned
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <Target size={16} className="text-gray-500" />
                         </div>
                       )}
                     </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-sm font-medium ${
+                        isCompleted 
+                          ? 'text-green-600' 
+                          : isPlanned
+                            ? 'text-orange-600'
+                            : isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>
+                        {habit.label}
+                      </div>
+                    </div>
+                    
+                    <div className={`w-4 h-4 rounded-full border ${
+                      isCompleted
+                        ? 'bg-green-500 border-green-500'
+                        : isPlanned
+                          ? 'bg-orange-500 border-orange-500'
+                          : isDarkMode 
+                            ? 'border-gray-500' 
+                            : 'border-gray-300'
+                    }`}>
+                      {isCompleted && (
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Day Details Modal */}
-      {selectedDay && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl ${
-            isDarkMode 
-              ? 'bg-gray-800 border border-gray-700' 
-              : 'bg-white border border-gray-200'
-          }`}>
-            {/* Modal Header */}
-            <div className={`p-6 border-b ${
-              isDarkMode ? 'border-gray-700' : 'border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className={`text-xl font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {selectedDay.date.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </h3>
-                  <p className={`text-sm ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
-                    Planned Habits
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSelectedDay(null)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isDarkMode 
-                      ? 'text-gray-400 hover:bg-gray-700' 
-                      : 'text-gray-500 hover:bg-gray-100'
-                  }`}
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 space-y-6">
-              {/* Habits Section */}
-              <div>
-                <h4 className={`text-lg font-semibold mb-4 ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>Planned Habits</h4>
-                {selectedDay.data.habits && selectedDay.data.habits.length > 0 ? (
-                  <div className="space-y-3">
-                    {selectedDay.data.habits.map((habitId: string) => {
-                      const isCompleted = selectedDay.data.completedHabits?.includes(habitId) || false;
-                      const imageSrc = habitImageMap[habitId];
-                      const label = habitOptions.find(h => h.id === habitId)?.label || habitId;
-                      
-                      return (
-                        <div key={habitId} className="flex items-center justify-between p-3 rounded-lg border">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-6 h-6 rounded-md overflow-hidden bg-gray-200">
-                              {imageSrc ? (
-                                <img src={imageSrc} alt={label} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <Target size={14} className="text-gray-500" />
-                                </div>
-                              )}
-                            </div>
-                            <span className={`font-medium ${
-                              isCompleted 
-                                ? 'text-green-600 line-through' 
-                                : isDarkMode ? 'text-white' : 'text-gray-900'
-                            }`}>
-                              {label}
-                            </span>
-                          </div>
-                          <span className={`text-sm ${
-                            isCompleted 
-                              ? 'text-green-600' 
-                              : isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                          }`}>
-                            {isCompleted ? 'Completed' : 'Not completed'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className={`text-sm ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>No habits planned for this day</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

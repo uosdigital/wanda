@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DailyData, AppData, WorryEntry } from '../types';
-import { Brain, Clock, MessageSquare, Heart, Eye, Lightbulb, Users, Gift, Timer, ArrowLeft, ArrowRight, X, Eye as EyeIcon, Edit3, Trash2 } from 'lucide-react';
+import { Brain, Clock, Heart, Eye, Lightbulb, Users, Gift, Timer, ArrowLeft, ArrowRight, X, Eye as EyeIcon, Edit3, Trash2 } from 'lucide-react';
 import FullScreenModal from './FullScreenModal';
 import monsterImg from '../../images/monster.jpg';
 
@@ -71,7 +71,7 @@ const Dread: React.FC<DreadProps> = ({
 
   // Weekly calendar state
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string>(new Date().toDateString());
 
   // Get weekly worries data for calendar
   const getWeeklyWorriesData = useMemo(() => {
@@ -528,7 +528,7 @@ const Dread: React.FC<DreadProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
       <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
         isDarkMode
@@ -564,7 +564,18 @@ const Dread: React.FC<DreadProps> = ({
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Workflow and Exercises */}
+      <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
+        isDarkMode
+          ? 'bg-gray-800/80 border-gray-700'
+          : 'bg-white/80 border-gray-100'
+      }`}>
+        <h2 className={`text-lg font-semibold mb-4 ${
+          isDarkMode ? 'text-white' : 'text-gray-900'
+        }`}>Tools for Relief</h2>
+        
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <button
@@ -621,192 +632,231 @@ const Dread: React.FC<DreadProps> = ({
 
 
 
-        {/* Weekly Calendar */}
-        <div className="mb-6 mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className={`text-lg font-semibold ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>Weekly Calendar</h3>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setCurrentWeekOffset(prev => prev - 1)}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'bg-gray-700 hover:bg-gray-600' 
-                    : 'bg-gray-100 hover:bg-gray-200'
-                }`}
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setCurrentWeekOffset(0)}
-                className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                    : 'bg-blue-500 hover:bg-blue-600 text-white'
-                }`}
-              >
-                This Week
-              </button>
-              <button
-                onClick={() => setCurrentWeekOffset(prev => prev + 1)}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'bg-gray-700 hover:bg-gray-600' 
-                    : 'bg-gray-100 hover:bg-gray-200'
-                }`}
-              >
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+      {/* Weekly Overview */}
+      <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
+        isDarkMode
+          ? 'bg-gray-800/80 border-gray-700'
+          : 'bg-white/80 border-gray-100'
+      }`}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className={`text-lg font-semibold ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>Weekly Overview</h2>
           
-          <div className="grid grid-cols-7 gap-2">
-            {getWeeklyWorriesData.map((day) => (
-              <button
-                key={day.date}
-                onClick={() => setSelectedDay(day.date)}
-                className={`p-3 rounded-lg text-center transition-colors ${
-                  day.date === new Date().toDateString()
-                    ? 'bg-blue-500 text-white'
-                    : day.hasWorries
-                    ? 'bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800'
-                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700'
-                }`}
-              >
-                <div className="text-xs font-medium">{day.dayName}</div>
-                <div className="text-lg font-bold">{day.dayNumber}</div>
-                {day.hasWorries && (
-                  <div className="text-xs mt-1">
-                    {day.worries.length} {day.worries.length === 1 ? 'worry' : 'worries'}
-                  </div>
-                )}
-              </button>
-            ))}
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev - 1)}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              ←
+            </button>
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev + 1)}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              →
+            </button>
           </div>
         </div>
 
-        {/* Today's Worries */}
-        {todaysWorries.length > 0 && (
-          <div className="space-y-4">
-            <h3 className={`text-lg font-semibold ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>Today's Worries</h3>
+        {/* Week Grid */}
+        <div className="grid grid-cols-7 gap-2 mb-4">
+          {getWeeklyWorriesData.map((day) => {
+            const hasWorries = day.worries && day.worries.length > 0;
+            const worryCount = day.worries.length;
             
-            {todaysWorries.map((worry) => (
+            return (
               <div
-                key={worry.id}
-                className={`p-4 rounded-xl border transition-all duration-200 ${
-                  isDarkMode
-                    ? 'bg-gray-700/50 border-gray-600 hover:bg-gray-700/80'
-                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                key={day.date}
+                className={`text-center p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedDay === day.date
+                    ? isDarkMode 
+                      ? 'bg-blue-900/50 border border-blue-700' 
+                      : 'bg-blue-50 border border-blue-200'
+                    : hasWorries
+                      ? isDarkMode
+                        ? 'bg-red-900/30 border border-red-700 hover:bg-red-900/40'
+                        : 'bg-red-100 border border-red-300 hover:bg-red-200'
+                      : isDarkMode 
+                        ? 'bg-gray-700 border border-gray-600 hover:bg-gray-600' 
+                        : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
                 }`}
+                onClick={() => setSelectedDay(day.date)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h4 className={`font-medium ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{worry.worry}</h4>
-                    
-                    {worry.reframe && (
-                      <div className={`p-3 rounded-lg mt-3 ${
-                        isDarkMode ? 'bg-green-900/20 border border-green-700' : 'bg-green-50 border border-green-200'
-                      }`}>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <Lightbulb className={`w-4 h-4 ${
-                            isDarkMode ? 'text-green-400' : 'text-green-600'
-                          }`} />
-                          <span className={`text-sm font-medium ${
-                            isDarkMode ? 'text-green-400' : 'text-green-600'
-                          }`}>Reframe</span>
-                        </div>
-                        <p className={`text-sm ${
-                          isDarkMode ? 'text-green-300' : 'text-green-700'
-                        }`}>{worry.reframe}</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                                     <div className="ml-4 flex items-center space-x-2">
-                     <button
-                       onClick={() => openViewModal(worry)}
-                       className={`p-2 rounded-lg transition-colors ${
-                         isDarkMode
-                           ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                       }`}
-                       title="View details"
-                     >
-                       <EyeIcon size={16} />
-                     </button>
-                     <button
-                       onClick={() => openEditModal(worry)}
-                       className={`p-2 rounded-lg transition-colors ${
-                         isDarkMode
-                           ? 'text-blue-400 hover:text-blue-200 hover:bg-blue-900/20'
-                           : 'text-blue-500 hover:text-blue-700 hover:bg-blue-100'
-                       }`}
-                       title="Edit worry"
-                     >
-                       <Edit3 size={16} />
-                     </button>
-                     <button
-                       onClick={() => handleDeleteWorry(worry.id)}
-                       className={`p-2 rounded-lg transition-colors ${
-                         isDarkMode
-                           ? 'text-red-400 hover:text-red-200 hover:bg-red-900/20'
-                           : 'text-red-500 hover:text-red-700 hover:bg-gray-100'
-                       }`}
-                       title="Delete worry"
-                     >
-                       <Trash2 size={16} />
-                     </button>
-                     {!worry.reframe ? (
-                       <button
-                         onClick={() => openReframeModal(worry)}
-                         className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                           isDarkMode
-                             ? 'bg-green-600 hover:bg-green-700 text-white'
-                             : 'bg-green-500 hover:bg-green-600 text-white'
-                         }`}
-                       >
-                         Add Reframe
-                       </button>
-                     ) : (
-                       <button
-                         onClick={() => openReframeModal(worry)}
-                         className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                           isDarkMode
-                             ? 'bg-green-600 hover:bg-green-700 text-white'
-                             : 'bg-green-500 hover:bg-green-600 text-white'
-                         }`}
-                       >
-                         Edit Reframe
-                       </button>
-                     )}
-                   </div>
+                <div className={`text-xs font-medium ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  {day.dayName}
+                </div>
+                <div className={`text-lg font-bold ${
+                  hasWorries
+                    ? 'text-red-700'
+                    : isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {day.dayNumber}
+                </div>
+                <div className={`text-xs ${
+                  hasWorries
+                    ? 'text-red-600'
+                    : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  {hasWorries ? `${worryCount} ${worryCount === 1 ? 'worry' : 'worries'}` : '0 worries'}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
 
-        {/* Empty State */}
-        {todaysWorries.length === 0 && (
-          <div className="text-center py-12">
-            <Brain className={`w-16 h-16 mx-auto mb-4 ${
-              isDarkMode ? 'text-gray-600' : 'text-gray-400'
-            }`} />
-            <h3 className={`text-lg font-medium mb-2 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-600'
-            }`}>No worries today</h3>
-            <p className={`text-sm ${
-              isDarkMode ? 'text-gray-500' : 'text-gray-500'
-            }`}>
-              When anxiety strikes, use the worry workflow to help reframe your thoughts
-            </p>
+        {/* Selected Day Details */}
+          <div className={`p-4 rounded-xl ${
+            isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+          }`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`font-semibold ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                {selectedDay === new Date().toDateString() 
+                  ? "Today's Worries"
+                  : new Date(selectedDay).toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })
+                }
+              </h3>
+              {selectedDay !== new Date().toDateString() && (
+                <button
+                  onClick={() => setSelectedDay(new Date().toDateString())}
+                  className={`p-1 rounded-lg transition-colors ${
+                    isDarkMode 
+                      ? 'text-gray-400 hover:bg-gray-600' 
+                      : 'text-gray-500 hover:bg-gray-200'
+                  }`}
+                  title="Back to today"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            
+            {appData.dailyData[selectedDay]?.worries && appData.dailyData[selectedDay].worries.length > 0 ? (
+              <div className="space-y-4">
+                {appData.dailyData[selectedDay].worries.map((worry) => (
+                  <div
+                    key={worry.id}
+                    className={`p-4 rounded-xl border ${
+                      isDarkMode
+                        ? 'bg-gray-600/50 border-gray-500'
+                        : 'bg-white border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h4 className={`font-medium mb-2 ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>{worry.worry}</h4>
+                        
+                        {worry.reframe && (
+                          <div className={`p-3 rounded-lg mt-3 ${
+                            isDarkMode ? 'bg-green-900/20 border border-green-700' : 'bg-green-50 border border-green-200'
+                          }`}>
+                            <div className="flex items-center space-x-2 mb-1">
+                              <Lightbulb className={`w-4 h-4 ${
+                                isDarkMode ? 'text-green-400' : 'text-green-600'
+                              }`} />
+                              <span className={`text-sm font-medium ${
+                                isDarkMode ? 'text-green-400' : 'text-green-600'
+                              }`}>Reframe</span>
+                            </div>
+                            <p className={`text-sm ${
+                              isDarkMode ? 'text-green-300' : 'text-green-700'
+                            }`}>{worry.reframe}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => openViewModal(worry)}
+                        className={`p-2 rounded-lg transition-colors ${
+                          isDarkMode
+                            ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-600'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        }`}
+                        title="View details"
+                      >
+                        <EyeIcon size={16} />
+                      </button>
+                      <button
+                        onClick={() => openEditModal(worry)}
+                        className={`p-2 rounded-lg transition-colors ${
+                          isDarkMode
+                            ? 'text-blue-400 hover:text-blue-200 hover:bg-blue-900/20'
+                            : 'text-blue-500 hover:text-blue-700 hover:bg-blue-100'
+                        }`}
+                        title="Edit worry"
+                      >
+                        <Edit3 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteWorry(worry.id)}
+                        className={`p-2 rounded-lg transition-colors ${
+                          isDarkMode
+                            ? 'text-red-400 hover:text-red-200 hover:bg-red-900/20'
+                            : 'text-red-500 hover:text-red-700 hover:bg-red-100'
+                        }`}
+                        title="Delete worry"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      {!worry.reframe ? (
+                        <button
+                          onClick={() => openReframeModal(worry)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                            isDarkMode
+                              ? 'bg-green-600 hover:bg-green-700 text-white'
+                              : 'bg-green-500 hover:bg-green-600 text-white'
+                          }`}
+                        >
+                          Add Reframe
+                        </button>
+                      ) : (
+                        <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                          isDarkMode
+                            ? 'bg-green-900/20 text-green-400 border border-green-700'
+                            : 'bg-green-50 text-green-700 border border-green-200'
+                        }`}>
+                          Reframed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={`text-center py-8 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>
+                <Brain className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>
+                  {selectedDay === new Date().toDateString() 
+                    ? "No worries today. When anxiety strikes, use the worry workflow to help reframe your thoughts."
+                    : "No worries recorded for this day"
+                  }
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Worry Workflow Modal */}
@@ -1281,158 +1331,6 @@ const Dread: React.FC<DreadProps> = ({
         </div>
       )}
 
-      {/* Day Details Modal */}
-      {selectedDay && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-xl ${
-            isDarkMode 
-              ? 'bg-gray-800 border border-gray-700' 
-              : 'bg-white border border-gray-200'
-          }`}>
-            {/* Modal Header */}
-            <div className={`p-6 border-b ${
-              isDarkMode ? 'border-gray-700' : 'border-gray-200'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className={`text-xl font-semibold ${
-                    isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {new Date(selectedDay).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </h3>
-                  <p className={`text-sm ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
-                    Worries and reflections from this day
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSelectedDay(null)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isDarkMode 
-                      ? 'text-gray-400 hover:bg-gray-700' 
-                      : 'text-gray-500 hover:bg-gray-100'
-                  }`}
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6">
-              {appData.dailyData[selectedDay]?.worries && appData.dailyData[selectedDay].worries.length > 0 ? (
-                <div className="space-y-4">
-                  {appData.dailyData[selectedDay].worries.map((worry) => (
-                    <div
-                      key={worry.id}
-                      className={`p-4 rounded-xl border ${
-                        isDarkMode
-                          ? 'bg-gray-700/50 border-gray-600'
-                          : 'bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className={`font-medium ${
-                            isDarkMode ? 'text-white' : 'text-gray-900'
-                          }`}>{worry.worry}</h4>
-                          
-                          {worry.reframe && (
-                            <div className={`p-3 rounded-lg mt-3 ${
-                              isDarkMode ? 'bg-green-900/20 border border-green-700' : 'bg-green-50 border border-green-200'
-                            }`}>
-                              <div className="flex items-center space-x-2 mb-1">
-                                <Lightbulb className={`w-4 h-4 ${
-                                  isDarkMode ? 'text-green-400' : 'text-green-600'
-                                }`} />
-                                <span className={`text-sm font-medium ${
-                                  isDarkMode ? 'text-green-400' : 'text-green-600'
-                                }`}>Reframe</span>
-                              </div>
-                              <p className={`text-sm ${
-                                isDarkMode ? 'text-green-300' : 'text-green-700'
-                              }`}>{worry.reframe}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="ml-4 flex items-center space-x-2">
-                          <button
-                            onClick={() => openViewModal(worry)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isDarkMode
-                                ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                            }`}
-                            title="View details"
-                          >
-                            <EyeIcon size={16} />
-                          </button>
-                          <button
-                            onClick={() => openEditModal(worry)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isDarkMode
-                                ? 'text-blue-400 hover:text-blue-200 hover:bg-blue-900/20'
-                                : 'text-blue-500 hover:text-blue-700 hover:bg-blue-100'
-                            }`}
-                            title="Edit worry"
-                          >
-                            <Edit3 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteWorry(worry.id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isDarkMode
-                                ? 'text-red-400 hover:text-red-200 hover:bg-red-900/20'
-                                : 'text-red-500 hover:text-red-700 hover:bg-gray-100'
-                            }`}
-                            title="Delete worry"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                          {!worry.reframe ? (
-                            <button
-                              onClick={() => openReframeModal(worry)}
-                              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                                isDarkMode
-                                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                                  : 'bg-green-500 hover:bg-green-600 text-white'
-                              }`}
-                            >
-                              Add Reframe
-                            </button>
-                          ) : (
-                            <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                              isDarkMode
-                                ? 'bg-green-900/20 text-green-400 border border-green-700'
-                                : 'bg-green-50 text-green-700 border border-green-200'
-                            }`}>
-                              Reframed
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={`text-center py-8 ${
-                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                  <Brain className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No worries recorded for this day</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Edit Worry Modal */}
       {showEditModal && editingWorry && (
@@ -1619,7 +1517,6 @@ const Dread: React.FC<DreadProps> = ({
           </div>
         </div>
       )}
-
 
     </div>
   );
