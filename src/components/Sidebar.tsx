@@ -255,8 +255,37 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* Stats Section */}
         {!isCollapsed && (
           <div className="space-y-3 animate-slide-up">
-            {/* Streaks Row - Top */}
+            {/* Top Row - Today's Points and Current Streak */}
             <div className="grid grid-cols-2 gap-3">
+              {/* Today's Points */}
+              <button
+                onClick={onOpenPointsBreakdown}
+                className={`rounded-lg p-3 border transition-all duration-200 hover:scale-105 cursor-pointer ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-blue-900/50 to-blue-800/50 border-blue-700 hover:from-blue-800/60 hover:to-blue-700/60' 
+                    : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100/80 hover:to-blue-200/80'
+                }`}
+              >
+                <div className="flex items-center space-x-2 text-blue-600">
+                  <Trophy size={16} />
+                  <span className="font-bold text-sm">{todaysPoints}</span>
+                </div>
+                <div className={`flex items-center justify-between text-xs mt-1 ${
+                  isDarkMode ? 'text-blue-300' : 'text-blue-700'
+                }`}>
+                  <span>Today</span>
+                  <span className={`px-1 py-0 rounded-full text-[9px] leading-none font-medium ${
+                    pointsDeltaFromHigh === 0
+                      ? isDarkMode ? 'bg-gray-800 text-gray-300 border border-gray-700' : 'bg-gray-100 text-gray-600 border border-gray-200'
+                      : pointsDeltaFromHigh > 0
+                        ? (isDarkMode ? 'bg-green-900/40 text-green-300 border border-green-700' : 'bg-green-50 text-green-700 border border-green-200')
+                        : (isDarkMode ? 'bg-red-900/40 text-red-300 border border-red-700' : 'bg-red-50 text-red-700 border border-red-200')
+                  }`}>
+                    {pointsDeltaFromHigh > 0 ? '+' : ''}{pointsDeltaFromHigh}
+                  </span>
+                </div>
+              </button>
+
               {/* Current Streak */}
               <div className={`rounded-lg p-3 border ${
                 isDarkMode 
@@ -267,59 +296,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <Flame size={16} />
                   <span className="font-bold text-sm">{currentStreak}</span>
                 </div>
-                <p className={`text-xs mt-1 ${
-                  isDarkMode ? 'text-rose-300' : 'text-rose-700'
-                }`}>Streak</p>
-              </div>
-              {/* Longest Streak */}
-              <div className={`rounded-lg p-3 border ${
-                isDarkMode 
-                  ? 'bg-gradient-to-r from-pink-900/50 to-pink-800/50 border-pink-700' 
-                  : 'bg-gradient-to-r from-pink-50 to-pink-100 border-pink-200'
-              }`}>
-                <div className="flex items-center space-x-2 text-pink-600">
-                  <Flame size={16} />
-                  <span className="font-bold text-sm">{longestStreak}</span>
-                </div>
-                <p className={`text-xs mt-1 ${
-                  isDarkMode ? 'text-pink-300' : 'text-pink-700'
-                }`}>Best</p>
+               <p className={`text-xs mt-1 ${
+                 isDarkMode ? 'text-rose-300' : 'text-rose-700'
+               }`}>Streak</p>
               </div>
             </div>
 
-            {/* Today's Points - Full Width */}
-            <button
-              onClick={onOpenPointsBreakdown}
-              className={`w-full rounded-lg p-3 border transition-all duration-200 hover:scale-105 cursor-pointer ${
-                isDarkMode 
-                  ? 'bg-gradient-to-r from-blue-900/50 to-blue-800/50 border-blue-700 hover:from-blue-800/60 hover:to-blue-700/60' 
-                  : 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100/80 hover:to-blue-200/80'
-              }`}
-            >
-              <div className="flex items-center justify-between text-blue-600">
-                <div className="flex items-center space-x-2">
-                  <Trophy size={16} />
-                  <span className="font-bold text-sm">Today's Points</span>
-                </div>
-                <span className="font-bold text-lg">{todaysPoints}</span>
-              </div>
-              <div className={`flex items-center justify-between text-xs mt-1 ${
-                isDarkMode ? 'text-blue-300' : 'text-blue-700'
-              }`}>
-                <span>Current</span>
-                <span className={`px-1 py-0 rounded-full text-[9px] leading-none font-medium ${
-                  pointsDeltaFromHigh === 0
-                    ? isDarkMode ? 'bg-gray-800 text-gray-300 border border-gray-700' : 'bg-gray-100 text-gray-600 border border-gray-200'
-                    : pointsDeltaFromHigh > 0
-                      ? (isDarkMode ? 'bg-green-900/40 text-green-300 border border-green-700' : 'bg-green-50 text-green-700 border border-green-200')
-                      : (isDarkMode ? 'bg-red-900/40 text-red-300 border border-red-700' : 'bg-red-50 text-red-700 border border-red-200')
-                }`}>
-                  {pointsDeltaFromHigh > 0 ? '+' : ''}{pointsDeltaFromHigh}
-                </span>
-              </div>
-            </button>
-
-            {/* Bottom Row - All-time and Average side by side */}
+            {/* Bottom Row - All-time High and Average side by side */}
             <div className="grid grid-cols-2 gap-3">
               {/* All-time High Score */}
               <div className={`rounded-lg p-3 border ${
