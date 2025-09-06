@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { AppData } from '../types';
 import {
   Chart as ChartJS,
@@ -206,63 +206,73 @@ const WeeklyLog: React.FC<WeeklyLogProps> = ({ appData, isDarkMode }) => {
   };
 
   return (
-    <div className={`max-w-4xl mx-auto ${isDarkMode ? 'text-white' : ''}`}>
-      {/* Header with Week Navigation */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-4">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
+        isDarkMode 
+          ? 'bg-gray-800/80 border-gray-700' 
+          : 'bg-white/80 border-gray-100'
+      }`}>
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className={`text-3xl font-bold ${
+            <h1 className={`text-2xl font-bold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>Trends</h1>
-            <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Your productivity journey</p>
-          </div>
-        </div>
-        
-        {/* Week Navigation */}
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setCurrentWeekOffset(prev => prev - 1)}
-            className={`p-3 rounded-xl transition-colors ${
-              isDarkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <ArrowLeft size={20} />
-          </button>
-          
-          <div className="text-center">
-            <div className={`text-sm font-medium ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-600'
-            }`}>
-              {currentWeekOffset === 0 ? 'This Week' : 
-               currentWeekOffset === -1 ? 'Last Week' : 
-               currentWeekOffset === 1 ? 'Next Week' : 
-               `${Math.abs(currentWeekOffset)} weeks ${currentWeekOffset < 0 ? 'ago' : 'ahead'}`}
-            </div>
-            <div className={`text-xs ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              {(() => {
-                // Compute Sunday -> Saturday range for currentWeekOffset
-                const ref = new Date();
-                ref.setHours(0, 0, 0, 0);
-                ref.setDate(ref.getDate() + currentWeekOffset * 7);
-                const sunday = new Date(ref);
-                sunday.setDate(ref.getDate() - ref.getDay());
-                const saturday = new Date(sunday);
-                saturday.setDate(sunday.getDate() + 6);
-                return `${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-              })()}
-            </div>
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>
+              Your productivity journey
+            </p>
           </div>
           
-          <button
-            onClick={() => setCurrentWeekOffset(prev => prev + 1)}
-            className={`p-3 rounded-xl transition-colors ${
-              isDarkMode ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <ArrowLeft size={20} className="rotate-180" />
-          </button>
+          {/* Week Navigation */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev - 1)}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              ←
+            </button>
+            
+            <div className="text-center px-3">
+              <div className={`text-sm font-medium ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>
+                {currentWeekOffset === 0 ? 'This Week' : 
+                 currentWeekOffset === -1 ? 'Last Week' : 
+                 currentWeekOffset === 1 ? 'Next Week' : 
+                 `${Math.abs(currentWeekOffset)} weeks ${currentWeekOffset < 0 ? 'ago' : 'ahead'}`}
+              </div>
+              <div className={`text-xs ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>
+                {(() => {
+                  // Compute Sunday -> Saturday range for currentWeekOffset
+                  const ref = new Date();
+                  ref.setHours(0, 0, 0, 0);
+                  ref.setDate(ref.getDate() + currentWeekOffset * 7);
+                  const sunday = new Date(ref);
+                  sunday.setDate(ref.getDate() - ref.getDay());
+                  const saturday = new Date(sunday);
+                  saturday.setDate(sunday.getDate() + 6);
+                  return `${sunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${saturday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+                })()}
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setCurrentWeekOffset(prev => prev + 1)}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              →
+            </button>
+          </div>
         </div>
       </div>
 

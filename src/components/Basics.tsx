@@ -111,7 +111,7 @@ const Basics: React.FC<BasicsProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
       <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
         isDarkMode 
@@ -159,7 +159,7 @@ const Basics: React.FC<BasicsProps> = ({
         isDarkMode 
           ? 'bg-gray-800/80 border-gray-700' 
           : 'bg-white/80 border-gray-100'
-      }`} style={{animationDelay: '0.1s'}}>
+      }`}>
         <h2 className={`text-lg font-semibold mb-4 ${
           isDarkMode ? 'text-white' : 'text-gray-900'
         }`}>Today's Basics</h2>
@@ -226,7 +226,7 @@ const Basics: React.FC<BasicsProps> = ({
         isDarkMode 
           ? 'bg-gray-800/80 border-gray-700' 
           : 'bg-white/80 border-gray-100'
-      }`} style={{animationDelay: '0.2s'}}>
+      }`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={`text-lg font-semibold ${
             isDarkMode ? 'text-white' : 'text-gray-900'
@@ -258,37 +258,67 @@ const Basics: React.FC<BasicsProps> = ({
 
         {/* Week Grid */}
         <div className="grid grid-cols-7 gap-2 mb-4">
-          {getWeeklyBasicsData.map((day, index) => (
-            <div
-              key={day.dateStr}
-              className={`text-center p-2 rounded-lg cursor-pointer transition-colors ${
-                selectedDay?.dateStr === day.dateStr
-                  ? isDarkMode 
-                    ? 'bg-blue-900/50 border border-blue-700' 
-                    : 'bg-blue-50 border border-blue-200'
-                  : isDarkMode 
-                    ? 'hover:bg-gray-700' 
-                    : 'hover:bg-gray-50'
-              }`}
-              onClick={() => setSelectedDay(day)}
-            >
-              <div className={`text-xs font-medium ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-600'
-              }`}>
-                {day.dayName}
+          {getWeeklyBasicsData.map((day, index) => {
+            const completedBasics = Object.values(day.data?.basics || {}).filter(Boolean).length;
+            const totalBasics = basicOptions.length;
+            const completionRate = totalBasics > 0 ? (completedBasics / totalBasics) * 100 : 0;
+            
+            return (
+              <div
+                key={day.dateStr}
+                className={`text-center p-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedDay?.dateStr === day.dateStr
+                    ? isDarkMode 
+                      ? 'bg-blue-900/50 border border-blue-700' 
+                      : 'bg-blue-50 border border-blue-200'
+                    : completionRate === 100
+                      ? isDarkMode
+                        ? 'bg-green-900/30 border border-green-700 hover:bg-green-900/40'
+                        : 'bg-green-100 border border-green-300 hover:bg-green-200'
+                      : completionRate >= 50
+                        ? isDarkMode
+                          ? 'bg-orange-900/30 border border-orange-700 hover:bg-orange-900/40'
+                          : 'bg-orange-100 border border-orange-300 hover:bg-orange-200'
+                        : completionRate > 0
+                          ? isDarkMode
+                            ? 'bg-red-900/30 border border-red-700 hover:bg-red-900/40'
+                            : 'bg-red-100 border border-red-300 hover:bg-red-200'
+                          : isDarkMode 
+                            ? 'bg-gray-700 border border-gray-600 hover:bg-gray-600' 
+                            : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                }`}
+                onClick={() => setSelectedDay(day)}
+              >
+                <div className={`text-xs font-medium ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                  {day.dayName}
+                </div>
+                <div className={`text-lg font-bold ${
+                  completionRate === 100
+                    ? 'text-green-700'
+                    : completionRate >= 50
+                      ? 'text-orange-700'
+                      : completionRate > 0
+                        ? 'text-red-700'
+                        : isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {day.dayNumber}
+                </div>
+                <div className={`text-xs ${
+                  completionRate === 100
+                    ? 'text-green-600'
+                    : completionRate >= 50
+                      ? 'text-orange-600'
+                      : completionRate > 0
+                        ? 'text-red-600'
+                        : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  {completedBasics}/{totalBasics}
+                </div>
               </div>
-              <div className={`text-lg font-bold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                {day.dayNumber}
-              </div>
-              <div className={`text-xs ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>
-                {Object.values(day.data?.basics || {}).filter(Boolean).length}/{basicOptions.length}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Selected Day Details */}
