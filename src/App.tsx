@@ -331,6 +331,13 @@ function App() {
     return total;
   };
 
+  const calculateAverageDailyPoints = (): number => {
+    const dailyPoints = Object.values(appData.dailyData).map(dayData => calculatePointsForDay(dayData));
+    if (dailyPoints.length === 0) return 0;
+    const total = dailyPoints.reduce((sum, points) => sum + points, 0);
+    return Math.round(total / dailyPoints.length);
+  };
+
   const calculateTodaysPoints = (): number => {
     const dayData = getTodaysData();
     let points = 0;
@@ -700,6 +707,7 @@ function App() {
         onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         todaysPoints={calculateTodaysPoints()}
         highScore={calculatePreviousHighScore()}
+        averagePoints={calculateAverageDailyPoints()}
         pointsDeltaFromHigh={calculateTodaysPoints() - calculatePreviousHighScore()}
         onSignOut={handleSignOut}
         isMobileOpen={mobileSidebarOpen}

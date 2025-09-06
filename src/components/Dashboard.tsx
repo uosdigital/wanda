@@ -304,7 +304,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
       
       {/* Welcome Section */}
       <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
@@ -367,8 +367,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      <div>
-        {/* Good Day Vision */}
+      {/* Good Day Vision */}
         {todaysData.goodDayVision && (
           <div className={`backdrop-blur-sm rounded-2xl p-6 shadow-lg border animate-slide-up ${
             isDarkMode 
@@ -1135,7 +1134,6 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };
