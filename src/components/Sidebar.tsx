@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'monthly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
 
 interface SidebarProps {
   currentView: View;
@@ -129,6 +129,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       color: 'text-green-600',
       bgColor: 'bg-green-100',
       hoverColor: 'hover:bg-green-50'
+    },
+    {
+      id: 'monthly' as View,
+      label: 'Monthly',
+      icon: Calendar,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
+      hoverColor: 'hover:bg-purple-50'
     },
     {
       id: 'habits' as View,

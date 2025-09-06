@@ -74,6 +74,30 @@ const Habits: React.FC<HabitsProps> = ({
     return plannedHabits.length > 0 ? (completedHabits.length / plannedHabits.length) * 100 : 0;
   };
 
+  // Get last completion date for a habit
+  const getLastCompletionDate = (habitId: string) => {
+    const dates = Object.keys(appData.dailyData).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    
+    for (const dateStr of dates) {
+      const dayData = appData.dailyData[dateStr];
+      if (dayData?.completedHabits?.includes(habitId)) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+        
+        return {
+          dateString: date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric',
+            year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+          }),
+          hoursDiff
+        };
+      }
+    }
+    return null;
+  };
+
   // Get weekly habits data
   const getWeeklyHabitsData = React.useMemo(() => {
     const days = [];
@@ -208,6 +232,28 @@ const Habits: React.FC<HabitsProps> = ({
                         </button>
                       )}
                     </div>
+                    <p className={`text-xs ${
+                      (() => {
+                        const lastCompleted = getLastCompletionDate(habit.id);
+                        if (!lastCompleted) {
+                          return isDarkMode ? 'text-red-400' : 'text-red-600'; // Never completed - red
+                        }
+                        
+                        const { hoursDiff } = lastCompleted;
+                        if (hoursDiff <= 48) {
+                          return isDarkMode ? 'text-green-400' : 'text-green-600'; // Within 48 hours - green
+                        } else if (hoursDiff <= 96) {
+                          return isDarkMode ? 'text-orange-400' : 'text-orange-600'; // 48-96 hours - orange
+                        } else {
+                          return isDarkMode ? 'text-red-400' : 'text-red-600'; // 96+ hours - red
+                        }
+                      })()
+                    }`}>
+                      {(() => {
+                        const lastCompleted = getLastCompletionDate(habit.id);
+                        return lastCompleted ? `Last completed on ${lastCompleted.dateString}` : 'Never completed';
+                      })()}
+                    </p>
                     <p className={`text-sm ${
                       isCompleted 
                         ? 'text-green-600' 
