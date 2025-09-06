@@ -17,6 +17,7 @@ import Points from './components/Points';
 import Notes from './components/Notes';
 import Basics from './components/Basics';
 import Dread from './components/Dread';
+import MonthlyTrends from './components/MonthlyTrends';
 import { TimeBlock } from './types';
 import { supabase, hasSupabaseConfig } from './utils/supabase';
 import visionImg from '../images/vision.jpg';
@@ -29,7 +30,7 @@ import monsterImg from '../images/monster.jpg';
 import focusImg from '../images/focus.jpg';
 import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'monthly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
 
 type AddPointsFn = (points: number, reason?: string) => void;
 
@@ -1017,6 +1018,13 @@ function App() {
 
         {currentView === 'weekly' && (
           <WeeklyLog
+            appData={appData}
+            isDarkMode={isDarkMode}
+          />
+        )}
+
+        {currentView === 'monthly' && (
+          <MonthlyTrends
             appData={appData}
             isDarkMode={isDarkMode}
           />
