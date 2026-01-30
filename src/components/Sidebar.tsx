@@ -22,11 +22,12 @@ import {
   Coffee,
   Brain,
   Users,
-  Zap
+  Zap,
+  Dumbbell
 } from 'lucide-react';
 import visionImg from '../../images/vision.jpg';
 
-type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'monthly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes';
+type View = 'dashboard' | 'morning' | 'evening' | 'weekly' | 'monthly' | 'timer' | 'habits' | 'basics' | 'dread' | 'timeblocking' | 'points' | 'notes' | 'workouts';
 
 interface SidebarProps {
   currentView: View;
@@ -137,6 +138,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
       hoverColor: 'hover:bg-purple-50'
+    },
+    {
+      id: 'workouts' as View,
+      label: 'Workouts',
+      icon: Dumbbell,
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-100',
+      hoverColor: 'hover:bg-cyan-50'
     },
     {
       id: 'habits' as View,
